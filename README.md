@@ -1,4 +1,8 @@
-# Juego serio de meditación y ejercicio con visión por computador
+# Temple
+
+**Juego serio de meditación y ejercicio que se maneja con la webcam.**
+
+*Temple* es la serenidad para mantener la calma y también el valor para afrontar un reto. Son las dos mitades del juego, primero meditar quieto y con la espalda recta y después darlo todo en las flexiones. En inglés, *temple* es un templo, el sitio al que vuelves cada día.
 
 Práctica 2 de **Interacción Persona-Máquina** (Grado en Ingeniería en Inteligencia Artificial, Universidad de Alicante, curso 2026-2027).
 
