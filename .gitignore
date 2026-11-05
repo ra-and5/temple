@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Modelos de MediaPipe (se descargan con el script)
+models/
+*.task
+
+# Secretos
+.env
+
+# Sistema y editores
+.DS_Store
+.vscode/
+.idea/
