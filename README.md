@@ -10,6 +10,31 @@ Práctica 2 de **Interacción Persona-Máquina** (Grado en Ingeniería en Inteli
 
 Meditar y entrenar cada día es algo que siempre he querido hacer y nunca me he atrevido a empezar. Quería un entrenador que me guiara paso a paso y que comprobara de verdad que lo hago bien, sin tocar el teclado y sin tener que fiarme de mí mismo.
 
+## La historia
+
+Temple es un ritual diario que va de la calma a la fuerza. Empieza respirando, sigue meditando, estira el cuerpo y termina con un reto de flexiones. Cada fase prepara la siguiente, igual que en una práctica de yoga o un entrenamiento de verdad.
+
+La idea nació con la meditación. Pero ponerse a meditar sin más cuesta, porque la mente va a mil. Por eso añadí antes un ejercicio de respiración que la calma y la deja lista para meditar. Las flexiones cierran la sesión con un reto físico, la otra mitad del nombre.
+
+La cámara hace de entrenador. No se limita a poner un temporizador, sino que comprueba que haces lo que pide y solo entonces avanza. En la respiración mira qué lado de la nariz tapas, y en las fases siguientes mirará que estés quieto o que bajes bien en cada flexión. El progreso se guarda día a día con lotos, rachas y niveles, para que volver mañana apetezca.
+
+### De dónde sale la respiración
+
+El **pranayama** es el conjunto de técnicas de control de la respiración del yoga. Una de las más conocidas es la **respiración alterna** o **Anuloma Viloma**, en la que el aire entra por un orificio de la nariz y sale por el otro, tapando cada lado con los dedos de una mano.
+
+El juego sigue paso a paso el vídeo [Pranayama para principiantes (Anuloma Viloma)](https://www.youtube.com/watch?v=CacBxE8bXao), de Anabel Otero. En él la técnica se presenta como una forma de calmar la mente y ganar concentración, y se recomienda hacerla justo antes de meditar. Es exactamente el papel que tiene en Temple.
+
+| Del vídeo | En el juego |
+|---|---|
+| Sentado, con la columna recta | Hay que verse de la cabeza al pecho |
+| Antes de empezar, tapar el orificio derecho y soltar todo el aire por el izquierdo | Es el primer paso de cada sesión |
+| Una vuelta es inhalar 4 por la izquierda, exhalar 8 por la derecha, inhalar 4 por la derecha y exhalar 8 por la izquierda | La cuenta sale en pantalla, un tiempo por segundo, con un golpecito suave en cada uno |
+| Cinco vueltas | 5 por defecto, y se pueden elegir de 1 a 9 |
+| Para quien ya tiene práctica, retener 16 tiempos con los dos lados tapados después de cada inhalación | Es la respiración avanzada, que se desbloquea con la práctica |
+| La instructora se graba en espejo para que sea más fácil seguirla | La cámara también se ve en espejo |
+
+La cámara no puede ver el aire. Lo que comprueba es qué orificio está tapado en cada momento, y el ritmo lo marca el juego. Temple es una ayuda para practicar, no una herramienta médica.
+
 ## Qué hace
 
 Una sesión diaria guiada por la cámara, en este orden.
