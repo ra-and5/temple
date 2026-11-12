@@ -16,3 +16,6 @@ models/
 .DS_Store
 .vscode/
 .idea/
+
+# Progreso de cada jugador, no se sube
+datos/
