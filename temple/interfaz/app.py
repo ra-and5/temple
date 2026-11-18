@@ -10,6 +10,10 @@ La camara va siempre a la izquierda, como un espejo, y el panel a la derecha
 cambia segun la pantalla. La logica esta en temple/respiracion.py y en
 temple/progreso.py. Aqui solo se dibuja y se gestionan teclas, raton y el dedo
 (temple/puntero.py).
+
+Con el teclado, las flechas arriba y abajo (o Tab) mueven el foco entre los
+botones y Enter pulsa el marcado. Izquierda y derecha cambian las vueltas en
+el inicio, y en la pausa pasan de Seguir a Salir (temple/navegacion.py).
 """
 
 from __future__ import annotations
@@ -27,6 +31,7 @@ from temple.camara import CamaraHilo
 from temple.interfaz import dibujo as D
 from temple.interfaz import estilo as E
 from temple.interfaz.sonido import Sonidos
+from temple import navegacion as N
 from temple.progreso import (PERFECTAS_PARA_AVANZADA, VUELTAS_MAX, VUELTAS_MIN, VUELTAS_NIVEL,
                              Progreso)
 from temple.puntero import GestoPalma, Puntero
@@ -49,6 +54,7 @@ class Boton:
     rect: pygame.Rect
     accion: Callable[[], None]
     zona: pygame.Rect | None = None  # donde cuenta el dedo, si es distinta del dibujo
+    grupo: str | None = None  # botones de la misma fila para el teclado
 
 
 class App:
@@ -89,6 +95,9 @@ class App:
         self.botones: list[Boton] = []
         self.puntero = Puntero(E.PANEL)
         self.palma = GestoPalma()
+        self.foco: int | None = None  # boton marcado con el teclado
+        self._pantalla_foco = None  # para quitar el foco al cambiar de pantalla
+        self._cursor = None  # flecha o mano, para no cambiarlo en cada fotograma
         self.t = 0.0
 
     # ================= bucle =================
@@ -114,13 +123,18 @@ class App:
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 return False
+            if ev.type == pygame.MOUSEMOTION:
+                self.foco = None  # con el raton manda el raton
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 for b in self.botones:
                     if b.rect.collidepoint(ev.pos):
+                        self.foco = None
                         b.accion()
                         break
             if ev.type == pygame.KEYDOWN:
                 k = ev.key
+                if self._teclas_foco(ev):
+                    continue
                 if k == pygame.K_F11:
                     pygame.display.toggle_fullscreen()
                 elif k == pygame.K_m:
@@ -149,6 +163,37 @@ class App:
                     if k in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_ESCAPE):
                         self._volver_inicio()
         return True
+
+    def _teclas_foco(self, ev) -> bool:
+        """Flechas, Tab y Enter sobre los botones. True si la tecla ya se ha usado."""
+        if not self.botones:
+            return False
+        k = ev.key
+        grupos = [b.grupo for b in self.botones]
+        if k in (pygame.K_UP, pygame.K_DOWN):
+            self.foco = N.mover(self.foco, grupos, 1 if k == pygame.K_DOWN else -1)
+            return True
+        if k == pygame.K_TAB:
+            atras = ev.mod & pygame.KMOD_SHIFT
+            self.foco = N.mover(self.foco, grupos, -1 if atras else 1, rodear=True)
+            return True
+        if k in (pygame.K_LEFT, pygame.K_RIGHT):
+            paso = 1 if k == pygame.K_RIGHT else -1
+            if self.modo == "inicio":
+                return False  # las vueltas, como siempre
+            if self.foco is None:
+                self.foco = N.mover(None, grupos, 1)
+                return True
+            lado = N.lateral(self.foco, grupos, paso)
+            if lado is not None:
+                self.foco = lado
+            return True
+        if k in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE) and self.foco is not None:
+            if 0 <= self.foco < len(self.botones):
+                self.sonido("toque")
+                self.botones[self.foco].accion()
+                return True
+        return False
 
     # ================= logica =================
 
@@ -281,6 +326,10 @@ class App:
     # ================= dibujo general =================
 
     def _dibujar(self, dt, frame, lectura) -> None:
+        pantalla = (self.modo, self.pausa_manual)
+        if pantalla != self._pantalla_foco:
+            self._pantalla_foco = pantalla
+            self.foco = None  # al entrar en una pantalla no hay nada marcado
         self.botones = []
         self.pantalla.blit(self.fondo, (0, 0))
         self.brasas.dibujar(self.pantalla, dt, self.t)
@@ -294,6 +343,18 @@ class App:
         self._pie()
         self._aviso()
         self._gestos(lectura)
+        if self.foco is not None and self.foco >= len(self.botones):
+            self.foco = None
+        # Mano al pasar el raton por un boton, como en una web
+        raton = pygame.mouse.get_pos()
+        encima = any(b.rect.collidepoint(raton) for b in self.botones)
+        cursor = pygame.SYSTEM_CURSOR_HAND if encima else pygame.SYSTEM_CURSOR_ARROW
+        if cursor != self._cursor:
+            self._cursor = cursor
+            try:
+                pygame.mouse.set_cursor(cursor)
+            except pygame.error:
+                pass  # hay escritorios sin cursores del sistema, se queda la flecha
 
     def _barra_superior(self) -> None:
         p = self.pantalla
@@ -406,14 +467,14 @@ class App:
 
     def _pie(self) -> None:
         ayudas = {
-            "inicio": "Señala un botón con el índice y espera   ·   Espacio empezar   ·   flechas para las vueltas   ·   M sonido   ·   Esc salir",
+            "inicio": "Señala con el índice o usa el ratón   ·   Flechas para moverte y Enter para pulsar   ·   M sonido   ·   Esc salir",
             "tutorial": "Palma abierta o Espacio para pausar   ·   M sonido   ·   Esc volver al inicio",
             "sesion": "Palma abierta o Espacio para pausar   ·   M sonido   ·   Esc volver al inicio",
-            "resultado": "Señala el botón con el índice y espera   ·   Espacio continuar",
+            "resultado": "Señala el botón con el índice o usa el ratón   ·   Enter o Espacio continuar",
         }
         texto = ayudas[self.modo]
         if self.pausa_manual:
-            texto = "Señala Seguir con el índice y espera   ·   Espacio seguir   ·   Esc salir"
+            texto = "Señala con el índice o usa el ratón   ·   Flechas para elegir y Enter para pulsar   ·   Esc salir"
         s = E.fuente("texto", 15).render(texto, True, E.APAGADO)
         self.pantalla.blit(s, s.get_rect(midbottom=(E.ANCHO // 2, E.ALTO - 22)))
 
@@ -459,12 +520,18 @@ class App:
     # ================= botones =================
 
     def _boton(self, rect, texto, tecla, accion, principal=False, etiqueta=None, icono=None,
-               centrado=False, zona=None):
+               centrado=False, zona=None, grupo=None):
         p = self.pantalla
         indice = len(self.botones)
         por_dedo = (self._menu_activo() and self.puntero.pos is not None
                     and self.puntero.objetivo == indice)
-        encima = por_dedo or rect.collidepoint(pygame.mouse.get_pos())
+        # Con el teclado se marca el boton del foco. En las vueltas, el menos y el
+        # mas juntos, porque las flechas de los lados ya los manejan
+        por_teclado = self.foco == indice or (
+            grupo == "vueltas" and self.foco is not None and self.foco < indice
+            and self.botones[self.foco].grupo == "vueltas")
+        marcado = por_dedo or por_teclado
+        encima = marcado or rect.collidepoint(pygame.mouse.get_pos())
         radio = rect.h // 2
         capa = pygame.Surface(rect.size, pygame.SRCALPHA)
         r = capa.get_rect()
@@ -481,9 +548,9 @@ class App:
             pygame.draw.rect(relleno, (255, 255, 255, 70), r, border_radius=radio)
             ancho = int(rect.w * min(1.0, self.puntero.llenado))
             capa.blit(relleno, (0, 0), pygame.Rect(0, 0, ancho, rect.h))
-        borde = (*E.CREMA, 230) if por_dedo else (*E.ORO, 140)
-        if not principal or por_dedo:
-            pygame.draw.rect(capa, borde, r, 2 if por_dedo else 1, border_radius=radio)
+        borde = (*E.CREMA, 230) if marcado else (*E.ORO, 140)
+        if not principal or marcado:
+            pygame.draw.rect(capa, borde, r, 2 if marcado else 1, border_radius=radio)
         p.blit(capa, rect.topleft)
 
         s = E.fuente("negrita", 19).render(texto, True, col_texto)
@@ -504,7 +571,7 @@ class App:
             caja.midright = (rect.right - 96, rect.centery)  # dentro, junto a la tecla
             pygame.draw.rect(p, E.ORO, caja, border_radius=caja.h // 2)
             p.blit(e, e.get_rect(center=caja.center))
-        self.botones.append(Boton(rect, accion, zona))
+        self.botones.append(Boton(rect, accion, zona, grupo))
 
     # ================= paneles =================
 
@@ -576,10 +643,10 @@ class App:
         mitad = ancho // 2
         self._boton(pygame.Rect(izq, y, lado, 46), "−", None,
                     lambda: self._cambiar_vueltas(-1), centrado=True,
-                    zona=pygame.Rect(izq, y, mitad, 46))
+                    zona=pygame.Rect(izq, y, mitad, 46), grupo="vueltas")
         self._boton(pygame.Rect(izq + ancho - lado, y, lado, 46), "+", None,
                     lambda: self._cambiar_vueltas(1), centrado=True,
-                    zona=pygame.Rect(izq + mitad, y, ancho - mitad, 46))
+                    zona=pygame.Rect(izq + mitad, y, ancho - mitad, 46), grupo="vueltas")
         D.texto(p, E.fuente("negrita", 19), f"{v} vueltas", E.CREMA, cx, y + 4)
         nota = ("no suben de nivel" if v < VUELTAS_NIVEL
                 else "mínimo" if v == VUELTAS_MIN else "máximo" if v == VUELTAS_MAX else "")
@@ -688,9 +755,9 @@ class App:
         if self.pausa_manual:
             ancho = (P.w - 72 - 12) // 2
             self._boton(pygame.Rect(P.left + 36, P.bottom - 82, ancho, 54), "Seguir", "Espacio",
-                        self._seguir, True)
+                        self._seguir, True, grupo="pausa")
             self._boton(pygame.Rect(P.right - 36 - ancho, P.bottom - 82, ancho, 54), "Salir",
-                        "Esc", self._volver_inicio)
+                        "Esc", self._volver_inicio, grupo="pausa")
         elif paso.tipo == "mensaje":
             ancho = int((P.w - 160) * e.hecho)
             pygame.draw.line(p, E.ORO_SUAVE, (P.left + 80, P.bottom - 44),

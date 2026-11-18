@@ -52,7 +52,7 @@ Una sesión diaria guiada por la cámara, en este orden.
 - **Sesión** de 1 a 9 vueltas (5 por defecto). Cada vuelta es inhalar 4 por la izquierda, exhalar 8 por la derecha, inhalar 4 por la derecha y exhalar 8 por la izquierda. La cuenta no avanza al cambiar de lado hasta que la cámara ve la mano bien puesta, así nadie va con prisa.
 - **Lotos** de 0 a 3 según el tiempo que has tapado bien el lado que tocaba, **racha** de días seguidos y los días de la semana practicados.
 - **Respiración avanzada**, que se desbloquea con 5 sesiones de 3 lotos y 5 vueltas o más. Añade 16 tiempos de retención con los dos lados tapados.
-- **Sin teclado.** Los menús se manejan señalando con el índice, y durante la respiración la palma abierta pausa. El teclado y el ratón siguen de reserva.
+- **Con la mano, el teclado o el ratón.** De lejos, los menús se manejan señalando con el índice, y durante la respiración la palma abierta pausa. De cerca, las flechas mueven la selección entre los botones y Enter pulsa, o se hace clic con el ratón.
 
 > Capturas pendientes. Se añadirán al cerrar la fase, con la pantalla de inicio, el tutorial, una sesión y el desbloqueo.
 
@@ -92,8 +92,11 @@ Siéntate de forma que la cámara te vea de la cabeza al pecho. En macOS la prim
 | Señalar un botón con el índice 1,5 s | Lo pulsa. El botón se va rellenando mientras esperas |
 | Señalar la mitad izquierda o derecha de la fila de vueltas | Quita o pone una vuelta |
 | Palma abierta, lejos de la nariz, 0,8 s | Pausa la respiración |
-| Espacio | Empezar, pausar o seguir |
-| Flechas izquierda y derecha | Cambiar las vueltas |
+| Clic con el ratón | Pulsa el botón |
+| Flechas arriba y abajo, o Tab | Mover la selección entre los botones |
+| Enter | Pulsar el botón seleccionado |
+| Espacio | Empezar, pausar o seguir (o pulsar el seleccionado) |
+| Flechas izquierda y derecha | Cambiar las vueltas en el inicio, o elegir Seguir o Salir en la pausa |
 | M | Activar o apagar el sonido |
 | Esc | Salir |
 
