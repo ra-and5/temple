@@ -4,6 +4,7 @@ Uso, desde la raiz del repositorio
     python main.py
     python main.py --vueltas 2      sesion corta para probar (en el juego se eligen con - y +)
     python main.py --avanzada       deja usar la variante avanzada sin desbloquearla
+    python main.py --minutos 1      meditacion corta para probar
 """
 
 import argparse
@@ -19,8 +20,10 @@ def main():
     parser.add_argument("--tiempo", type=float, default=TIEMPO_S, help="segundos por tiempo")
     parser.add_argument("--avanzada", action="store_true",
                         help="variante avanzada disponible sin desbloquearla")
+    parser.add_argument("--minutos", type=float, default=None,
+                        help="minutos de meditacion solo para probar (no cuentan para subir)")
     args = parser.parse_args()
-    App(args.vueltas, args.tiempo, args.avanzada).ejecutar()
+    App(args.vueltas, args.tiempo, args.avanzada, args.minutos).ejecutar()
 
 
 if __name__ == "__main__":

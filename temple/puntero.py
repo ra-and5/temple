@@ -7,9 +7,13 @@
                  el mismo boton lo pulsa. Para volver a pulsar hay que dejar de
                  senalar un momento, y al cambiar de pantalla igual, para que
                  nada se pulse solo (por ejemplo con la mano aun en la nariz).
+                 Los botones repetibles (menos y mas) no piden soltar, y seguir
+                 senalando vuelve a pulsar cada REPETIR_S segundos.
   - GestoPalma   la palma abierta y lejos de la nariz durante PALMA_S segundos
                  pausa la respiracion. Lejos de la nariz para no confundirlo
-                 con la mano que esta tapando.
+                 con la mano que esta tapando. Al meditar ademas tiene que
+                 estar por encima de los hombros (techo), porque las manos
+                 apoyadas en el regazo pueden parecer una palma abierta.
 
 Las manos llegan como 21 puntos (x, y) normalizados de 0 a 1 sobre la imagen
 ya en espejo, igual que la pantalla. Los botones son rectangulos (x, y, ancho,
@@ -31,6 +35,7 @@ ESPERA_S = 1.5  # tiempo senalando el mismo boton para pulsarlo
 IMAN = 28  # pixeles alrededor de un boton que todavia cuentan como encima
 SOLTAR_S = 0.25  # sin senalar este rato cuenta como soltar (aguanta parpadeos del modelo)
 PALMA_S = 0.8  # tiempo con la palma abierta para pausar (casi al instante)
+REPETIR_S = 0.8  # menos y mas, cada cuanto se repite si sigues senalando
 PERDIDA_S = 0.4  # si no se ve la mano este rato, el cursor desaparece
 SUAVIDAD = 14.0  # cuanto mas alto, antes alcanza el cursor al dedo
 LEJOS_NARIZ = 0.6  # en anchos de hombros
@@ -103,14 +108,19 @@ class Puntero:
         self._clave = None
         self._listo = True
 
-    def actualizar(self, dt: float, mano, botones, mano_3d=None) -> int | None:
+    def actualizar(self, dt: float, mano, botones, mano_3d=None,
+                   repetibles=frozenset()) -> int | None:
         """Mueve el cursor. Devuelve el indice del boton pulsado, o None.
 
         botones son las zonas que se pueden pulsar. mano_3d, si llega, se usa
-        para reconocer el gesto de senalar.
+        para reconocer el gesto de senalar. repetibles son los indices de los
+        botones que se repiten sin soltar.
         """
-        # Mano apoyada abajo (en la mesa o las piernas), no se esta apuntando
-        if mano is not None and mano[INDICE][1] > ZONA_Y[1] + REPOSO:
+        # Mano apoyada abajo (en la mesa o las piernas), no se esta apuntando.
+        # Si senala si cuenta, aunque este muy abajo, porque sentado cerca de la
+        # camara el dedo cae ahi al apuntar a los botones de abajo
+        if (mano is not None and mano[INDICE][1] > ZONA_Y[1] + REPOSO
+                and not senalando(mano_3d or mano)):
             mano = None
             self._sin_mano = PERDIDA_S
         if mano is None:
@@ -152,6 +162,10 @@ class Puntero:
             self._clave, self.llenado = clave, 0.0
         self.llenado += dt / self.espera_s
         if self.llenado >= 1:
+            if i in repetibles:
+                # Se queda en el boton y vuelve a pulsar en REPETIR_S
+                self.llenado = 1 - REPETIR_S / self.espera_s
+                return i
             self.llenado, self._clave = 0.0, None
             self._listo = False  # hay que soltar antes de la siguiente
             return i
@@ -164,11 +178,17 @@ class GestoPalma:
         self.llenado = 0.0
         self._armado = True
 
-    def actualizar(self, dt: float, mano, nariz=None, escala=None) -> bool:
-        """True en el momento en que se completa el gesto."""
+    def actualizar(self, dt: float, mano, nariz=None, escala=None, techo=None) -> bool:
+        """True en el momento en que se completa el gesto.
+
+        techo, si llega, es la altura (y de 0 a 1) por encima de la que tiene
+        que estar el centro de la palma.
+        """
         abierta = mano is not None and palma_abierta(mano)
         if abierta and nariz is not None and escala:
             abierta = _dist(mano[CENTRO_PALMA], nariz) / escala > LEJOS_NARIZ
+        if abierta and techo is not None:
+            abierta = mano[CENTRO_PALMA][1] < techo
         if not abierta:
             self.llenado = 0.0
             self._armado = True

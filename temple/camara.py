@@ -1,6 +1,6 @@
 """Camara y deteccion en un hilo aparte.
 
-Los dos modelos de MediaPipe tardan unos 30-50 ms por fotograma. Si se
+Los modelos de MediaPipe tardan unos 30-50 ms por fotograma. Si se
 ejecutaran en el mismo bucle que la interfaz, las animaciones irian a saltos.
 Aqui un hilo lee la camara y detecta sin parar, y la interfaz solo recoge el
 ultimo resultado cuando lo necesita.
@@ -26,6 +26,7 @@ class CamaraHilo(threading.Thread):
         self._parar = threading.Event()
         self.error: str | None = None
         self.listo = threading.Event()
+        self.cara = False  # la interfaz lo enciende al meditar
 
     def run(self) -> None:
         cap = cv2.VideoCapture(self._indice)
@@ -41,6 +42,7 @@ class CamaraHilo(threading.Thread):
                         time.sleep(0.01)
                         continue
                     frame = cv2.flip(frame, 1)  # modo espejo
+                    detector.usar_cara = self.cara
                     lectura = detector.procesar(frame)
                     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     with self._candado:

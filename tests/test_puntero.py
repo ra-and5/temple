@@ -115,8 +115,15 @@ class TestPuntero(unittest.TestCase):
 
     def test_mano_en_reposo_no_hay_cursor(self):
         p = Puntero(AREA)
-        p.actualizar(DT, mano_en(0.6, 0.95), [ARRIBA])
+        p.actualizar(DT, mano_en(0.6, 0.95, abierta=True), [ARRIBA])
         self.assertIsNone(p.pos)
+
+    def test_senalando_muy_abajo_llega_al_boton_de_abajo(self):
+        abajo_del_todo = (100, 660, 400, 54)
+        p = Puntero(AREA)
+        correr(p, 0.5, None, [abajo_del_todo])
+        pulsados = correr(p, 2.0, mano_en(0.4, 0.95), [abajo_del_todo])
+        self.assertIn(0, pulsados)
 
 
 class TestPalma(unittest.TestCase):
@@ -140,3 +147,26 @@ class TestPalma(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestArreglosMeditacion(unittest.TestCase):
+    """Menos y mas se repiten sin soltar, y la palma al meditar pide estar arriba."""
+
+    def test_boton_repetible_sin_soltar(self):
+        from temple.puntero import ESPERA_S, REPETIR_S
+        boton = (0, 0, 1000, 1000)
+        p = Puntero((0, 0, 1000, 1000))
+        mano = mano_en(0.5, 0.5)
+        p.actualizar(0.1, None, [boton])  # quitar la mano cuenta como soltar
+        p.actualizar(1.0, None, [boton])
+        pulsaciones = 0
+        for _ in range(int((ESPERA_S + 2 * REPETIR_S + 0.1) * 30)):
+            if p.actualizar(1 / 30, mano, [boton], repetibles={0}) is not None:
+                pulsaciones += 1
+        self.assertEqual(pulsaciones, 3)
+
+    def test_palma_por_debajo_del_techo_no_pausa(self):
+        g = GestoPalma(0.5)
+        mano = mano_en(0.5, 0.4, abierta=True)  # centro de la palma en y = 0.5
+        self.assertFalse(any(g.actualizar(0.1, mano, techo=0.3) for _ in range(20)))
+        self.assertTrue(any(g.actualizar(0.1, mano, techo=0.7) for _ in range(20)))

@@ -2,7 +2,8 @@
 
 Pose da la nariz y el ancho de los hombros, que sirve de regla para medir
 distancias sin que importe lo lejos que este la persona. Hands da las puntas
-de los dedos.
+de los dedos. Face (solo al meditar, con usar_cara) dice si los ojos estan
+cerrados.
 
   - derecho    la punta del pulgar esta pegada a la nariz
   - izquierdo  la punta de otro dedo esta pegada a la nariz (con la mano
@@ -29,6 +30,7 @@ import mediapipe as mp
 RAIZ = Path(__file__).resolve().parent.parent
 MODELO_POSE = RAIZ / "models" / "pose_landmarker_full.task"
 MODELO_MANOS = RAIZ / "models" / "hand_landmarker.task"
+MODELO_CARA = RAIZ / "models" / "face_landmarker.task"
 
 NARIZ = 0
 HOMBRO_IZQ, HOMBRO_DER = 11, 12
@@ -52,6 +54,8 @@ class Lectura:
     mano: list[tuple[float, float]] | None = None  # los 21 puntos de la mano
     mano_3d: list[tuple[float, float, float]] | None = None  # en metros, con profundidad
     perdida_s: float = 0.0  # segundos sin ver la mano
+    hombros: tuple[tuple[float, float], tuple[float, float]] | None = None
+    ojos: float | None = None  # 0 abiertos, 1 cerrados (solo con el modelo de cara)
 
 
 def clasificar(d_pulgar: float, d_otro: float,
@@ -97,6 +101,19 @@ class DetectorFosas:
                 min_tracking_confidence=0.3,
             )
         )
+        # El de cara solo se usa al meditar. Si falta el archivo, el juego sigue
+        # sin saber si cierras los ojos
+        self._cara = None
+        if MODELO_CARA.exists():
+            self._cara = vision.FaceLandmarker.create_from_options(
+                vision.FaceLandmarkerOptions(
+                    base_options=base(model_asset_path=str(MODELO_CARA)),
+                    running_mode=vision.RunningMode.VIDEO,
+                    num_faces=1,
+                    output_face_blendshapes=True,
+                )
+            )
+        self.usar_cara = False
         self._memoria_s = memoria_s
         self._historial: deque[str] = deque(maxlen=n_suavizado)
         self._estable = "ninguno"
@@ -112,6 +129,12 @@ class DetectorFosas:
         self._ultimo_ts = ts
         res_pose = self._pose.detect_for_video(imagen, ts)
         res_manos = self._manos.detect_for_video(imagen, ts)
+        ojos = None
+        if self.usar_cara and self._cara is not None:
+            res_cara = self._cara.detect_for_video(imagen, ts)
+            if res_cara.face_blendshapes:
+                valores = {b.category_name: b.score for b in res_cara.face_blendshapes[0]}
+                ojos = (valores.get("eyeBlinkLeft", 0) + valores.get("eyeBlinkRight", 0)) / 2
         ahora = time.monotonic()
 
         # La mano se devuelve aunque no haya cuerpo, porque los menus se
@@ -123,13 +146,14 @@ class DetectorFosas:
         puntos_3d = ([(q.x, q.y, q.z) for q in res_manos.hand_world_landmarks[0]]
                      if res_manos.hand_world_landmarks else None)
         if not res_pose.pose_landmarks:
-            return Lectura(estado=None, mano=puntos_mano, mano_3d=puntos_3d)
+            return Lectura(estado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
         p = res_pose.pose_landmarks[0]
         nariz = p[NARIZ]
         escala = _distancia(p[HOMBRO_IZQ], p[HOMBRO_DER])
         if escala < 1e-3:
-            return Lectura(estado=None, mano=puntos_mano, mano_3d=puntos_3d)
+            return Lectura(estado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
         pos_nariz = (nariz.x, nariz.y)
+        hombros = ((p[HOMBRO_IZQ].x, p[HOMBRO_IZQ].y), (p[HOMBRO_DER].x, p[HOMBRO_DER].y))
 
         if not res_manos.hand_landmarks:
             perdida = ahora - self._visto_mano
@@ -137,7 +161,7 @@ class DetectorFosas:
                 self._estable = "ninguno"
                 self._historial.clear()
             return Lectura(estado=self._estable, nariz=pos_nariz, escala=escala,
-                           perdida_s=perdida)
+                           perdida_s=perdida, hombros=hombros, ojos=ojos)
 
         self._visto_mano = ahora
         mano = res_manos.hand_landmarks[0]
@@ -156,11 +180,15 @@ class DetectorFosas:
             escala=escala,
             mano=puntos_mano,
             mano_3d=puntos_3d,
+            hombros=hombros,
+            ojos=ojos,
         )
 
     def cerrar(self) -> None:
         self._pose.close()
         self._manos.close()
+        if self._cara is not None:
+            self._cara.close()
 
     def __enter__(self):
         return self

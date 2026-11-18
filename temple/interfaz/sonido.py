@@ -3,6 +3,8 @@
   cuenco  cuenco tibetano para empezar y acabar
   toque   campanita corta cuando haces bien lo que se pide
   tic     golpecito de madera muy suave en cada tiempo de la cuenta
+  aviso   dos golpes graves y bajitos al meditar, si te mueves o te encorvas
+  campana campana suave y larga cada minuto de meditacion
 Si el equipo no tiene audio, todo sigue funcionando en silencio.
 """
 
@@ -28,6 +30,13 @@ def _onda(duracion, parciales, volumen):
     return np.column_stack([mono, mono])
 
 
+def _dos_golpes():
+    """Aviso grave, dos golpes seguidos de madera hueca. Se nota sin sobresaltar."""
+    golpe = _onda(0.35, [(220, 1.0, 0.09), (330, 0.4, 0.05)], 0.30)
+    hueco = np.zeros((int(FRECUENCIA * 0.12), 2), dtype=np.int16)
+    return np.ascontiguousarray(np.concatenate([golpe, hueco, golpe]))
+
+
 class Sonidos:
     def __init__(self):
         self.activo = True
@@ -42,6 +51,9 @@ class Sonidos:
                     1.6, [(784, 1.0, 0.55), (784 * 2.76, 0.3, 0.25)], 0.18)),
                 "tic": pygame.sndarray.make_sound(_onda(
                     0.12, [(520, 1.0, 0.025), (1310, 0.4, 0.012)], 0.10)),
+                "aviso": pygame.sndarray.make_sound(_dos_golpes()),
+                "campana": pygame.sndarray.make_sound(_onda(
+                    4.0, [(523, 1.0, 1.6), (523 * 2.4, 0.35, 0.9), (523 * 4.1, 0.12, 0.5)], 0.20)),
             }
         except pygame.error:
             self._sonidos = {}  # sin tarjeta de sonido
