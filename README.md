@@ -1,5 +1,7 @@
 # Temple
 
+[![Tests](https://github.com/ra-and5/temple/actions/workflows/tests.yml/badge.svg)](https://github.com/ra-and5/temple/actions/workflows/tests.yml)
+
 **Juego serio de respiración, meditación y ejercicio que se maneja con la webcam.**
 
 *Temple* es la serenidad para mantener la calma y también el valor para afrontar un reto. Son las dos mitades del juego, primero respirar y meditar con calma y después darlo todo en las flexiones. En inglés, *temple* es un templo, el sitio al que vuelves cada día.
@@ -76,7 +78,7 @@ Funciona igual en Ubuntu y en macOS. Hace falta tener [Miniconda](https://www.an
 ```bash
 conda create -n IPM python=3.12
 conda activate IPM
-pip install mediapipe==0.10.21 opencv-contrib-python==4.11.0.86 numpy==1.26.4 pygame==2.6.1
+pip install -r requirements.txt
 ```
 
 **2. Modelos de MediaPipe** (solo la primera vez, no se suben a GitHub)
@@ -134,6 +136,8 @@ El progreso se guarda en `datos/progreso.json`, que se queda en tu equipo y no s
 ```bash
 python -m unittest discover tests
 ```
+
+En GitHub se pasan solos en cada push, en un equipo limpio con Ubuntu y Python 3.12 (`.github/workflows/tests.yml`). El distintivo de arriba del todo dice si el último commit los pasa.
 
 Prueban la lógica sin cámara ni ventana (guiones de la respiración y la meditación, calibración de la postura, avisos, escalera de minutos y desbloqueos, gesto de señalar, imán de los botones y navegación con el teclado). Además, `tests/test_interfaz.py` abre la aplicación sin ventana, con una cámara falsa y una carpeta de datos temporal, y la recorre del inicio al resultado en las dos fases, así que nunca toca tu progreso.
 
@@ -199,6 +203,7 @@ La cámara y los modelos van en un hilo aparte porque tardan unos 30 a 50 ms por
 | Cada texto en un hueco fijo de una línea que se encoge si no cabe | Así nada se pisa, diga lo que diga |
 | Una clase por fase con las mismas funciones, y la aplicación solo habla con la fase activa | `app.py` había llegado a 1.300 líneas con las dos fases mezcladas. Partido así, cada archivo tiene una sola responsabilidad y la tercera fase entra sin tocar las otras |
 | La cámara y la carpeta de datos se pueden pasar al crear la aplicación | Los tests la abren con una cámara falsa y datos temporales, sin webcam y sin tocar el progreso de verdad |
+| Tests automáticos en GitHub en cada push, instalando desde `requirements.txt` | Comprueban en un equipo que no es el mío que todo se instala con las versiones fijadas y que nada se ha roto. Es lo más parecido al "equipo limpio" que pide la entrega |
 | Sonidos generados con numpy | No hace falta ningún archivo de audio, y si el equipo no tiene audio todo sigue funcionando |
 
 ## Tecnología

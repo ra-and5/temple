@@ -1,0 +1,35 @@
+# Pasa todos los tests en un equipo limpio de GitHub cada vez que se sube codigo.
+# Si algo se rompe, el commit sale con una cruz roja en GitHub y llega un correo.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      # Sin pantalla ni altavoces, Pygame usa unos falsos
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Librerias del sistema que piden OpenCV y MediaPipe
+        run: sudo apt-get update && sudo apt-get install -y libgl1 libegl1 libgles2
+
+      - name: Instalar las dependencias
+        run: pip install -r requirements.txt
+
+      - name: Pasar los tests
+        run: python -m unittest discover tests -v

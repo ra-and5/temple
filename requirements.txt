@@ -1,0 +1,6 @@
+# Versiones fijas, las mismas con las que se ha probado Temple (Python 3.12).
+# mediapipe 0.10.21 no tiene version para Python 3.13 o superior.
+mediapipe==0.10.21
+opencv-contrib-python==4.11.0.86
+numpy==1.26.4
+pygame==2.6.1
