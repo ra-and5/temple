@@ -10,6 +10,7 @@ Uso, desde la raiz del repositorio
 import argparse
 
 from temple.interfaz.app import App
+from temple.interfaz.opciones import Opciones
 from temple.respiracion import TIEMPO_S
 
 
@@ -23,7 +24,8 @@ def main():
     parser.add_argument("--minutos", type=float, default=None,
                         help="minutos de meditacion solo para probar (no cuentan para subir)")
     args = parser.parse_args()
-    App(args.vueltas, args.tiempo, args.avanzada, args.minutos).ejecutar()
+    opciones = Opciones(args.vueltas, args.tiempo, args.avanzada, args.minutos)
+    App(opciones).ejecutar()
 
 
 if __name__ == "__main__":

@@ -135,29 +135,43 @@ El progreso se guarda en `datos/progreso.json`, que se queda en tu equipo y no s
 python -m unittest discover tests
 ```
 
-Prueban la lógica sin cámara ni ventana (guiones de la respiración y la meditación, calibración de la postura, avisos, escalera de minutos y desbloqueos, gesto de señalar, imán de los botones y navegación con el teclado).
+Prueban la lógica sin cámara ni ventana (guiones de la respiración y la meditación, calibración de la postura, avisos, escalera de minutos y desbloqueos, gesto de señalar, imán de los botones y navegación con el teclado). Además, `tests/test_interfaz.py` abre la aplicación sin ventana, con una cámara falsa y una carpeta de datos temporal, y la recorre del inicio al resultado en las dos fases, así que nunca toca tu progreso.
 
 ## Arquitectura
 
+El código está en tres capas. Los **ojos** ven puntos, el **cerebro** decide qué pasa y la **interfaz** lo enseña y suena. El cerebro no importa Pygame ni OpenCV, así que se prueba con datos inventados.
+
 ```
-main.py                  arranque y opciones
+main.py                    arranque y opciones
 temple/
-  camara.py              cámara y detección en un hilo aparte
-  vision.py              nariz y hombros (Pose), mano (Hands), ojos (Face) y qué orificio se tapa
-  respiracion.py         guion de pasos de la respiración, sin cámara
-  meditacion.py          calibración de la postura, quieto, recto y ojos, y guion de la meditación
-  puntero.py             cursor con el índice, imán, gesto de señalar y palma
-  navegacion.py          moverse por los botones con el teclado
-  progreso.py            historial, racha, lotos, escalera de minutos y desbloqueos en JSON
+  camara.py                ojos     cámara y detección en un hilo aparte
+  vision.py                ojos     nariz y hombros (Pose), mano (Hands), ojos (Face) y qué orificio se tapa
+  respiracion.py           cerebro  guion de pasos de la respiración
+  meditacion.py            cerebro  calibración de la postura, quieto, recto y ojos, y guion de la meditación
+  puntero.py               cerebro  cursor con el índice, imán, gesto de señalar y palma
+  navegacion.py            cerebro  moverse por los botones con el teclado
+  progreso.py              cerebro  historial, racha, lotos, escalera de minutos y desbloqueos en JSON
   interfaz/
-    app.py               pantallas de Pygame
-    dibujo.py, estilo.py dibujo y colores
-    sonido.py            sonidos generados con numpy
-herramientas/            scripts de los experimentos
+    app.py                 el bucle, las teclas, la pausa y el cambio de pantalla
+    inicio.py              pantalla de inicio (la fila del ritual, el sonido y la semana)
+    fases/
+      base.py              lo que tiene que saber hacer cada fase para que la app la muestre
+      respiracion.py       pantallas de la respiración (inicio, panel, cámara y resultado)
+      meditacion.py        pantallas de la meditación
+    marco.py               lo que rodea al panel (barra, cámara, ayuda, avisos y gestos)
+    botones.py             los botones y cómo se pulsan con el dedo, el ratón y el teclado
+    piezas.py              piezas del panel que se repiten (líneas, botones de pausa, resultado)
+    textos.py              frases y formatos compartidos
+    opciones.py            opciones de arranque y carpeta de datos
+    dibujo.py, estilo.py   dibujo y colores
+    sonido.py              sonidos generados con numpy
+herramientas/              scripts de los experimentos
 tests/
 ```
 
-La cámara y los modelos van en un hilo aparte porque tardan unos 30 a 50 ms por fotograma, y en el mismo bucle que la interfaz las animaciones irían a saltos. El modelo de cara solo trabaja durante la meditación, y añade unos 13 ms. La lógica (respiración, meditación, puntero, navegación y progreso) no depende de Pygame, así se puede probar sin ventana.
+La aplicación no sabe nada de respirar ni de meditar. Lleva el bucle y le pide a la fase activa lo suyo (sus botones del inicio, su panel, lo que dibuja sobre la cámara y su resultado). Para añadir una fase se escribe su lógica en `temple/` con sus tests, su clase en `temple/interfaz/fases/` y se apunta en la lista `FASES`. La fila del ritual, las teclas y el cambio de pantalla salen solos.
+
+La cámara y los modelos van en un hilo aparte porque tardan unos 30 a 50 ms por fotograma, y en el mismo bucle que la interfaz las animaciones irían a saltos. El modelo de cara solo trabaja durante la meditación, y añade unos 13 ms.
 
 ## Decisiones técnicas
 
@@ -183,6 +197,8 @@ La cámara y los modelos van en un hilo aparte porque tardan unos 30 a 50 ms por
 | Escalera de minutos con saltos pequeños al principio y un día que cuenta con 2 lotos | Al empezar es cuando más cuesta. Los lotos importan para subir, pero no hace falta ser perfecto (2 lotos es el 65 %) |
 | Pausa de la meditación con la mano por encima de los hombros, y se sigue cerrando los ojos | Con las manos en el regazo saltaba la pausa sola. Cerrar los ojos es el gesto natural para volver a meditar |
 | Cada texto en un hueco fijo de una línea que se encoge si no cabe | Así nada se pisa, diga lo que diga |
+| Una clase por fase con las mismas funciones, y la aplicación solo habla con la fase activa | `app.py` había llegado a 1.300 líneas con las dos fases mezcladas. Partido así, cada archivo tiene una sola responsabilidad y la tercera fase entra sin tocar las otras |
+| La cámara y la carpeta de datos se pueden pasar al crear la aplicación | Los tests la abren con una cámara falsa y datos temporales, sin webcam y sin tocar el progreso de verdad |
 | Sonidos generados con numpy | No hace falta ningún archivo de audio, y si el equipo no tiene audio todo sigue funcionando |
 
 ## Tecnología
@@ -202,6 +218,7 @@ La cámara y los modelos van en un hilo aparte porque tardan unos 30 a 50 ms por
 - **De cerca, el dedo no llega abajo.** Sentado a medio metro, al señalar los botones de abajo el dedo caía tan bajo en la imagen que el juego lo tomaba por una mano en reposo. Ahora, si señalas, cuenta siempre.
 - **Medir antes de ajustar.** Sentado lejos no podía hacer capturas de los números, así que el juego los apunta solos en un CSV. Con él vi que los fallos de recto venían de los hombros y no de encorvarme.
 - **Decir qué hacer, no qué fallaste.** "Lo que más te ha costado, abrir los ojos" se entendía al revés. Ahora dice "Para mejorar, mantén los ojos cerrados".
+- **Reorganizar sin cambiar nada, y demostrarlo.** Antes de partir `app.py` grabé 385 capturas de un recorrido automático por todas las pantallas (con teclas, gestos y una cámara falsa). Después de partirlo, el mismo recorrido dio las 385 capturas idénticas píxel a píxel. Por el camino, un test que cerraba Pygame entero rompía el siguiente, porque las fuentes guardadas en caché quedaban inválidas.
 - **La fuente también cuenta.** Cormorant tiene números de estilo antiguo que bajan de la línea, y la cuenta tapaba el texto de debajo. Se centra el número por su tinta real.
 
 ## Autores
