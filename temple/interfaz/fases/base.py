@@ -25,7 +25,7 @@ class Fase:
     tecla = None  # tecla del inicio que la elige
     usa_cara = False  # si necesita el modelo de cara (gasta unos 13 ms por fotograma)
     motivo_pausa = ""  # que decir en la camara cuando se pausa con la mano
-    ayuda: str | None = None  # ayuda de abajo mientras se practica, si no vale la de siempre
+    ayuda: tuple[str, str] | None = None  # ayuda de abajo mientras se practica, si no vale la de siempre
 
     def __init__(self, app, palma_s: float):
         # Cada fase hija recibe (app, opciones) y llama a esto con su tiempo de palma

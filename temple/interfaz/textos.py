@@ -15,12 +15,17 @@ PROXIMAS = ("Flexiones",)
 
 # Ayuda de la linea de abajo en cada pantalla
 AYUDAS = {
-    "inicio": "Señala con el índice o usa el ratón   ·   Flechas para moverte y Enter para pulsar   ·   M sonido   ·   Esc salir",
-    "tutorial": "Palma abierta o Espacio para pausar   ·   M sonido   ·   Esc volver al inicio",
-    "sesion": "Palma abierta o Espacio para pausar   ·   M sonido   ·   Esc volver al inicio",
-    "resultado": "Señala el botón con el índice o usa el ratón   ·   Enter o Espacio continuar",
+    "inicio": ("Señala un botón con el índice y espera",
+               "Flechas y Enter, o el ratón  ·  M sonido  ·  Esc salir de Temple"),
+    "tutorial": ("Palma abierta y quieta para pausar",
+                 "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio"),
+    "sesion": ("Palma abierta y quieta para pausar",
+               "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio"),
+    "resultado": ("Señala un botón con el índice y espera",
+                  "Enter continuar  ·  Esc volver al inicio"),
 }
-AYUDA_PAUSA = "Señala con el índice o usa el ratón   ·   Flechas para elegir y Enter para pulsar   ·   Esc salir"
+AYUDA_PAUSA = ("Señala Seguir o Salir con el índice y espera",
+               "Espacio seguir  ·  Esc volver al inicio")
 
 
 def minutos(m: float) -> str:

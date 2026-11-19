@@ -34,8 +34,8 @@ class Meditacion(Fase):
     tecla = pygame.K_e
     usa_cara = True
     motivo_pausa = "Cierra los ojos para seguir, o señala un botón"
-    ayuda = ("Palma abierta o Espacio para pausar   ·   D ver los datos   ·   "
-             "M sonido   ·   Esc volver al inicio")
+    ayuda = ("Palma abierta y quieta, por encima de los hombros, para pausar",
+             "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio")
 
     def __init__(self, app, opciones: Opciones):
         super().__init__(app, M.PALMA_MEDITAR_S)

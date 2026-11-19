@@ -70,7 +70,9 @@ def camara(app, frame, lectura) -> None:
 
     h, w = frame.shape[:2]
     img = pygame.image.frombuffer(frame.tobytes(), (w, h), "RGB")
-    img = pygame.transform.smoothscale(img, E.CAMARA.size).convert_alpha()
+    escalada = pygame.transform.smoothscale(img, E.CAMARA.size)
+    img = pygame.Surface(E.CAMARA.size, pygame.SRCALPHA)
+    img.blit(escalada, (0, 0))
     practicando = app.modo in ("tutorial", "sesion")
     if app.modo == "resultado" or app.pausado():
         velo = pygame.Surface(E.CAMARA.size, pygame.SRCALPHA)
@@ -128,13 +130,20 @@ def datos(app, lectura) -> None:
 # ---------- abajo y encima ----------
 
 def pie(app) -> None:
-    texto = AYUDAS[app.modo]
-    if app.modo in ("tutorial", "sesion"):
-        texto = app.fase.ayuda or texto
+    mano, teclado = AYUDAS[app.modo]
+    if app.modo in ("tutorial", "sesion") and app.fase.ayuda:
+        mano, teclado = app.fase.ayuda
     if app.pausa_manual:
-        texto = AYUDA_PAUSA
-    s = E.fuente("texto", 15).render(texto, True, E.APAGADO)
-    app.pantalla.blit(s, s.get_rect(midbottom=(E.ANCHO // 2, E.ALTO - 22)))
+        mano, teclado = AYUDA_PAUSA
+    filas = [("CON LA MANO", mano, E.CREMA), ("TECLADO", teclado, E.APAGADO)]
+    etiquetas = [E.fuente("negrita", 15).render(e, True, E.ORO_SUAVE) for e, _, _ in filas]
+    textos = [E.fuente("texto", 18).render(t, True, c) for _, t, c in filas]
+    col = max(s.get_width() for s in etiquetas) + 14
+    x = (E.ANCHO - col - max(s.get_width() for s in textos)) // 2
+    for i, (etiqueta, texto) in enumerate(zip(etiquetas, textos)):
+        y = E.ALTO - 52 + i * 28
+        app.pantalla.blit(etiqueta, etiqueta.get_rect(midright=(x + col - 14, y)))
+        app.pantalla.blit(texto, texto.get_rect(midleft=(x + col, y)))
 
 
 def aviso(app) -> None:

@@ -26,7 +26,8 @@ class Estiramientos(Fase):
     # Al estirar las manos van a la cabeza, al codo y arriba con la palma
     # abierta, asi que aqui la palma no pausa. Se pausa con Espacio o saliendo
     # de la camara
-    ayuda = "Espacio para pausar   ·   D ver los datos   ·   M sonido   ·   Esc volver al inicio"
+    ayuda = ("Sal de la cámara para pausar (aquí la palma no pausa)",
+             "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio")
 
     def __init__(self, app, opciones: Opciones):
         super().__init__(app, PALMA_S)
