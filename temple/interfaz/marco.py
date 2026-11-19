@@ -15,7 +15,7 @@ from mediapipe.python.solutions.hands import HAND_CONNECTIONS
 from temple import meditacion as M
 from temple.interfaz import dibujo as D
 from temple.interfaz import estilo as E
-from temple.interfaz.textos import AYUDA_PAUSA, AYUDA_SALIR, AYUDAS
+from temple.interfaz.textos import AYUDA_PAUSA, AYUDA_PROGRESO, AYUDA_SALIR, AYUDAS
 
 
 def barra_superior(app) -> None:
@@ -137,6 +137,8 @@ def pie(app) -> None:
         mano, teclado = AYUDA_PAUSA
     if app.modo == "inicio" and app.preguntando_salir:
         mano, teclado = AYUDA_SALIR
+    if app.modo == "inicio" and app.viendo_progreso:
+        mano, teclado = AYUDA_PROGRESO
     filas = [("CON LA MANO", mano, E.CREMA), ("TECLADO", teclado, E.APAGADO)]
     etiquetas = [E.fuente("negrita", 15).render(e, True, E.ORO_SUAVE) for e, _, _ in filas]
     textos = [E.fuente("texto", 18).render(t, True, c) for _, t, c in filas]

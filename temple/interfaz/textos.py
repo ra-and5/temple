@@ -24,6 +24,8 @@ AYUDAS = {
     "resultado": ("Señala un botón con el índice y espera",
                   "Enter continuar  ·  Esc volver al inicio"),
 }
+AYUDA_PROGRESO = ("Señala Volver con el índice y espera",
+                  "Esc o Enter volver")
 AYUDA_SALIR = ("Señala Sí o No con el índice y espera",
                "Enter salir  ·  Esc seguir aquí")
 AYUDA_PAUSA = ("Señala Seguir o Salir con el índice y espera",

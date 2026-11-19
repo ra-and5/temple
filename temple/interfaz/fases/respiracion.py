@@ -58,6 +58,13 @@ class Respiracion(Fase):
             return True
         return False
 
+    def resumen(self) -> str:
+        if self.app.progreso.avanzada_desbloqueada():
+            return "Tienes la respiración avanzada"
+        hechas = min(self.app.progreso.perfectas(self.clave, "principiante"),
+                     PERFECTAS_PARA_AVANZADA)
+        return f"{hechas} de {PERFECTAS_PARA_AVANZADA} sesiones con 3 lotos para la avanzada"
+
     def panel_inicio(self) -> None:
         app, p = self.app, self.app.pantalla
         primera = not app.progreso.tutorial_hecho(self.clave)
@@ -78,7 +85,8 @@ class Respiracion(Fase):
         v = self.vueltas
         nota = ("no suben de nivel" if v < VUELTAS_NIVEL
                 else "mínimo" if v == VUELTAS_MIN else "máximo" if v == VUELTAS_MAX else "")
-        Z.fila_mas_menos(app, f"{v} vueltas", nota, self.cambiar, "vueltas")
+        nombre = "vuelta" if v == 1 else "vueltas"
+        Z.fila_mas_menos(app, f"{v} {nombre}", nota, self.cambiar, "vueltas")
 
     # ================= practica =================
 

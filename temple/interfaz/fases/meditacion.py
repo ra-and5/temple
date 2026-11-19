@@ -69,6 +69,14 @@ class Meditacion(Fase):
         self.minutos_fijos = None
         self.app.progreso.cambiar_minutos(paso, date.today())
 
+    def resumen(self) -> str:
+        hoy = date.today()
+        siguiente = self.app.progreso.siguiente_escalon(hoy)
+        if siguiente is None:
+            return "Lo tienes todo. Medita sin límite"
+        dias = min(self.app.progreso.dias_meditados_semana(hoy), DIAS_PARA_SUBIR)
+        return f"{dias} de {DIAS_PARA_SUBIR} días esta semana para {premio(siguiente)}"
+
     def panel_inicio(self) -> None:
         app = self.app
         primera = not app.progreso.tutorial_hecho(self.clave)

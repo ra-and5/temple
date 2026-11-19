@@ -295,6 +295,32 @@ class TestInterfaz(unittest.TestCase):
         boton.accion()
         self.assertFalse(app.ventana.completa)
 
+    def test_tu_progreso_se_abre_y_se_cierra(self):
+        ya = self.progreso()
+        ya.registrar("respiracion", "principiante", 0.9, 3, vueltas=5)
+        ya.registrar("meditacion", "normal", 0.8, 2, minutos=5)
+        ya.registrar("estiramientos", "normal", 0.7, 2)
+        app = self.abrir()
+        self.correr(app, DT)
+        boton = next(b for b in app.botonera.lista if b.accion == app.ver_progreso)
+        boton.accion()
+        self.correr(app, DT)
+        self.assertTrue(app.viendo_progreso)
+        self.assertEqual(app.fases["respiracion"].resumen(),
+                         "1 de 5 sesiones con 3 lotos para la avanzada")
+        self.tecla(app, pygame.K_ESCAPE)
+        self.assertFalse(app.viendo_progreso)
+        self.assertEqual(app.modo, "inicio")
+
+    def test_tu_progreso_sin_sesiones(self):
+        app = self.abrir()
+        app.ver_progreso()
+        self.correr(app, DT)
+        self.assertEqual(app.fases["estiramientos"].resumen(), "Todavía sin sesiones")
+        volver = next(b for b in app.botonera.lista if b.accion == app.cerrar_progreso)
+        volver.accion()
+        self.assertFalse(app.viendo_progreso)
+
     def test_salir_con_el_dedo(self):
         app = self.abrir()
         self.correr(app, DT)

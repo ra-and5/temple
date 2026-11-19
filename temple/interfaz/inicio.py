@@ -14,8 +14,9 @@ from temple.interfaz import estilo as E
 from temple.interfaz import marco
 from temple.interfaz import dibujo as D
 from temple.interfaz import piezas as Z
+from temple.interfaz import resumen
 from temple.interfaz.botones import Boton
-from temple.interfaz.textos import DIAS, PROXIMAS
+from temple.interfaz.textos import PROXIMAS
 
 P = E.PANEL
 
@@ -24,13 +25,16 @@ def dibujar(app) -> None:
     if app.preguntando_salir:
         _pregunta_salir(app)
         return
+    if app.viendo_progreso:
+        resumen.dibujar(app)
+        return
     p = app.pantalla
     D.texto(p, E.fuente("cursiva", 22), "tu práctica de hoy", E.ORO, P.centerx, P.top + 22)
     _ritual(app)
     app.fases[app.elegida].panel_inicio()
     _sonido(app)
     _pantalla_completa(app)
-    _semana(app)
+    _progreso(app)
     app.botonera.dibujar(p, pygame.Rect(P.right - 20 - 96, P.top + 14, 96, 40), "Salir", None,
                          app.pedir_salir, centrado=True)
 
@@ -107,21 +111,16 @@ def _pantalla_completa(app) -> None:
         app.ventana.alternar_pantalla_completa)
 
 
-def _semana(app) -> None:
-    """Los siete dias de esta semana. Lleno si practicaste y con aro el de hoy."""
+def _progreso(app) -> None:
     p = app.pantalla
-    y = P.bottom - 40
-    semana = app.progreso.semana(date.today())
+    rect = pygame.Rect(Z.IZQ, P.top + 472, Z.ANCHO, 40)
+    app.botonera.dibujar(p, rect, "Tu progreso", None, app.ver_progreso)
     hoy_i = date.today().weekday()
-    for i, (letra, hecho) in enumerate(zip(DIAS, semana)):
-        x = P.centerx + (i - 3) * 46
+    for i, hecho in enumerate(app.progreso.semana(date.today())):
+        x = rect.right - 30 - (6 - i) * 20
         if hecho:
-            pygame.draw.circle(p, E.ORO, (x, y), 15)
-            col = E.NOCHE_ARRIBA
+            pygame.draw.circle(p, E.ORO, (x, rect.centery), 6)
         else:
-            pygame.draw.circle(p, E.ORO_SUAVE, (x, y), 15, 1)
-            col = E.APAGADO
+            pygame.draw.circle(p, E.ORO_SUAVE, (x, rect.centery), 6, 1)
         if i == hoy_i:
-            pygame.draw.circle(p, E.CREMA, (x, y), 19, 1)
-        s = E.fuente("negrita", 14).render(letra, True, col)
-        p.blit(s, s.get_rect(center=(x, y)))
+            pygame.draw.circle(p, E.CREMA, (x, rect.centery), 9, 1)

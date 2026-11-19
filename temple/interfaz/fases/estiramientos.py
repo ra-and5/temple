@@ -40,6 +40,12 @@ class Estiramientos(Fase):
 
     # ================= inicio =================
 
+    def resumen(self) -> str:
+        mejor = self.app.progreso.mejor(self.clave, "normal")
+        if mejor is None:
+            return "Todavía sin sesiones"
+        return f"Tu mejor marca, {math.floor(mejor * 100)} % del tiempo en la postura"
+
     def panel_inicio(self) -> None:
         app, p = self.app, self.app.pantalla
         primera = not app.progreso.tutorial_hecho(self.clave)

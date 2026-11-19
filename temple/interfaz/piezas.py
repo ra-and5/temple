@@ -150,6 +150,9 @@ def botones_pausa(app, y=None, terminar=None) -> None:
         b.dibujar(app.pantalla, pygame.Rect(P.right - 36 - ancho, y, ancho, 54), "Terminar",
                   "Enter", terminar, grupo="pausa")
     else:
+        if app.modo == "sesion":
+            linea(app.pantalla, "Si sales, esta sesión no se guarda", "texto", 15, E.APAGADO,
+                  y - 30)
         b.dibujar(app.pantalla, pygame.Rect(P.right - 36 - ancho, y, ancho, 54), "Salir",
                   "Esc", app.volver_inicio, grupo="pausa")
 

@@ -69,6 +69,7 @@ class App:
         self.ver_datos = False  # D, numeros de la camara para ajustar umbrales
         self.aviso: tuple[str, float] | None = None
         self.preguntando_salir = False
+        self.viendo_progreso = False
         self.cerrar = False
 
     # ================= bucle =================
@@ -124,10 +125,17 @@ class App:
     def volver_inicio(self) -> None:
         self.modo = "inicio"
         self.preguntando_salir = False
+        self.viendo_progreso = False
         self.camara.cara = False
         self.fase.salir()
         self.elegida = self._fase_sugerida()
         self.pausa_manual = False
+
+    def ver_progreso(self) -> None:
+        self.viendo_progreso = True
+
+    def cerrar_progreso(self) -> None:
+        self.viendo_progreso = False
 
     def pedir_salir(self) -> None:
         self.preguntando_salir = True
@@ -215,6 +223,10 @@ class App:
             if k == pygame.K_ESCAPE:
                 self.no_salir()
             return True
+        if self.viendo_progreso:
+            if k in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+                self.cerrar_progreso()
+            return True
         if k == pygame.K_ESCAPE:
             self.pedir_salir()
             return True
@@ -249,8 +261,8 @@ class App:
         self.fase.actualizar(dt, lectura)
 
     def _dibujar(self, dt, frame, lectura) -> None:
-        self.botonera.empezar_fotograma((self.modo, self.pausa_manual, self.preguntando_salir),
-                                        self.menu_activo())
+        pantalla = (self.modo, self.pausa_manual, self.preguntando_salir, self.viendo_progreso)
+        self.botonera.empezar_fotograma(pantalla, self.menu_activo())
         self.pantalla.blit(self.fondo, (0, 0))
         self.brasas.dibujar(self.pantalla, dt, self.t)
         marco.barra_superior(self)

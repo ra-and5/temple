@@ -42,6 +42,9 @@ class Fase:
     def cambiar(self, paso: int) -> None:
         """Menos y mas del inicio."""
 
+    def resumen(self) -> str:
+        return ""
+
     def tecla_inicio(self, k) -> bool:
         """Teclas propias del inicio. True si la ha usado."""
         return False

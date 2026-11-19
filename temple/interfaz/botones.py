@@ -92,7 +92,7 @@ class Botonera:
         if principal:
             color = tuple(min(255, c + 18) for c in E.AZAFRAN) if encima else E.AZAFRAN
             pygame.draw.rect(capa, color, r, border_radius=radio)
-            col_texto, col_tecla = E.NOCHE_ARRIBA, (90, 50, 20)
+            col_texto, col_tecla = E.NOCHE_ARRIBA, (64, 34, 12)
         else:
             pygame.draw.rect(capa, (*E.ORO, 46 if encima else 18), r, border_radius=radio)
             col_texto, col_tecla = E.CREMA, E.ORO_SUAVE
@@ -122,7 +122,7 @@ class Botonera:
         if etiqueta:
             e = E.fuente("negrita", 12).render(etiqueta.upper(), True, E.NOCHE_ARRIBA)
             caja = e.get_rect().inflate(14, 6)
-            caja.midright = (rect.right - 96, rect.centery)  # dentro, junto a la tecla
+            caja.midright = (rect.right - 88, rect.centery)  # dentro, junto a la tecla
             pygame.draw.rect(destino, E.ORO, caja, border_radius=caja.h // 2)
             destino.blit(e, e.get_rect(center=caja.center))
         self.anadir(Boton(rect, accion, zona, grupo))
