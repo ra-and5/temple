@@ -1,11 +1,17 @@
-# Pasa todos los tests en un equipo limpio de GitHub cada vez que se sube codigo.
+# Comprueba Temple en equipos limpios de GitHub cada vez que se sube codigo.
 # Si algo se rompe, el commit sale con una cruz roja en GitHub y llega un correo.
+#
+#   tests        los tests rapidos, instalando con pip (unos 2 minutos)
+#   instalacion  lo que haria un usuario nuevo en Ubuntu y en macOS, bash instalar.sh
+#                desde cero (instala Miniconda, el entorno y los modelos y pasa
+#                todos los tests, tambien el que carga los modelos de verdad)
 name: Tests
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -17,10 +23,10 @@ jobs:
       SDL_AUDIODRIVER: dummy
     steps:
       - name: Descargar el codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Instalar Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -33,3 +39,25 @@ jobs:
 
       - name: Pasar los tests
         run: python -m unittest discover tests -v
+
+  instalacion:
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos-latest es un Mac con chip de Apple
+        os: [ubuntu-24.04, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v7
+
+      - name: Librerias del sistema (en un Ubuntu de escritorio ya vienen)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgl1 libegl1 libgles2
+
+      - name: Instalar como un usuario nuevo
+        run: bash instalar.sh -y
+
+      - name: Que jugar.sh encuentra el entorno y arranca
+        run: bash jugar.sh --help
