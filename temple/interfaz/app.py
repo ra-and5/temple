@@ -30,6 +30,7 @@ from temple.interfaz.botones import Botonera
 from temple.interfaz.fases import FASES
 from temple.interfaz.opciones import Opciones
 from temple.interfaz.sonido import Sonidos
+from temple.interfaz.ventana import Ventana
 from temple.progreso import RUTA, Progreso
 
 PAUSA_SIN_CUERPO_S = 1.2  # si no te ve este rato mientras practicas, se pausa sola
@@ -41,11 +42,10 @@ class App:
         opciones = opciones or Opciones()
         pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.init()
-        pygame.display.set_caption("Temple")
         icono = pygame.Surface((64, 64), pygame.SRCALPHA)
         D.loto(icono, (32, 50), 36)
-        pygame.display.set_icon(icono)
-        self.pantalla = pygame.display.set_mode((E.ANCHO, E.ALTO), pygame.SCALED)
+        self.ventana = Ventana("Temple", icono)
+        self.pantalla = pygame.Surface((E.ANCHO, E.ALTO))
         self.reloj = pygame.time.Clock()
         self.t = 0.0
 
@@ -58,7 +58,7 @@ class App:
         self.fondo = D.crear_fondo()
         self.mascara_cam = D.mascara_redondeada(E.CAMARA.size, E.RADIO)
         self.brasas = D.Brasas()
-        self.botonera = Botonera(E.PANEL, self.sonido)
+        self.botonera = Botonera(E.PANEL, self.sonido, self.ventana.raton)
 
         self.fases = {F.clave: F(self, opciones) for F in FASES}
         self.fase = self.fases[FASES[0].clave]  # la que se hace o la ultima que se hizo
@@ -77,7 +77,7 @@ class App:
                 dt = self.reloj.tick(E.FPS) / 1000
                 if not self.paso(dt):
                     break
-                pygame.display.flip()
+                self.ventana.mostrar(self.pantalla)
         finally:
             # Esperar a que el hilo cierre la camara y MediaPipe antes de salir
             self.camara.parar()
@@ -163,7 +163,7 @@ class App:
             if ev.type == pygame.MOUSEMOTION:
                 self.botonera.mover_raton()
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
-                self.botonera.clic(ev.pos)
+                self.botonera.clic(self.ventana.a_juego(ev.pos))
             if ev.type == pygame.KEYDOWN and not self._tecla(ev):
                 return False
         return True
@@ -174,7 +174,7 @@ class App:
         if self.botonera.tecla(ev, self.modo == "inicio"):
             return True
         if k == pygame.K_F11:
-            pygame.display.toggle_fullscreen()
+            self.ventana.alternar_pantalla_completa()
         elif k == pygame.K_m:
             self.alternar_sonido()
         elif k == pygame.K_d:

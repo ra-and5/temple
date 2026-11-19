@@ -28,10 +28,12 @@ class Boton:
 
 
 class Botonera:
-    def __init__(self, area: pygame.Rect, sonido: Callable[[str], None]):
+    def __init__(self, area: pygame.Rect, sonido: Callable[[str], None],
+                 raton: Callable[[], tuple[int, int]] = pygame.mouse.get_pos):
         self.lista: list[Boton] = []
         self.puntero = Puntero(area)
         self.sonido = sonido
+        self.raton = raton
         self.foco: int | None = None  # boton marcado con el teclado
         self.dedo = False  # si en esta pantalla el dedo mueve el cursor
         self._pantalla = None  # para quitar el foco al cambiar de pantalla
@@ -50,7 +52,7 @@ class Botonera:
         if self.foco is not None and self.foco >= len(self.lista):
             self.foco = None
         # Mano al pasar el raton por un boton, como en una web
-        raton = pygame.mouse.get_pos()
+        raton = self.raton()
         encima = any(b.rect.collidepoint(raton) for b in self.lista)
         cursor = pygame.SYSTEM_CURSOR_HAND if encima else pygame.SYSTEM_CURSOR_ARROW
         if cursor != self._cursor:
@@ -83,7 +85,7 @@ class Botonera:
             grupo in REPETIBLES and self.foco is not None and self.foco < indice
             and self.lista[self.foco].grupo == grupo)
         marcado = por_dedo or por_teclado
-        encima = marcado or rect.collidepoint(pygame.mouse.get_pos())
+        encima = marcado or rect.collidepoint(self.raton())
         radio = rect.h // 2
         capa = pygame.Surface(rect.size, pygame.SRCALPHA)
         r = capa.get_rect()
