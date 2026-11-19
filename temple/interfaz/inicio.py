@@ -21,12 +21,17 @@ P = E.PANEL
 
 
 def dibujar(app) -> None:
+    if app.preguntando_salir:
+        _pregunta_salir(app)
+        return
     p = app.pantalla
     D.texto(p, E.fuente("cursiva", 22), "tu práctica de hoy", E.ORO, P.centerx, P.top + 22)
     _ritual(app)
     app.fases[app.elegida].panel_inicio()
     _sonido(app)
     _semana(app)
+    app.botonera.dibujar(p, pygame.Rect(P.right - 20 - 96, P.top + 14, 96, 40), "Salir", None,
+                         app.pedir_salir, centrado=True)
 
 
 def _ritual(app) -> None:
@@ -45,7 +50,7 @@ def _ritual(app) -> None:
             zona.midtop = (x, y - 28)
             indice = len(b.lista)
             marcado = b.marcado(indice)
-            encima = marcado or zona.collidepoint(pygame.mouse.get_pos())
+            encima = marcado or zona.collidepoint(b.raton())
             if elegida or encima:
                 capa = pygame.Surface(zona.size, pygame.SRCALPHA)
                 r = capa.get_rect()
@@ -71,6 +76,18 @@ def _ritual(app) -> None:
         s = E.fuente("negrita" if elegida else "texto", 14).render(
             nombre, True, E.CREMA if clave else E.APAGADO)
         p.blit(s, s.get_rect(midtop=(x, y + 16)))
+
+
+def _pregunta_salir(app) -> None:
+    p, b = app.pantalla, app.botonera
+    D.loto(p, (P.centerx, P.top + 150), 56)
+    D.texto(p, E.fuente("titulo", 40), "¿Salir de Temple?", E.CREMA, P.centerx, P.top + 190)
+    D.texto(p, E.fuente("texto", 19), "Tu progreso ya está guardado", E.APAGADO, P.centerx,
+            P.top + 246)
+    b.dibujar(p, pygame.Rect(Z.IZQ, P.top + 310, Z.ANCHO, 54), "Sí, salir", "Enter",
+              app.salir, True)
+    b.dibujar(p, pygame.Rect(Z.IZQ, P.top + 384, Z.ANCHO, 54), "No, seguir aquí", "Esc",
+              app.no_salir)
 
 
 def _sonido(app) -> None:

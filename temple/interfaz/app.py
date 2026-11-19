@@ -68,6 +68,8 @@ class App:
         self.sin_cuerpo_desde: float | None = None
         self.ver_datos = False  # D, numeros de la camara para ajustar umbrales
         self.aviso: tuple[str, float] | None = None
+        self.preguntando_salir = False
+        self.cerrar = False
 
     # ================= bucle =================
 
@@ -87,7 +89,7 @@ class App:
     def paso(self, dt: float) -> bool:
         """Un fotograma. Devuelve False si hay que salir."""
         self.t += dt
-        if not self._eventos():
+        if not self._eventos() or self.cerrar:
             return False
         frame, lectura = self.camara.ultimo()
         self._actualizar(dt, lectura)
@@ -121,10 +123,20 @@ class App:
 
     def volver_inicio(self) -> None:
         self.modo = "inicio"
+        self.preguntando_salir = False
         self.camara.cara = False
         self.fase.salir()
         self.elegida = self._fase_sugerida()
         self.pausa_manual = False
+
+    def pedir_salir(self) -> None:
+        self.preguntando_salir = True
+
+    def no_salir(self) -> None:
+        self.preguntando_salir = False
+
+    def salir(self) -> None:
+        self.cerrar = True
 
     # ================= pausa y avisos =================
 
@@ -197,8 +209,15 @@ class App:
 
     def _tecla_inicio(self, k) -> bool:
         elegida = self.fases[self.elegida]
+        if self.preguntando_salir:
+            if k in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                return False
+            if k == pygame.K_ESCAPE:
+                self.no_salir()
+            return True
         if k == pygame.K_ESCAPE:
-            return False
+            self.pedir_salir()
+            return True
         if k in (pygame.K_SPACE, pygame.K_RETURN):
             self.accion_principal()
         elif k == pygame.K_t:
@@ -230,7 +249,8 @@ class App:
         self.fase.actualizar(dt, lectura)
 
     def _dibujar(self, dt, frame, lectura) -> None:
-        self.botonera.empezar_fotograma((self.modo, self.pausa_manual), self.menu_activo())
+        self.botonera.empezar_fotograma((self.modo, self.pausa_manual, self.preguntando_salir),
+                                        self.menu_activo())
         self.pantalla.blit(self.fondo, (0, 0))
         self.brasas.dibujar(self.pantalla, dt, self.t)
         marco.barra_superior(self)

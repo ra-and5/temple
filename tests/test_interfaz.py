@@ -273,7 +273,28 @@ class TestInterfaz(unittest.TestCase):
         self.assertEqual(app.modo, "tutorial")
         self.tecla(app, pygame.K_ESCAPE)
         self.assertEqual(app.modo, "inicio")
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE, mod=0))
+        self.tecla(app, pygame.K_ESCAPE)
+        self.assertTrue(app.preguntando_salir)
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, mod=0))
+        self.assertFalse(app.paso(DT))
+
+    def test_salir_pregunta_y_se_puede_volver(self):
+        app = self.abrir()
+        self.tecla(app, pygame.K_ESCAPE)
+        self.assertTrue(app.preguntando_salir)
+        self.tecla(app, pygame.K_ESCAPE)
+        self.assertFalse(app.preguntando_salir)
+        self.assertEqual(app.modo, "inicio")
+
+    def test_salir_con_el_dedo(self):
+        app = self.abrir()
+        self.correr(app, DT)
+        salir = next(b for b in app.botonera.lista if b.accion == app.pedir_salir)
+        salir.accion()
+        self.correr(app, DT)
+        self.assertTrue(app.preguntando_salir)
+        si = next(b for b in app.botonera.lista if b.accion == app.salir)
+        si.accion()
         self.assertFalse(app.paso(DT))
 
 
