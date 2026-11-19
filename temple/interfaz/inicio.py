@@ -29,6 +29,7 @@ def dibujar(app) -> None:
     _ritual(app)
     app.fases[app.elegida].panel_inicio()
     _sonido(app)
+    _pantalla_completa(app)
     _semana(app)
     app.botonera.dibujar(p, pygame.Rect(P.right - 20 - 96, P.top + 14, 96, 40), "Salir", None,
                          app.pedir_salir, centrado=True)
@@ -93,9 +94,17 @@ def _pregunta_salir(app) -> None:
 def _sonido(app) -> None:
     activo = app.sonido.activo
     app.botonera.dibujar(
-        app.pantalla, pygame.Rect(Z.IZQ, P.top + 378, Z.ANCHO, 46),
+        app.pantalla, pygame.Rect(Z.IZQ, P.top + 376, Z.ANCHO, 40),
         "Sonido activado" if activo else "Sonido apagado", "M", app.alternar_sonido,
         icono=lambda c: marco.altavoz(app.pantalla, c, activo, E.CREMA if activo else E.APAGADO))
+
+
+def _pantalla_completa(app) -> None:
+    completa = app.ventana.completa
+    app.botonera.dibujar(
+        app.pantalla, pygame.Rect(Z.IZQ, P.top + 424, Z.ANCHO, 40),
+        "Salir de pantalla completa" if completa else "Pantalla completa", "F",
+        app.ventana.alternar_pantalla_completa)
 
 
 def _semana(app) -> None:

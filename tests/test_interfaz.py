@@ -286,6 +286,15 @@ class TestInterfaz(unittest.TestCase):
         self.assertFalse(app.preguntando_salir)
         self.assertEqual(app.modo, "inicio")
 
+    def test_pantalla_completa_con_la_tecla_y_con_el_boton(self):
+        app = self.abrir()
+        self.tecla(app, pygame.K_f)
+        self.assertTrue(app.ventana.completa)
+        boton = next(b for b in app.botonera.lista
+                     if b.accion == app.ventana.alternar_pantalla_completa)
+        boton.accion()
+        self.assertFalse(app.ventana.completa)
+
     def test_salir_con_el_dedo(self):
         app = self.abrir()
         self.correr(app, DT)

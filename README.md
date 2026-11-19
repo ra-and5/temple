@@ -126,8 +126,9 @@ De lejos, con la mano. De cerca, con el teclado o el ratón, como cualquier prog
 | Clic | Pulsar un botón |
 | R, E, I | Elegir respiración, meditación o estiramientos en el inicio |
 | M | Sonido |
+| F | Pantalla completa, y otra vez para volver a la ventana |
 | D | Ver los números que mide la cámara |
-| Esc | Volver al inicio, o salir |
+| Esc | Volver al inicio. En el inicio pregunta si quieres salir, igual que el botón Salir |
 
 Opciones para probar, que no cuentan para subir de nivel.
 

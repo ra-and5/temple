@@ -16,7 +16,7 @@ PROXIMAS = ("Flexiones",)
 # Ayuda de la linea de abajo en cada pantalla
 AYUDAS = {
     "inicio": ("Señala un botón con el índice y espera",
-               "Flechas y Enter, o el ratón  ·  M sonido  ·  Esc salir de Temple"),
+               "Flechas y Enter, o el ratón  ·  F pantalla completa  ·  M sonido  ·  Esc salir"),
     "tutorial": ("Palma abierta y quieta para pausar",
                  "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio"),
     "sesion": ("Palma abierta y quieta para pausar",

@@ -185,7 +185,7 @@ class App:
         k = ev.key
         if self.botonera.tecla(ev, self.modo == "inicio"):
             return True
-        if k == pygame.K_F11:
+        if k in (pygame.K_f, pygame.K_F11):
             self.ventana.alternar_pantalla_completa()
         elif k == pygame.K_m:
             self.alternar_sonido()
