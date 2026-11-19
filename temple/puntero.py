@@ -1,7 +1,8 @@
 """Manejar los menus con el dedo, sin teclado ni raton.
 
-  - Puntero      solo cuenta si se SENALA (indice estirado y los demas dedos
-                 cerrados), asi la mano relajada no pulsa nada. La punta del
+  - Puntero      solo cuenta si se SENALA (indice estirado, los demas dedos
+                 cerrados y el indice hacia la pantalla o hacia arriba), asi
+                 la mano relajada o apoyada en la cabeza no pulsa nada. La punta del
                  indice mueve un cursor por el panel y un iman resalta el boton
                  si esta encima o casi (IMAN px). ESPERA_S segundos senalando
                  el mismo boton lo pulsa. Para volver a pulsar hay que dejar de
@@ -9,11 +10,15 @@
                  nada se pulse solo (por ejemplo con la mano aun en la nariz).
                  Los botones repetibles (menos y mas) no piden soltar, y seguir
                  senalando vuelve a pulsar cada REPETIR_S segundos.
-  - GestoPalma   la palma abierta y lejos de la nariz durante PALMA_S segundos
-                 pausa la respiracion. Lejos de la nariz para no confundirlo
-                 con la mano que esta tapando. Al meditar ademas tiene que
-                 estar por encima de los hombros (techo), porque las manos
-                 apoyadas en el regazo pueden parecer una palma abierta.
+  - GestoPalma   la palma abierta, de frente a la camara, quieta y lejos de la
+                 nariz durante PALMA_S segundos pausa. De frente quiere decir
+                 que la mano se ve ancha (de nudillo a nudillo) y quieta que
+                 no se mueve mientras se llena el aro, asi una mano que baja o
+                 pasa por delante no pausa (le paso a Rares al meditar, 19/11).
+                 Lejos de la nariz para no confundirlo con la mano que esta
+                 tapando. Al meditar ademas tiene que estar por encima de los
+                 hombros (techo), porque las manos en el regazo pueden parecer
+                 una palma abierta. En los estiramientos no se usa.
 
 Las manos llegan como 21 puntos (x, y) normalizados de 0 a 1 sobre la imagen
 ya en espejo, igual que la pantalla. Los botones son rectangulos (x, y, ancho,
@@ -25,6 +30,7 @@ from __future__ import annotations
 import math
 
 INDICE, MUNECA, CENTRO_PALMA = 8, 0, 9
+NUDILLO_INDICE, NUDILLO_MENIQUE = 5, 17
 PUNTAS_Y_NUDILLOS = ((8, 6), (12, 10), (16, 14), (20, 18))
 
 # Esta parte de la camara cubre todo el panel de botones, para llegar a todo
@@ -34,7 +40,11 @@ ZONA_Y = (0.20, 0.80)
 ESPERA_S = 1.5  # tiempo senalando el mismo boton para pulsarlo
 IMAN = 28  # pixeles alrededor de un boton que todavia cuentan como encima
 SOLTAR_S = 0.25  # sin senalar este rato cuenta como soltar (aguanta parpadeos del modelo)
-PALMA_S = 0.8  # tiempo con la palma abierta para pausar (casi al instante)
+PALMA_S = 1.0  # tiempo con la palma abierta para pausar
+DE_FRENTE = 0.6  # ancho de la palma partido por su largo. De lado se ve estrecha
+VISIBLE_LARGO = 0.4  # si el indice se ve mas corto que esto de la palma, apunta a la camara
+ARRIBA = 0.5  # el indice apunta arriba si sube mas que esto de su largo (unos 30 grados)
+QUIETA = 0.35  # lo que puede moverse el centro de la palma, en largos de palma
 REPETIR_S = 0.8  # menos y mas, cada cuanto se repite si sigues senalando
 PERDIDA_S = 0.4  # si no se ve la mano este rato, el cursor desaparece
 SUAVIDAD = 14.0  # cuanto mas alto, antes alcanza el cursor al dedo
@@ -74,10 +84,41 @@ def senalando(mano) -> bool:
     return indice and cerrados >= 2
 
 
+def apunta_a_pantalla(mano) -> bool:
+    """El indice apunta a la camara (se ve corto en la imagen) o hacia arriba.
+
+    Para mover algo en la pantalla el dedo va hacia ella o hacia arriba. De lado
+    o hacia abajo es la mano apoyada, por ejemplo en la cabeza con los dedos
+    caidos o tumbados (le paso a Rares el 19/11).
+    """
+    dx = mano[INDICE][0] - mano[NUDILLO_INDICE][0]
+    dy = mano[INDICE][1] - mano[NUDILLO_INDICE][1]  # y crece hacia abajo
+    largo = math.hypot(dx, dy)
+    # Hacia la camara el dedo se ve tan corto que su direccion es ruido
+    if largo < VISIBLE_LARGO * largo_palma(mano):
+        return True
+    return -dy > ARRIBA * largo
+
+
+def senala(mano, mano_3d=None) -> bool:
+    """El gesto de senalar (en 3D si se tiene) con el dedo hacia la pantalla o arriba."""
+    return senalando(mano_3d or mano) and apunta_a_pantalla(mano)
+
+
 def palma_abierta(mano) -> bool:
     """Los cuatro dedos estirados, cada punta mas lejos de la muneca que su nudillo."""
     m = mano[MUNECA]
     return all(_dist(mano[t], m) > 1.15 * _dist(mano[n], m) for t, n in PUNTAS_Y_NUDILLOS)
+
+
+def largo_palma(mano) -> float:
+    return _dist(mano[MUNECA], mano[CENTRO_PALMA])
+
+
+def de_frente(mano) -> bool:
+    """La palma se ve ancha, o sea que mira a la camara y no esta de lado."""
+    largo = largo_palma(mano)
+    return largo > 1e-6 and _dist(mano[NUDILLO_INDICE], mano[NUDILLO_MENIQUE]) / largo >= DE_FRENTE
 
 
 class Puntero:
@@ -120,7 +161,7 @@ class Puntero:
         # Si senala si cuenta, aunque este muy abajo, porque sentado cerca de la
         # camara el dedo cae ahi al apuntar a los botones de abajo
         if (mano is not None and mano[INDICE][1] > ZONA_Y[1] + REPOSO
-                and not senalando(mano_3d or mano)):
+                and not senala(mano, mano_3d)):
             mano = None
             self._sin_mano = PERDIDA_S
         if mano is None:
@@ -139,7 +180,7 @@ class Puntero:
             self.pos = (self.pos[0] + (destino[0] - self.pos[0]) * k,
                         self.pos[1] + (destino[1] - self.pos[1]) * k)
 
-        if not senalando(mano_3d or mano):
+        if not senala(mano, mano_3d):
             self._sin_senalar += dt
             if self._sin_senalar >= SOLTAR_S:
                 self._soltar()
@@ -177,6 +218,7 @@ class GestoPalma:
         self.segundos = segundos
         self.llenado = 0.0
         self._armado = True
+        self._desde: tuple[float, float] | None = None  # donde empezo a llenarse
 
     def actualizar(self, dt: float, mano, nariz=None, escala=None, techo=None) -> bool:
         """True en el momento en que se completa el gesto.
@@ -184,7 +226,7 @@ class GestoPalma:
         techo, si llega, es la altura (y de 0 a 1) por encima de la que tiene
         que estar el centro de la palma.
         """
-        abierta = mano is not None and palma_abierta(mano)
+        abierta = mano is not None and palma_abierta(mano) and de_frente(mano)
         if abierta and nariz is not None and escala:
             abierta = _dist(mano[CENTRO_PALMA], nariz) / escala > LEJOS_NARIZ
         if abierta and techo is not None:
@@ -192,9 +234,15 @@ class GestoPalma:
         if not abierta:
             self.llenado = 0.0
             self._armado = True
+            self._desde = None
             return False
         if not self._armado:
             return False
+        # Si la mano se mueve, se vuelve a empezar desde donde esta ahora
+        centro = mano[CENTRO_PALMA]
+        if self._desde is None or _dist(centro, self._desde) > QUIETA * largo_palma(mano):
+            self._desde = centro
+            self.llenado = 0.0
         self.llenado += dt / self.segundos
         if self.llenado >= 1:
             self.llenado = 0.0

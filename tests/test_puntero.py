@@ -1,7 +1,7 @@
 import unittest
 
-from temple.puntero import (GestoPalma, Puntero, a_area, distancia_a_rect, palma_abierta,
-                            senalando)
+from temple.puntero import (GestoPalma, Puntero, a_area, apunta_a_pantalla, distancia_a_rect,
+                            palma_abierta, senala, senalando)
 
 AREA = (0, 0, 1280, 720)
 ARRIBA = (100, 100, 400, 60)
@@ -21,6 +21,8 @@ def mano_en(x, y, abierta=False, puno=False):
         puntos[punta] = (x, y) if abierta else (x, y + 0.15)
     puntos[8] = (x, y + 0.15) if puno else (x, y)
     puntos[9] = (x, y + 0.1)
+    if abierta:  # de frente, los nudillos del indice y del menique separados
+        puntos[5], puntos[17] = (x - 0.04, y + 0.1), (x + 0.04, y + 0.1)
     return puntos
 
 
@@ -126,6 +128,37 @@ class TestPuntero(unittest.TestCase):
         self.assertIn(0, pulsados)
 
 
+class TestDireccionDelDedo(unittest.TestCase):
+    def test_mano_apoyada_en_la_cabeza_no_senala(self):
+        """Indice estirado pero caido hacia abajo, con la mano sobre la cabeza (Rares, 19/11)."""
+        mano = mano_en(0.5, 0.5)
+        caida = [(x, 1.0 - y) for x, y in mano]  # la misma mano boca abajo
+        self.assertTrue(senala(mano))
+        self.assertFalse(senala(caida))
+        boton = (0, 0, 1000, 1000)
+        p = Puntero(boton)
+        self.assertEqual([r for r in correr(p, 3, caida, [boton]) if r is not None], [])
+
+    def test_hacia_la_camara_si_senala(self):
+        """Apuntando a la camara el dedo se ve corto y casi encima del nudillo."""
+        mano = mano_en(0.5, 0.5)
+        mano[5] = (0.5, 0.49)  # la punta, un poco por debajo del nudillo en la imagen
+        self.assertTrue(apunta_a_pantalla(mano))
+
+    def test_de_lado_no_senala(self):
+        """Tumbado con la mano en la cabeza y el indice hacia un lado (Rares, 19/11)."""
+        for signo in (1, -1):
+            mano = mano_en(0.5, 0.5)
+            lado = [(0.5 + signo * (0.7 - y), 0.5 + 0.02 * (x - 0.5)) for x, y in mano]
+            self.assertTrue(senalando(lado))  # la forma es la de senalar
+            self.assertFalse(senala(lado))  # pero no la direccion
+
+    def test_en_diagonal_hacia_arriba_si_senala(self):
+        mano = mano_en(0.5, 0.5)
+        mano[8] = (0.6, 0.42)  # la punta arriba a la derecha del nudillo (45 grados)
+        self.assertTrue(apunta_a_pantalla(mano))
+
+
 class TestPalma(unittest.TestCase):
     def test_palma_abierta(self):
         self.assertTrue(palma_abierta(mano_en(0.5, 0.5, abierta=True)))
@@ -137,6 +170,20 @@ class TestPalma(unittest.TestCase):
         r = [g.actualizar(DT, mano, (0.5, 0.2), 0.3) for _ in range(300)]
         self.assertEqual(r.count(True), 1)
         self.assertFalse(any(r[:int(1.9 / DT)]))
+
+    def test_de_lado_no_cuenta(self):
+        g = GestoPalma(0.5)
+        mano = mano_en(0.7, 0.5, abierta=True)
+        mano[5], mano[17] = (0.7, 0.6), (0.71, 0.6)  # la mano se ve estrecha
+        self.assertFalse(any(g.actualizar(DT, mano, (0.5, 0.2), 0.3) for _ in range(100)))
+
+    def test_mano_que_baja_no_pausa(self):
+        """Al bajar la mano abierta despues de meditar no se pausa (Rares, 19/11)."""
+        g = GestoPalma(0.5)
+        r = [g.actualizar(DT, mano_en(0.7, 0.2 + 0.004 * i, abierta=True), (0.5, 0.2), 0.3)
+             for i in range(100)]
+        self.assertFalse(any(r))
+        self.assertEqual(g.llenado < 0.3, True)
 
     def test_cerca_de_la_nariz_no_cuenta(self):
         g = GestoPalma(0.5)
