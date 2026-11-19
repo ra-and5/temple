@@ -11,7 +11,7 @@ DIAS = "LMXJVSD"  # iniciales de la semana, de lunes a domingo
 CORTES = (40, 65, 85)  # % para 1, 2 y 3 lotos (respiracion.estrellas y meditacion.lotos)
 
 # Fases que todavia no existen. Salen apagadas en la fila del ritual
-PROXIMAS = ("Estiramientos", "Flexiones")
+PROXIMAS = ("Flexiones",)
 
 # Ayuda de la linea de abajo en cada pantalla
 AYUDAS = {

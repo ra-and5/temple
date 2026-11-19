@@ -19,4 +19,5 @@ class Opciones:
     tiempo_s: float = TIEMPO_S  # segundos por tiempo de la cuenta
     avanzada: bool = False  # respiracion avanzada sin desbloquearla
     minutos: float | None = None  # minutos de meditacion (0 es sin limite)
+    segundos: float | None = None  # segundos de cada estiramiento
     datos: Path = RUTA.parent  # carpeta del progreso y del registro (los tests usan otra)

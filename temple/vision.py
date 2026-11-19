@@ -3,7 +3,8 @@
 Pose da la nariz y el ancho de los hombros, que sirve de regla para medir
 distancias sin que importe lo lejos que este la persona. Hands da las puntas
 de los dedos. Face (solo al meditar, con usar_cara) dice si los ojos estan
-cerrados.
+cerrados. Las orejas, los codos y las munecas de Pose sirven para los
+estiramientos.
 
   - derecho    la punta del pulgar esta pegada a la nariz
   - izquierdo  la punta de otro dedo esta pegada a la nariz (con la mano
@@ -33,7 +34,10 @@ MODELO_MANOS = RAIZ / "models" / "hand_landmarker.task"
 MODELO_CARA = RAIZ / "models" / "face_landmarker.task"
 
 NARIZ = 0
+OREJA_IZQ, OREJA_DER = 7, 8
 HOMBRO_IZQ, HOMBRO_DER = 11, 12
+CODO_IZQ, CODO_DER = 13, 14
+MUNECA_IZQ, MUNECA_DER = 15, 16
 PULGAR_PUNTA = 4
 OTRAS_PUNTAS = {8: "indice", 12: "corazon", 16: "anular", 20: "menique"}
 
@@ -56,6 +60,11 @@ class Lectura:
     perdida_s: float = 0.0  # segundos sin ver la mano
     hombros: tuple[tuple[float, float], tuple[float, float]] | None = None
     ojos: float | None = None  # 0 abiertos, 1 cerrados (solo con el modelo de cara)
+    # Para los estiramientos. Cada par va en el mismo orden que los hombros
+    orejas: tuple[tuple[float, float], tuple[float, float]] | None = None
+    codos: tuple[tuple[float, float], tuple[float, float]] | None = None
+    munecas: tuple[tuple[float, float], tuple[float, float]] | None = None
+    vis_munecas: tuple[float, float] | None = None  # 0 a 1, lo seguro que esta el modelo
 
 
 def clasificar(d_pulgar: float, d_otro: float,
@@ -155,13 +164,20 @@ class DetectorFosas:
         pos_nariz = (nariz.x, nariz.y)
         hombros = ((p[HOMBRO_IZQ].x, p[HOMBRO_IZQ].y), (p[HOMBRO_DER].x, p[HOMBRO_DER].y))
 
+        def par(i, j):
+            return (p[i].x, p[i].y), (p[j].x, p[j].y)
+
+        cuerpo = dict(orejas=par(OREJA_IZQ, OREJA_DER), codos=par(CODO_IZQ, CODO_DER),
+                      munecas=par(MUNECA_IZQ, MUNECA_DER),
+                      vis_munecas=(p[MUNECA_IZQ].visibility, p[MUNECA_DER].visibility))
+
         if not res_manos.hand_landmarks:
             perdida = ahora - self._visto_mano
             if perdida > self._memoria_s:
                 self._estable = "ninguno"
                 self._historial.clear()
             return Lectura(estado=self._estable, nariz=pos_nariz, escala=escala,
-                           perdida_s=perdida, hombros=hombros, ojos=ojos)
+                           perdida_s=perdida, hombros=hombros, ojos=ojos, **cuerpo)
 
         self._visto_mano = ahora
         mano = res_manos.hand_landmarks[0]
@@ -182,6 +198,7 @@ class DetectorFosas:
             mano_3d=puntos_3d,
             hombros=hombros,
             ojos=ojos,
+            **cuerpo,
         )
 
     def cerrar(self) -> None:
