@@ -16,6 +16,7 @@ class Ventana:
         self.nitida = self._textura("0")
         self.suave = self._textura("1")
         self.destino = pygame.Rect(0, 0, E.ANCHO, E.ALTO)
+        self.pixeles = 1.0
         self.completa = False
 
     def _textura(self, calidad: str) -> Texture:
@@ -24,6 +25,10 @@ class Ventana:
 
     def mostrar(self, superficie: pygame.Surface) -> None:
         salida = self.render.get_viewport()
+        ancho = self.ventana.size[0]
+        if salida.w == 0 or salida.h == 0 or ancho == 0:
+            return
+        self.pixeles = salida.w / ancho
         escala = min(salida.w / E.ANCHO, salida.h / E.ALTO)
         if escala >= 1 and escala - int(escala) < 0.05:
             escala = int(escala)
@@ -47,11 +52,8 @@ class Ventana:
             self.ventana.size = (E.ANCHO, E.ALTO)
 
     def a_juego(self, pos) -> tuple[int, int]:
-        if self.ventana.size[0] == 0 or self.destino.w == 0:
-            return pos
-        pixeles = self.render.get_viewport().w / self.ventana.size[0]
-        x = (pos[0] * pixeles - self.destino.x) * E.ANCHO / self.destino.w
-        y = (pos[1] * pixeles - self.destino.y) * E.ALTO / self.destino.h
+        x = (pos[0] * self.pixeles - self.destino.x) * E.ANCHO / self.destino.w
+        y = (pos[1] * self.pixeles - self.destino.y) * E.ALTO / self.destino.h
         return int(x), int(y)
 
     def raton(self) -> tuple[int, int]:
