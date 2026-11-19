@@ -57,7 +57,15 @@ def camara(app, frame, lectura) -> None:
         centro = E.CAMARA.center
         if not app.camara.error:
             D.enso(p, centro, 46, (app.t * 0.5) % 1, E.ORO_SUAVE, 8, 160, inicio=app.t * 120)
-        D.texto(p, E.fuente("texto", 20), mensaje, E.APAGADO, centro[0], centro[1] + 70)
+        # El problema en grande y debajo que hacer, partido en lineas si no cabe
+        titulo, _, ayuda = mensaje.partition("\n")
+        if not app.camara.error:
+            D.texto(p, E.fuente("texto", 20), titulo, E.APAGADO, centro[0], centro[1] + 70)
+        else:
+            y = D.texto(p, E.fuente("negrita", 24), titulo, E.CREMA, centro[0], centro[1] - 50,
+                        E.CAMARA.w - 80)
+            D.texto(p, E.fuente("texto", 18), ayuda, E.APAGADO, centro[0], y + 12,
+                    E.CAMARA.w - 120)
         return
 
     h, w = frame.shape[:2]

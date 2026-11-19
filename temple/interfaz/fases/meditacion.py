@@ -46,6 +46,7 @@ class Meditacion(Fase):
         self.reloj = 0.0  # tiempo del guion, se para en la pausa
         self.estado: M.Estado | None = None
         self._ojos_desde: float | None = None  # en la pausa, cerrar los ojos sigue
+        self.ofrecer_estirar = False  # al acabar, si lo siguiente del ritual es estirar
 
     @property
     def minutos(self) -> float:
@@ -133,7 +134,7 @@ class Meditacion(Fase):
             return
         # Pausa automatica si te vas mientras se mide la postura o se medita
         vigilando = self.estado is not None and self.estado.paso.tipo in ("calibrar", "meditar")
-        app.vigilar(lectura.estado is None and vigilando)
+        app.vigilar(not lectura.cuerpo and vigilando)
         if app.pausado():
             self.palma.actualizar(0, None)
             self._seguir_con_los_ojos(lectura)
@@ -204,6 +205,8 @@ class Meditacion(Fase):
             "corta": pr.minutos < nivel,
             "nivel": nivel,
         }
+        # Despues de meditar, lo siguiente del ritual es estirar
+        self.ofrecer_estirar = not app.progreso.hecha_hoy("estiramientos")
         app.modo = "resultado"
         self.estado = None
 
@@ -363,11 +366,21 @@ class Meditacion(Fase):
         else:
             texto, color = f"Día contado, {dias} de {DIAS_PARA_SUBIR} esta semana", E.JADE
         Z.linea(p, texto, "negrita", 16, color, P.top + 384)
-        Z.boton_volver(app)
+        if self.ofrecer_estirar:
+            Z.botones_seguir(app, "Estirar", self.accion_resultado)
+        else:
+            Z.boton_volver(app)
+
+    def accion_resultado(self) -> None:
+        if self.ofrecer_estirar:
+            self.app.elegir_fase("estiramientos")
+            self.app.accion_principal()
+        else:
+            self.app.volver_inicio()
 
 
 def _cuerpo(lectura) -> M.Cuerpo | None:
     """Lo que la logica necesita de la lectura de la camara."""
-    if lectura.estado is None or not lectura.nariz or not lectura.hombros:
+    if not lectura.cuerpo or not lectura.nariz or not lectura.hombros:
         return None
     return M.Cuerpo(lectura.nariz, *lectura.hombros, lectura.ojos)

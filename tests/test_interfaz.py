@@ -59,11 +59,11 @@ class CamaraFalsa:
 
     def ultimo(self):
         lado = ("derecho", "izquierdo")[int(self.t / 2) % 2]
-        lectura = Lectura(estado=lado, nariz=(0.5, 0.38), escala=0.3,
+        lectura = Lectura(tapado=lado, nariz=(0.5, 0.38), escala=0.3,
                           hombros=((0.35, 0.62), (0.65, 0.62)), ojos=0.9)
         if self.postura is not None:
             c = self.postura
-            lectura = Lectura(estado=lado, nariz=c.nariz, escala=c.escala,
+            lectura = Lectura(tapado=lado, nariz=c.nariz, escala=c.escala,
                               hombros=(c.hombro_a, c.hombro_b), orejas=(c.oreja_a, c.oreja_b),
                               codos=(c.codo_a, c.codo_b), munecas=(c.muneca_a, c.muneca_b),
                               vis_munecas=(c.vis_muneca_a, c.vis_muneca_b))
@@ -127,8 +127,9 @@ class TestInterfaz(unittest.TestCase):
         sesion = self.progreso().sesiones[0]
         self.assertEqual((sesion["fase"], sesion["estrellas"]), ("meditacion", 3))
         self.assertTrue((Path(self.dir.name) / "ultima_meditacion.csv").exists())
+        # Lo siguiente del ritual es estirar, y la primera vez con su tutorial
         self.tecla(app, pygame.K_RETURN)
-        self.assertEqual(app.modo, "inicio")
+        self.assertEqual((app.modo, app.fase.clave), ("tutorial", "estiramientos"))
 
     POSTURAS = {"cuerpo": T.NEUTRO, "neutro": T.NEUTRO, "cuello_der": T.CUELLO_DER,
                 "cuello_izq": T.CUELLO_IZQ, "arriba": T.ARRIBA, "cruzado_der": T.CRUZADO_DER,
@@ -185,10 +186,9 @@ class TestInterfaz(unittest.TestCase):
         self.assertEqual(app.fase.clave, "meditacion")
         self.correr(app, 25)
         self.assertEqual((app.modo, app.fase.clave), ("resultado", "meditacion"))
-        self.tecla(app, pygame.K_RETURN)
-        self.assertEqual((app.modo, app.elegida), ("inicio", "estiramientos"))
         self.camara.postura = T.NEUTRO
-        self.tecla(app, pygame.K_s)
+        self.tecla(app, pygame.K_RETURN)  # y el de meditar lleva directo a estirar
+        self.assertEqual((app.modo, app.fase.clave), ("sesion", "estiramientos"))
         self.estirar(app, "sesion")
         self.assertEqual(app.modo, "resultado")
         progreso = self.progreso()

@@ -105,7 +105,7 @@ class Respiracion(Fase):
             return
 
         # Pausa automatica si te vas de la camara en mitad de la cuenta
-        app.vigilar(lectura.estado is None and en_cuenta)
+        app.vigilar(not lectura.cuerpo and en_cuenta)
         if app.pausado():
             self.palma.actualizar(0, None)
             return
@@ -116,7 +116,7 @@ class Respiracion(Fase):
 
         self.reloj += dt
         self.estado_previo = self.estado
-        self.estado = self.guion.actualizar(self.reloj, lectura.estado, lectura.mano is not None)
+        self.estado = self.guion.actualizar(self.reloj, lectura.tapado, lectura.mano is not None)
         self._sonidos()
         if self.estado.terminado:
             self._terminar()
@@ -174,7 +174,7 @@ class Respiracion(Fase):
         latido = 0.5 + 0.5 * math.sin(self.app.t * 4)
         for lado in ("derecho", "izquierdo"):
             if tapado in (lado, "ambos"):
-                bien = lectura.estado == tapado
+                bien = lectura.tapado == tapado
                 color = E.JADE if bien else E.AZAFRAN
                 r = 13 + int(3 * latido * (not bien))
                 pygame.draw.circle(img, color, (lado_x[lado], y), r, 3)
@@ -250,7 +250,7 @@ class Respiracion(Fase):
                 Z.chip(app, COMO_TAPAR[paso.tapado], E.TERRACOTA)
         elif paso.tipo == "esperar":
             Z.esperando(p, centro, radio, e.hecho, app.t)
-            if lectura.estado is None:
+            if not lectura.cuerpo:
                 Z.chip(app, "No te veo", E.APAGADO, suave=True)
         else:
             Z.mensaje(p, centro, app.t)
@@ -290,12 +290,6 @@ class Respiracion(Fase):
             Z.linea(p, texto, "negrita", 16, color, P.top + 384)
 
         if self.ofrecer_meditar:
-            # Lo siguiente del ritual, con la vuelta al inicio al lado
-            ancho = (P.w - 72 - 12) // 2
-            app.botonera.dibujar(p, pygame.Rect(P.left + 36, P.bottom - 82, ancho + 40, 54),
-                                 "Meditar", "Espacio", self.accion_resultado, True, grupo="fin")
-            app.botonera.dibujar(p, pygame.Rect(P.right - 36 - ancho + 40, P.bottom - 82,
-                                                ancho - 40, 54),
-                                 "Inicio", "Esc", app.volver_inicio, grupo="fin")
+            Z.botones_seguir(app, "Meditar", self.accion_resultado)
         else:
             Z.boton_volver(app)

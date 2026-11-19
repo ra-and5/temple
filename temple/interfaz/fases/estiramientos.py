@@ -77,7 +77,7 @@ class Estiramientos(Fase):
         if app.modo not in ("tutorial", "sesion"):
             return
         manteniendo = self.estado is not None and self.estado.paso.tipo == "mantener"
-        app.vigilar(lectura.estado is None and manteniendo)
+        app.vigilar(not lectura.cuerpo and manteniendo)
         if app.pausado():
             self.palma.actualizar(0, None)
             return
@@ -319,7 +319,7 @@ def _hombro(c: S.Cuerpo, lado: str):
 
 def _cuerpo(lectura) -> S.Cuerpo | None:
     """Lo que la logica necesita de la lectura de la camara."""
-    if (lectura.estado is None or not lectura.nariz or not lectura.hombros
+    if (not lectura.cuerpo or not lectura.nariz or not lectura.hombros
             or not lectura.orejas or not lectura.codos or not lectura.munecas):
         return None
     vis = lectura.vis_munecas or (1.0, 1.0)

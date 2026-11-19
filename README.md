@@ -74,16 +74,43 @@ bash jugar.sh
 
 En macOS, la primera vez pide permiso para usar la cámara desde la Terminal. Si no sale la imagen, se activa en Ajustes del Sistema → Privacidad y seguridad → Cámara, y se vuelve a abrir.
 
-## Probarlo desde cero
+Para quitarlo todo.
 
-Para quien lo abre por primera vez. Unos 20 minutos.
+```bash
+bash desinstalar.sh
+```
 
-1. Instálalo con los tres comandos de arriba y arráncalo con `bash jugar.sh --segundos 5 --minutos 1`, que acorta los estiramientos y la meditación.
-2. Siéntate a medio metro de la cámara, de forma que se te vea de la cabeza al pecho.
-3. **Respiración.** Señala el botón de aprender con el índice (hacia la pantalla) y haz el tutorial. Después una sesión.
-4. **Meditación.** Al acabar la respiración, un botón te lleva a meditar. Haz el tutorial y una sesión. Prueba a pausar con la palma abierta, quieta y por encima de los hombros, y a seguir cerrando los ojos.
-5. **Estiramientos.** Elígelos en la fila de arriba del inicio y haz el tutorial y una sesión.
-6. Apunta lo que no se entienda, lo que tarde en reconocer y lo que se pulse sin querer. Con la tecla **D** se ven los números que mide la cámara.
+Borra el entorno y los modelos, y pregunta antes de borrar tu progreso. Si Miniconda la instaló Temple, también pregunta si quitarla. Después ya se puede borrar la carpeta.
+
+## Tu primera sesión
+
+Unos 20 minutos. Para que no se haga largo, arráncalo con la meditación y los estiramientos acortados.
+
+```bash
+bash jugar.sh --segundos 5 --minutos 1
+```
+
+1. **Colócate.** Sentado, a medio metro de la cámara y con luz de frente, de forma que se te vea de la cabeza al pecho y los codos.
+2. **Respiración.** Señala con el índice, apuntando a la pantalla, el botón "Aprender a respirar" y espera a que se rellene. El tutorial enseña a tapar cada lado. Después haz una sesión.
+3. **Meditación.** Al acabar la respiración, un botón te lleva a meditar. Haz el tutorial y una sesión con los ojos cerrados. Para pausar, palma abierta, quieta y por encima de los hombros. Para seguir, cierra los ojos 2 s.
+4. **Estiramientos.** Al acabar la meditación, un botón te lleva a estirar. Haz el tutorial y una sesión. Abajo te dice qué te falta en cada postura. Aquí se pausa con Espacio.
+5. **Al acabar las tres**, el resultado dice "Ritual de hoy completo" y en el inicio sale tu racha.
+
+Si algo tarda en reconocerse, la tecla **D** enseña los números que mide la cámara.
+
+## Si algo falla
+
+| Qué pasa | Qué hacer |
+|---|---|
+| "No se puede abrir la cámara" | Cierra los programas que la usan (videollamadas). Si tienes varias, prueba `bash jugar.sh --camara 1` |
+| "La cámara no da imagen" (macOS) | Ajustes del Sistema → Privacidad y seguridad → Cámara, activa la Terminal y vuelve a abrir Temple |
+| En un Mac coge la cámara del iPhone | `bash jugar.sh --camara 1` |
+| "Faltan los modelos de MediaPipe" | `bash instalar.sh` |
+| "Temple no está instalado" al usar `jugar.sh` | `bash instalar.sh` |
+| "No te veo" | Aléjate un poco y pon luz de frente, que se te vea de la cabeza al pecho |
+| "No veo tu mano, aléjate un poco" | Muy cerca solo se ve el dedo y no la mano entera |
+| Señalas y no se pulsa | El índice estirado apuntando a la pantalla o hacia arriba, los demás dedos cerrados, y quieto 1,5 s |
+| La instalación falla en los tests | Copia lo que sale en la Terminal y abre un *issue* en el repositorio |
 
 ## Cómo se maneja
 
@@ -109,20 +136,22 @@ bash jugar.sh --vueltas 2     # respiración corta
 bash jugar.sh --avanzada      # respiración avanzada sin desbloquearla
 bash jugar.sh --minutos 1     # meditación corta (0 es sin límite)
 bash jugar.sh --segundos 5    # estiramientos cortos
+bash jugar.sh --camara 1      # otra cámara, si hay varias
 ```
 
 El progreso se guarda en `datos/progreso.json`, en tu equipo. Cada meditación y cada sesión de estiramientos apunta además lo que mide la cámara en un CSV de `datos/`, cuatro veces por segundo, para ajustar los umbrales con números reales.
 
 ## Tests
 
+`instalar.sh` los pasa al final. Para pasarlos otra vez basta con repetirlo, porque lo que ya está instalado se lo salta y en menos de un minuto solo comprueba.
+
 ```bash
-conda activate temple
-python -m unittest discover tests
+bash instalar.sh
 ```
 
-Son 113 y no necesitan cámara. Prueban la lógica de las tres fases con cuerpos inventados (cada postura, la calibración, los avisos, la escalera de minutos y los desbloqueos), los gestos (señalar, la palma que pausa y la que solo pasa por delante, la mano apoyada en la cabeza), la navegación con el teclado y la instalación (los scripts, las versiones fijadas y que los modelos cargan). `tests/test_interfaz.py` abre la aplicación sin ventana con una cámara falsa y hace el ritual entero como un usuario, sin tocar tu progreso.
+Son más de 100 y no necesitan cámara. Prueban la lógica de las tres fases con cuerpos inventados (cada postura, la calibración, los avisos, la escalera de minutos y los desbloqueos), los gestos (señalar, la palma que pausa y la que solo pasa por delante, la mano apoyada en la cabeza), la navegación con el teclado y la instalación (los scripts, las versiones fijadas y que los modelos cargan). `tests/test_interfaz.py` abre la aplicación sin ventana con una cámara falsa y hace el ritual entero como un usuario, sin tocar tu progreso.
 
-En GitHub se pasan solos en cada push (`.github/workflows/tests.yml`). Además, un Ubuntu y un Mac de GitHub ejecutan `instalar.sh` desde cero, igual que un usuario nuevo.
+En GitHub se pasan solos en cada push (`.github/workflows/tests.yml`). Además, un Ubuntu y un Mac de GitHub ejecutan `instalar.sh` desde cero, arrancan con `jugar.sh` y lo quitan con `desinstalar.sh`, igual que un usuario nuevo.
 
 ## Arquitectura
 
@@ -130,9 +159,9 @@ Tres capas. Los **ojos** ven puntos, el **cerebro** decide qué pasa y la **inte
 
 ```
 main.py                    arranque y opciones
-instalar.sh, jugar.sh      instalación en un equipo limpio y arranque
+instalar.sh, jugar.sh      instalación en un equipo limpio, arranque y desinstalar.sh para quitarlo
 temple/
-  camara.py                ojos     cámara y detección en un hilo aparte
+  camara.py                ojos     cámara y detección en un hilo aparte, y los avisos si fallan
   vision.py                ojos     Pose (cuerpo), Hands (mano) y Face (ojos), y qué orificio se tapa
   respiracion.py           cerebro  guion de la respiración
   meditacion.py            cerebro  calibración de la postura, quieto, recto y ojos

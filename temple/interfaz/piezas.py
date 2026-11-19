@@ -154,6 +154,15 @@ def botones_pausa(app, y=None, terminar=None) -> None:
                   "Esc", app.volver_inicio, grupo="pausa")
 
 
+def botones_seguir(app, siguiente, accion) -> None:
+    """Lo siguiente del ritual (Meditar, Estirar) y al lado la vuelta al inicio."""
+    p, ancho = app.pantalla, (P.w - 72 - 12) // 2
+    app.botonera.dibujar(p, pygame.Rect(P.left + 36, P.bottom - 82, ancho + 40, 54),
+                         siguiente, "Espacio", accion, True, grupo="fin")
+    app.botonera.dibujar(p, pygame.Rect(P.right - 36 - ancho + 40, P.bottom - 82, ancho - 40, 54),
+                         "Inicio", "Esc", app.volver_inicio, grupo="fin")
+
+
 def boton_volver(app) -> None:
     app.botonera.dibujar(app.pantalla, pygame.Rect(P.left + 36, P.bottom - 82, P.w - 72, 54),
                          "Volver al inicio", "Espacio", app.volver_inicio, True)

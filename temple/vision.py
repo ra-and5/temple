@@ -1,4 +1,6 @@
-"""Detecta que orificio de la nariz tapa la mano, con MediaPipe Pose y Hands.
+"""Lo que ve la camara en cada fotograma, con MediaPipe Pose, Hands y Face.
+
+La parte principal es saber que orificio de la nariz tapa la mano.
 
 Pose da la nariz y el ancho de los hombros, que sirve de regla para medir
 distancias sin que importe lo lejos que este la persona. Hands da las puntas
@@ -49,7 +51,7 @@ UMBRAL_AMBOS = 0.15  # para "ambos" los dos dedos tienen que estar muy pegados
 class Lectura:
     """Lo que ve la camara en un fotograma."""
 
-    estado: str | None  # derecho, izquierdo, ambos, ninguno o None si no hay cuerpo
+    tapado: str | None  # derecho, izquierdo, ambos, ninguno, o None si no se ve a nadie
     d_pulgar: float | None = None
     d_otro: float | None = None
     dedo_otro: str | None = None
@@ -65,6 +67,11 @@ class Lectura:
     codos: tuple[tuple[float, float], tuple[float, float]] | None = None
     munecas: tuple[tuple[float, float], tuple[float, float]] | None = None
     vis_munecas: tuple[float, float] | None = None  # 0 a 1, lo seguro que esta el modelo
+
+    @property
+    def cuerpo(self) -> bool:
+        """Si la camara ve a alguien (nariz y hombros)."""
+        return self.tapado is not None
 
 
 def clasificar(d_pulgar: float, d_otro: float,
@@ -82,12 +89,12 @@ def _distancia(a, b) -> float:
     return math.hypot(a.x - b.x, a.y - b.y)
 
 
-class DetectorFosas:
+class Detector:
     """Junta los dos modelos y suaviza el resultado entre fotogramas.
 
-    El estado que devuelve es el mas repetido en los ultimos n_suavizado
+    El lado tapado que devuelve es el mas repetido en los ultimos n_suavizado
     fotogramas. Si la mano desaparece menos de memoria_s segundos se mantiene
-    el ultimo estado, porque delante de la cara el modelo la pierde a ratos.
+    el ultimo, porque delante de la cara el modelo la pierde a ratos.
     """
 
     def __init__(self, n_suavizado: int = 8, memoria_s: float = 0.6):
@@ -155,12 +162,12 @@ class DetectorFosas:
         puntos_3d = ([(q.x, q.y, q.z) for q in res_manos.hand_world_landmarks[0]]
                      if res_manos.hand_world_landmarks else None)
         if not res_pose.pose_landmarks:
-            return Lectura(estado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
+            return Lectura(tapado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
         p = res_pose.pose_landmarks[0]
         nariz = p[NARIZ]
         escala = _distancia(p[HOMBRO_IZQ], p[HOMBRO_DER])
         if escala < 1e-3:
-            return Lectura(estado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
+            return Lectura(tapado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
         pos_nariz = (nariz.x, nariz.y)
         hombros = ((p[HOMBRO_IZQ].x, p[HOMBRO_IZQ].y), (p[HOMBRO_DER].x, p[HOMBRO_DER].y))
 
@@ -176,7 +183,7 @@ class DetectorFosas:
             if perdida > self._memoria_s:
                 self._estable = "ninguno"
                 self._historial.clear()
-            return Lectura(estado=self._estable, nariz=pos_nariz, escala=escala,
+            return Lectura(tapado=self._estable, nariz=pos_nariz, escala=escala,
                            perdida_s=perdida, hombros=hombros, ojos=ojos, **cuerpo)
 
         self._visto_mano = ahora
@@ -188,7 +195,7 @@ class DetectorFosas:
         self._historial.append(clasificar(d_pul, d_otro))
         self._estable = Counter(self._historial).most_common(1)[0][0]
         return Lectura(
-            estado=self._estable,
+            tapado=self._estable,
             d_pulgar=d_pul,
             d_otro=d_otro,
             dedo_otro=OTRAS_PUNTAS[i_otro],

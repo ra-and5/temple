@@ -6,6 +6,7 @@ Uso, desde la raiz del repositorio
     python main.py --avanzada       deja usar la variante avanzada sin desbloquearla
     python main.py --minutos 1      meditacion corta para probar
     python main.py --segundos 5     estiramientos cortos para probar
+    python main.py --camara 1       usar otra camara si hay varias
 """
 
 import argparse
@@ -26,8 +27,11 @@ def main():
                         help="minutos de meditacion solo para probar (no cuentan para subir)")
     parser.add_argument("--segundos", type=float, default=None,
                         help="segundos de cada estiramiento solo para probar")
+    parser.add_argument("--camara", type=int, default=0,
+                        help="que camara usar si hay varias (0 la primera, 1 la segunda...)")
     args = parser.parse_args()
-    opciones = Opciones(args.vueltas, args.tiempo, args.avanzada, args.minutos, args.segundos)
+    opciones = Opciones(args.vueltas, args.tiempo, args.avanzada, args.minutos, args.segundos,
+                        camara=args.camara)
     App(opciones).ejecutar()
 
 

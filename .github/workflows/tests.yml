@@ -2,9 +2,10 @@
 # Si algo se rompe, el commit sale con una cruz roja en GitHub y llega un correo.
 #
 #   tests        los tests rapidos, instalando con pip (unos 2 minutos)
-#   instalacion  lo que haria un usuario nuevo en Ubuntu y en macOS, bash instalar.sh
+#   instalacion  lo que haria un usuario nuevo en Ubuntu y en macOS. bash instalar.sh
 #                desde cero (instala Miniconda, el entorno y los modelos y pasa
-#                todos los tests, tambien el que carga los modelos de verdad)
+#                todos los tests, tambien el que carga los modelos de verdad),
+#                arrancar con jugar.sh y quitarlo todo con desinstalar.sh
 name: Tests
 
 on:
@@ -61,3 +62,6 @@ jobs:
 
       - name: Que jugar.sh encuentra el entorno y arranca
         run: bash jugar.sh --help
+
+      - name: Desinstalar
+        run: bash desinstalar.sh -y

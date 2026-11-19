@@ -52,7 +52,7 @@ class App:
         self.progreso = Progreso.cargar(opciones.datos / RUTA.name)
         self.sonido = Sonidos()
         # La camara se puede pasar hecha, para probar la app sin webcam
-        self.camara = camara or CamaraHilo()
+        self.camara = camara or CamaraHilo(opciones.camara)
         self.camara.start()
 
         self.fondo = D.crear_fondo()

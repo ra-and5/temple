@@ -20,4 +20,5 @@ class Opciones:
     avanzada: bool = False  # respiracion avanzada sin desbloquearla
     minutos: float | None = None  # minutos de meditacion (0 es sin limite)
     segundos: float | None = None  # segundos de cada estiramiento
+    camara: int = 0  # que camara usar si hay varias (0 es la primera)
     datos: Path = RUTA.parent  # carpeta del progreso y del registro (los tests usan otra)

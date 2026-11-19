@@ -16,9 +16,10 @@ else
     if [[ -x "$c" ]]; then CONDA="$c"; break; fi
   done
 fi
-if [[ -z "$CONDA" ]] || ! "$CONDA" env list | awk '{print $1}' | grep -qx temple; then
+ENTORNO="${TEMPLE_ENTORNO:-temple}"
+if [[ -z "$CONDA" ]] || ! "$CONDA" env list | awk '{print $1}' | grep -qx "$ENTORNO"; then
   echo "Temple no está instalado. Primero ejecuta  bash instalar.sh" >&2
   exit 1
 fi
-PYTHON="$("$CONDA" run -n temple python -c 'import sys; print(sys.executable)')"
+PYTHON="$("$CONDA" run -n "$ENTORNO" python -c 'import sys; print(sys.executable)')"
 exec "$PYTHON" main.py "$@"

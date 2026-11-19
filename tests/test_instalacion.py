@@ -23,12 +23,12 @@ MODELOS = (vision.MODELO_POSE, vision.MODELO_MANOS, vision.MODELO_CARA)
 class TestScripts(unittest.TestCase):
     @unittest.skipUnless(shutil.which("bash"), "sin bash")
     def test_los_scripts_no_tienen_errores_de_sintaxis(self):
-        for script in ("instalar.sh", "jugar.sh"):
+        for script in ("instalar.sh", "jugar.sh", "desinstalar.sh"):
             r = subprocess.run(["bash", "-n", str(RAIZ / script)], capture_output=True, text=True)
             self.assertEqual(r.returncode, 0, f"{script}\n{r.stderr}")
 
     def test_los_scripts_se_pueden_ejecutar(self):
-        for script in ("instalar.sh", "jugar.sh"):
+        for script in ("instalar.sh", "jugar.sh", "desinstalar.sh"):
             self.assertTrue(os.access(RAIZ / script, os.X_OK), script)
 
     def test_instalar_descarga_los_modelos_que_usa_el_juego(self):
@@ -50,16 +50,28 @@ class TestScripts(unittest.TestCase):
             self.assertIn(patron, ignorado)
 
 
+class TestAvisos(unittest.TestCase):
+    def test_sin_modelos_el_juego_dice_que_hacer(self):
+        from unittest import mock
+
+        from temple import camara
+        with mock.patch.object(camara, "MODELO_POSE", RAIZ / "no_existe.task"):
+            hilo = camara.CamaraHilo()
+            hilo.run()  # sin hilo, para ver el resultado al momento
+        self.assertEqual(hilo.error, camara.SIN_MODELOS)
+        self.assertIn("instalar.sh", hilo.error)
+
+
 @unittest.skipUnless(all(m.exists() for m in MODELOS), "faltan los modelos (bash instalar.sh)")
 class TestModelos(unittest.TestCase):
     def test_los_tres_modelos_cargan_y_analizan_una_imagen(self):
         negro = np.zeros((480, 640, 3), np.uint8)
-        with vision.DetectorFosas() as detector:
+        with vision.Detector() as detector:
             detector.usar_cara = True
             for _ in range(3):  # en modo video, varios fotogramas seguidos
                 lectura = detector.procesar(negro)
         # En una imagen negra no hay nadie
-        self.assertIsNone(lectura.estado)
+        self.assertIsNone(lectura.tapado)
         self.assertIsNone(lectura.mano)
         self.assertIsNone(lectura.ojos)
 

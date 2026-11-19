@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-ENTORNO="temple"
+ENTORNO="${TEMPLE_ENTORNO:-temple}"  # se cambia solo para probar los scripts
 SI=0
 [[ "${1:-}" == "-y" ]] && SI=1
 cd "$(dirname "$0")"
@@ -58,6 +58,8 @@ if [[ -z "$CONDA" ]]; then
     || error "No se pudo descargar Miniconda para ${NOMBRE_SO} ${ARQUITECTURA}."
   bash "$instalador" -b -p "$HOME/miniconda3"
   rm -f "$instalador"
+  # Marca para que desinstalar.sh sepa que esta Miniconda la puso Temple
+  touch "$HOME/miniconda3/.instalada_por_temple"
   CONDA="$HOME/miniconda3/bin/conda"
 fi
 echo "Conda en $CONDA"
@@ -114,4 +116,4 @@ if ! salida="$(SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy "$PYTHON" -m unittest
 fi
 echo "$salida" | grep -E "^(Ran|OK)"
 
-printf '\n\033[1;32mTemple está instalado.\033[0m Para jugar\n\n    bash jugar.sh\n\n'
+printf '\n\033[1;32mTemple está instalado.\033[0m Para jugar\n\n    bash jugar.sh\n\nPara quitarlo, bash desinstalar.sh\n\n'
