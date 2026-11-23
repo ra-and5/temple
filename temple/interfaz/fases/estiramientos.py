@@ -272,7 +272,7 @@ class Estiramientos(Fase):
             D.enso(p, centro, radio, 1, E.ORO_SUAVE, 12, 45)
             D.enso(p, centro, radio, e.hecho, color, 14)
             Z.numero(p, str(math.ceil(e.restante_s)), 80, centro, 12)
-            d = E.fuente("texto", 16).render("segundos", True, E.APAGADO)
+            d = E.fuente("texto", 20).render("segundos", True, E.APAGADO)
             p.blit(d, d.get_rect(midtop=(centro[0], centro[1] + 30)))
         elif paso.tipo == "esperar":
             Z.esperando(p, centro, radio, e.hecho, app.t)
@@ -289,7 +289,7 @@ class Estiramientos(Fase):
             else:
                 Z.chip(app, falta or "Vuelve a la postura", E.TERRACOTA)
         elif paso.tipo == "esperar" and falta and e.hecho == 0:
-            Z.chip(app, falta, E.APAGADO, suave=True)
+            Z.chip(app, falta, E.CREMA, suave=True)
         elif paso.tipo == "mensaje":
             Z.barra_mensaje(p, e.hecho)
 

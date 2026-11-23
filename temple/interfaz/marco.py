@@ -21,7 +21,10 @@ from temple.interfaz.textos import AYUDA_PAUSA, AYUDA_PROGRESO, AYUDA_SALIR, AYU
 def barra_superior(app) -> None:
     p = app.pantalla
     D.loto(p, (62, 62), 30)
-    D.texto_espaciado(p, E.fuente("titulo", 34), "TEMPLE", E.CREMA, (92, 26), espacio=6)
+    ancho = D.texto_espaciado(p, E.fuente("titulo", 34), "TEMPLE", E.CREMA, (92, 26), espacio=6)
+    lema = E.fuente("cursiva", 22).render("respira · medita · estira, con tu cámara", True,
+                                          E.ORO_SUAVE)
+    p.blit(lema, (92 + ancho + 24, 36))
     racha = app.progreso.racha(date.today())
     if racha:
         etiqueta = f"Racha de {racha} {'día' if racha == 1 else 'días'}"
@@ -76,7 +79,7 @@ def camara(app, frame, lectura) -> None:
     practicando = app.modo in ("tutorial", "sesion")
     if app.modo == "resultado" or app.pausado():
         velo = pygame.Surface(E.CAMARA.size, pygame.SRCALPHA)
-        velo.fill((12, 10, 20, 150))
+        velo.fill((14, 12, 10, 210))
         img.blit(velo, (0, 0))
     elif practicando:
         app.fase.pistas(img, lectura)

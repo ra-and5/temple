@@ -300,7 +300,7 @@ class Meditacion(Fase):
             libre = self.practica.libre
             resto = int(e.transcurrido_s) if libre else math.ceil(e.restante_s)
             Z.numero(p, f"{resto // 60}:{resto % 60:02d}", 64, centro, 10)
-            d = E.fuente("texto", 16).render("llevas" if libre else "quedan", True, E.APAGADO)
+            d = E.fuente("texto", 20).render("llevas" if libre else "quedan", True, E.APAGADO)
             p.blit(d, d.get_rect(midtop=(centro[0], centro[1] + 30)))
         elif paso.tipo == "calibrar":
             D.enso(p, centro, radio, 1, E.ORO_SUAVE, 12, 45)
@@ -365,10 +365,10 @@ class Meditacion(Fase):
         if siguiente is None:
             texto, color = "Ya meditas sin límite. Cuida tu racha", E.ORO
         elif r["corta"]:
-            texto, color = f"Con menos de {texto_minutos(r['nivel'])} el día no cuenta", E.TERRACOTA
+            texto, color = f"Con menos de {texto_minutos(r['nivel'])} el día no cuenta", E.APAGADO
         elif r["estrellas"] < LOTOS_PARA_CONTAR:
             texto, color = (f"Hacen falta {LOTOS_PARA_CONTAR} lotos para que el día cuente",
-                            E.TERRACOTA)
+                            E.APAGADO)
         elif dias >= DIAS_PARA_SUBIR:
             texto, color = f"Meta cumplida. La semana que viene, {premio(siguiente)}", E.AZAFRAN
         else:

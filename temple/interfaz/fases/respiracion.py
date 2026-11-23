@@ -245,7 +245,7 @@ class Respiracion(Fase):
             D.enso(p, centro, radio, 1, E.ORO_SUAVE, 12, 45)
             D.enso(p, centro, radio, e.hecho, color, 14)
             Z.numero(p, str(e.cuenta), 92, centro, 14)
-            d = E.fuente("texto", 16).render(f"de {paso.tiempos}", True, E.APAGADO)
+            d = E.fuente("texto", 20).render(f"de {paso.tiempos}", True, E.APAGADO)
             # Fijo para que no baile al cambiar de numero (el mas alto llega a +18)
             p.blit(d, d.get_rect(midtop=(centro[0], centro[1] + 28)))
             if e.correcto:
@@ -288,9 +288,9 @@ class Respiracion(Fase):
             texto, color = "", E.APAGADO
         elif r.get("pocas_vueltas"):
             texto, color = (f"Con menos de {VUELTAS_NIVEL} vueltas no cuenta para la avanzada",
-                            E.TERRACOTA)
+                            E.APAGADO)
         elif r["estrellas"] < 3:
-            texto, color = "Para la avanzada cuentan las de 3 lotos", E.TERRACOTA
+            texto, color = "Para la avanzada cuentan las de 3 lotos", E.APAGADO
         else:
             texto, color = (f"Cuenta para la avanzada, {hechas} de {PERFECTAS_PARA_AVANZADA}",
                             E.JADE)

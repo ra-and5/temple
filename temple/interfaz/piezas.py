@@ -39,9 +39,9 @@ def cabecera(p, texto) -> None:
 
 def instruccion(p, paso) -> None:
     """Lo que hay que hacer ahora, en grande, y debajo el detalle."""
-    linea(p, paso.texto, "titulo", 42, E.CREMA, P.top + 84)
+    linea(p, paso.texto, "titulo", 52, E.CREMA, P.top + 84)
     if paso.detalle:
-        D.texto(p, E.fuente("texto", 20), paso.detalle, E.APAGADO, P.centerx, P.top + 140,
+        D.texto(p, E.fuente("texto", 26), paso.detalle, E.APAGADO, P.centerx, P.top + 156,
                 P.w - 70)
 
 
@@ -50,7 +50,7 @@ def chip(app, texto, color, suave=False) -> None:
     if app.pausa_manual:
         return  # en su sitio van los botones de la pausa
     p = app.pantalla
-    f = E.fuente("texto" if suave else "negrita", 17)
+    f = E.fuente("texto" if suave else "negrita", 22)
     s = f.render(texto, True, color if suave else E.NOCHE_ARRIBA)
     caja = s.get_rect(center=(P.centerx, P.bottom - 42)).inflate(30, 14)
     if not suave:

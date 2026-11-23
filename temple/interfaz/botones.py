@@ -99,7 +99,7 @@ class Botonera:
         if por_dedo and self.puntero.llenado > 0:
             # El boton se va llenando de izquierda a derecha mientras esperas
             relleno = pygame.Surface(rect.size, pygame.SRCALPHA)
-            pygame.draw.rect(relleno, (255, 255, 255, 70), r, border_radius=radio)
+            pygame.draw.rect(relleno, (255, 255, 255, 45), r, border_radius=radio)
             ancho = int(rect.w * min(1.0, self.puntero.llenado))
             capa.blit(relleno, (0, 0), pygame.Rect(0, 0, ancho, rect.h))
         borde = (*E.CREMA, 230) if marcado else (*E.ORO, 140)

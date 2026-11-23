@@ -37,7 +37,7 @@ def dibujar(app) -> None:
     for fase in app.fases.values():
         _fila(app, fase, y)
         y += 58
-    Z.linea(p, "El círculo verde marca lo que ya has hecho hoy", "texto", 13, E.APAGADO, y - 8)
+    Z.linea(p, "El círculo marcado es lo que ya has hecho hoy", "texto", 13, E.APAGADO, y - 8)
 
     app.botonera.dibujar(p, pygame.Rect(P.left + 36, P.bottom - 82, P.w - 72, 54), "Volver",
                          "Esc", app.cerrar_progreso, True)

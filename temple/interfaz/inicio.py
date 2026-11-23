@@ -62,7 +62,7 @@ def _ritual(app) -> None:
                 pygame.draw.rect(capa, (*E.ORO, 46 if encima else 24), r, border_radius=14)
                 if b.por_dedo(indice) and b.puntero.llenado > 0:
                     relleno = pygame.Surface(zona.size, pygame.SRCALPHA)
-                    pygame.draw.rect(relleno, (255, 255, 255, 70), r, border_radius=14)
+                    pygame.draw.rect(relleno, (255, 255, 255, 45), r, border_radius=14)
                     lleno = int(zona.w * min(1.0, b.puntero.llenado))
                     capa.blit(relleno, (0, 0), pygame.Rect(0, 0, lleno, zona.h))
                 if marcado:
