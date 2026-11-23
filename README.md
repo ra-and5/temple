@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/ra-and5/temple/actions/workflows/tests.yml/badge.svg)](https://github.com/ra-and5/temple/actions/workflows/tests.yml)
 
-**Juego serio de respiración, meditación y estiramientos que se maneja con la webcam.**
+**Juego serio de respiración, meditación, estiramientos y flexiones que se maneja con la webcam.**
 
 *Temple* es la serenidad para mantener la calma y también el valor para afrontar un reto. En inglés es un templo, el sitio al que vuelves cada día.
 
@@ -21,9 +21,9 @@ Un ritual diario guiado por la cámara, que va de la calma al cuerpo. La cámara
 | **Respiración** | Respiración alterna (Anuloma Viloma). El juego marca el ritmo y la cámara mira qué orificio de la nariz tapas | ✅ |
 | **Meditación** | Que estés quieto, con la espalda recta y los ojos cerrados | ✅ |
 | **Estiramientos** | Siete posturas de cuello, hombros y brazos, sentado | ✅ |
-| Flexiones | Un reto que cuente solo las repeticiones bien hechas | Fuera de esta entrega |
+| **Flexiones** | En el suelo y de lado a la cámara. Cuenta las repeticiones y mira que bajes y que el cuerpo vaya recto | ✅ |
 
-Las tres fases tienen **tutorial** la primera vez, **lotos** de 0 a 3 según el tiempo que lo haces bien, **racha** de días seguidos y los días de la semana practicados.
+Las cuatro fases tienen **tutorial** la primera vez, **lotos** de 0 a 3 según lo bien que lo haces, **racha** de días seguidos y los días de la semana practicados.
 
 ### Respiración
 
@@ -45,6 +45,18 @@ Siete posturas sentado, de 20 s cada una. La cuenta solo avanza mientras estás 
 | Brazos arriba | Los dos codos por encima de la nariz |
 | Brazo derecho e izquierdo cruzados | La muñeca pasa al otro lado del pecho y la otra mano sujeta el codo |
 | Tríceps derecho e izquierdo | El codo por encima de la cabeza, el brazo doblado con la mano a la espalda y la otra mano sujetando el codo |
+
+### Flexiones
+
+Se hacen en el suelo, con el portátil también en el suelo, de lado y a unos 2 m, para que la cámara te vea de la cabeza a los pies. Al empezar tienes 5 s para colocarte, y después hay que aguantar la plancha 2 s antes de que empiece a contar. Son 5 flexiones. Cada vez que completas una suena un tono, y si no ha salido bien suenan dos golpes, porque desde el suelo no se ve la pantalla.
+
+| Qué mira | Cómo lo mide la cámara |
+|---|---|
+| Una flexión | El ángulo del codo (hombro, codo y muñeca) baja de un límite y vuelve a subir |
+| Que bajes hasta el suelo | Lo que le queda al hombro hasta la altura de la muñeca |
+| El cuerpo recto | Que la cadera no se salga de la línea entre el hombro y el tobillo |
+
+Hay dos niveles, que se cambian con los botones de menos y más del inicio. **Fácil** cuenta casi todo y es para quien está empezando. **Técnico** pide bajar hasta el suelo con el cuerpo recto. Cada nivel guarda su mejor marca.
 
 > Capturas pendientes. Se añadirán con el vídeo.
 
@@ -84,7 +96,7 @@ Borra el entorno y los modelos, y pregunta antes de borrar tu progreso. Si Minic
 
 ## Tu primera sesión
 
-Unos 20 minutos. Para que no se haga largo, arráncalo con la meditación y los estiramientos acortados.
+Unos 25 minutos. Para que no se haga largo, arráncalo con la meditación y los estiramientos acortados.
 
 ```bash
 bash jugar.sh --segundos 5 --minutos 1
@@ -94,7 +106,8 @@ bash jugar.sh --segundos 5 --minutos 1
 2. **Respiración.** Señala con el índice, apuntando a la pantalla, el botón "Aprender a respirar" y espera a que se rellene. El tutorial enseña a tapar cada lado. Después haz una sesión.
 3. **Meditación.** Al acabar la respiración, un botón te lleva a meditar. Haz el tutorial y una sesión con los ojos cerrados. Para pausar, palma abierta, quieta y por encima de los hombros. Para seguir, cierra los ojos 2 s.
 4. **Estiramientos.** Al acabar la meditación, un botón te lleva a estirar. Haz el tutorial y una sesión. Abajo te dice qué te falta en cada postura. Aquí se pausa con Espacio.
-5. **Al acabar las tres**, el resultado dice "Ritual de hoy completo" y en el inicio sale tu racha.
+5. **Flexiones.** Pon el portátil en el suelo, de lado y a unos 2 m. Elige el nivel Fácil, haz el tutorial y una sesión. Aquí se pausa con Espacio o levantándote.
+6. **Al acabar las cuatro**, el resultado dice "Ritual de hoy completo" y en el inicio sale tu racha.
 
 Si algo tarda en reconocerse, la tecla **D** enseña los números que mide la cámara.
 
@@ -108,6 +121,7 @@ Si algo tarda en reconocerse, la tecla **D** enseña los números que mide la c�
 | "Faltan los modelos de MediaPipe" | `bash instalar.sh` |
 | "Temple no está instalado" al usar `jugar.sh` | `bash instalar.sh` |
 | "No te veo" | Aléjate un poco y pon luz de frente, que se te vea de la cabeza al pecho |
+| "No te veo entero" en las flexiones | Aléjate hasta que se te vean los pies, con el portátil en el suelo y de lado |
 | "No veo tu mano, aléjate un poco" | Muy cerca solo se ve el dedo y no la mano entera |
 | Señalas y no se pulsa | El índice estirado apuntando a la pantalla o hacia arriba, los demás dedos cerrados, y quieto 1,5 s |
 | La instalación falla en los tests | Copia lo que sale en la Terminal y abre un *issue* en el repositorio |
@@ -121,10 +135,10 @@ De lejos, con la mano. De cerca, con el teclado o el ratón, como cualquier prog
 | Señalar un botón con el índice 1,5 s | Lo pulsa. El dedo tiene que apuntar a la pantalla o hacia arriba |
 | Palma abierta, de frente, quieta y lejos de la nariz | Pausa la respiración (1 s) y la meditación (1,5 s, por encima de los hombros) |
 | Cerrar los ojos 2 s en la pausa de la meditación | Sigue meditando |
-| Espacio | Empezar, pausar o seguir. En los estiramientos es la única pausa, porque ahí las manos están siempre abiertas |
+| Espacio | Empezar, pausar o seguir. En los estiramientos y las flexiones es la única pausa, porque ahí las manos están ocupadas |
 | Flechas o Tab, y Enter | Moverse entre los botones y pulsar |
 | Clic | Pulsar un botón |
-| R, E, I | Elegir respiración, meditación o estiramientos en el inicio |
+| R, E, I, X | Elegir respiración, meditación, estiramientos o flexiones en el inicio |
 | M | Sonido |
 | F | Pantalla completa, y otra vez para volver a la ventana |
 | Botón Tu progreso | La racha, la semana y lo que llevas de cada fase |
@@ -141,7 +155,7 @@ bash jugar.sh --segundos 5    # estiramientos cortos
 bash jugar.sh --camara 1      # otra cámara, si hay varias
 ```
 
-El progreso se guarda en `datos/progreso.json`, en tu equipo. Cada meditación y cada sesión de estiramientos apunta además lo que mide la cámara en un CSV de `datos/`, cuatro veces por segundo, para ajustar los umbrales con números reales.
+El progreso se guarda en `datos/progreso.json`, en tu equipo. Cada meditación, sesión de estiramientos y de flexiones apunta además lo que mide la cámara en un CSV de `datos/`, varias veces por segundo, para ajustar los umbrales con números reales.
 
 ## Tests
 
@@ -151,7 +165,7 @@ El progreso se guarda en `datos/progreso.json`, en tu equipo. Cada meditación y
 bash instalar.sh
 ```
 
-Son más de 100 y no necesitan cámara. Prueban la lógica de las tres fases con cuerpos inventados (cada postura, la calibración, los avisos, la escalera de minutos y los desbloqueos), los gestos (señalar, la palma que pausa y la que solo pasa por delante, la mano apoyada en la cabeza), la navegación con el teclado y la instalación (los scripts, las versiones fijadas y que los modelos cargan). `tests/test_interfaz.py` abre la aplicación sin ventana con una cámara falsa y hace el ritual entero como un usuario, sin tocar tu progreso.
+Son más de 100 y no necesitan cámara. Prueban la lógica de las cuatro fases con cuerpos inventados (cada postura, contar flexiones, la calibración, los avisos, la escalera de minutos y los desbloqueos), los gestos (señalar, la palma que pausa y la que solo pasa por delante, la mano apoyada en la cabeza), la navegación con el teclado y la instalación (los scripts, las versiones fijadas y que los modelos cargan). `tests/test_interfaz.py` abre la aplicación sin ventana con una cámara falsa y hace el ritual entero como un usuario, sin tocar tu progreso.
 
 En GitHub se pasan solos en cada push (`.github/workflows/tests.yml`). Además, un Ubuntu y un Mac de GitHub ejecutan `instalar.sh` desde cero, arrancan con `jugar.sh` y lo quitan con `desinstalar.sh`, igual que un usuario nuevo.
 
@@ -164,22 +178,23 @@ main.py                    arranque y opciones
 instalar.sh, jugar.sh      instalación en un equipo limpio, arranque y desinstalar.sh para quitarlo
 temple/
   camara.py                ojos     cámara y detección en un hilo aparte, y los avisos si fallan
-  vision.py                ojos     Pose (cuerpo), Hands (mano) y Face (ojos), y qué orificio se tapa
+  vision.py                ojos     Pose (cuerpo, también cadera y tobillo), Hands (mano) y Face (ojos), y qué orificio se tapa
   respiracion.py           cerebro  guion de la respiración
   meditacion.py            cerebro  calibración de la postura, quieto, recto y ojos
   estiramientos.py         cerebro  las siete posturas, qué falta en cada una y su guion
+  flexiones.py             cerebro  el ángulo del codo, lo que bajas, la cadera y el contador
   puntero.py               cerebro  señalar, el imán de los botones y la palma que pausa
   navegacion.py            cerebro  moverse por los botones con el teclado
   progreso.py              cerebro  historial, racha, lotos, escalera y desbloqueos en JSON
   interfaz/
     app.py                 el bucle, las teclas, la pausa y el cambio de pantalla
-    fases/                 una clase por fase (respiración, meditación y estiramientos)
+    fases/                 una clase por fase (respiración, meditación, estiramientos y flexiones)
     inicio.py, marco.py, botones.py, piezas.py, textos.py, dibujo.py, estilo.py, sonido.py
 herramientas/              scripts de los experimentos
 tests/
 ```
 
-La aplicación no sabe nada de respirar ni de estirar. Le pide a la fase activa lo suyo (sus botones del inicio, su panel, lo que dibuja sobre la cámara y su resultado). Los estiramientos entraron así, con su lógica en `temple/`, su clase en `temple/interfaz/fases/` y una línea en la lista `FASES`, sin tocar las otras fases.
+La aplicación no sabe nada de respirar ni de estirar. Le pide a la fase activa lo suyo (sus botones del inicio, su panel, lo que dibuja sobre la cámara y su resultado). Los estiramientos y las flexiones entraron así, con su lógica en `temple/`, su clase en `temple/interfaz/fases/` y una línea en la lista `FASES`, sin tocar las otras fases.
 
 La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por fotograma. El modelo de cara solo trabaja al meditar.
 
@@ -203,6 +218,12 @@ La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por f
 | Una clase por fase y la aplicación solo habla con la fase activa | `app.py` había llegado a 1.300 líneas con dos fases mezcladas |
 | Instalación con Conda y conda-forge, y tests en GitHub en Ubuntu y Mac | Es lo más parecido al equipo limpio que pide la entrega, y conda-forge no pide aceptar condiciones |
 | Sonidos generados con numpy | No hace falta ningún archivo de audio |
+| En las flexiones la regla de medir es el largo del tronco (de hombro a cadera) | De lado los hombros quedan uno encima del otro y su ancho sale casi 0 |
+| Se mide el brazo que MediaPipe ve mejor | De lado un brazo tapa al otro |
+| Una flexión cuenta al bajar de un ángulo y volver a subir de otro distinto | Si fuera el mismo, un temblor del codo contaría dos flexiones |
+| 5 s para colocarse y 2 s de plancha antes de contar | En la primera prueba contaba una flexión mientras nos tumbábamos |
+| Dos niveles en las flexiones | Con los límites del nivel técnico, alguien que empieza no sumaba casi ninguna |
+| Fondo en tonos de piedra y letra más grande en las sesiones | El violeta no recordaba a un templo, y a 1-2 m la letra pequeña no se leía |
 
 ## Tecnología
 
@@ -220,6 +241,7 @@ La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por f
 - **Si no se ve la palma, no hay mano.** Muy cerca de la cámara solo salía el dedo y MediaPipe no detectaba la mano. Ahora el juego avisa con "No veo tu mano, aléjate un poco".
 - **Manejar menús con la mano es más difícil de lo que parece.** Fueron cuatro intentos (cursor fino, imán largo, gesto de señalar e imán corto) antes de que no se pulsara nada sin querer.
 - **Reorganizar sin cambiar nada, y demostrarlo.** Antes de partir `app.py` grabamos 385 capturas de un recorrido automático por todas las pantallas, y después del cambio salieron idénticas píxel a píxel.
+- **Los límites se ajustan con datos.** En la primera prueba de las flexiones casi todas salían "poco profundas". Mirando el CSV vimos que en el fondo de una flexión normal el hombro quedaba más alto de lo que habíamos supuesto, y cambiamos el límite.
 - **Decir qué hacer, no qué fallaste.** "Lo que más te ha costado, abrir los ojos" se entendía al revés. Ahora dice "Para mejorar, mantén los ojos cerrados", y en los estiramientos, lo que falta para estar en la postura.
 
 ## Autores
