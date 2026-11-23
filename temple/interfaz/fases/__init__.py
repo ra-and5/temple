@@ -5,7 +5,8 @@ La fila del ritual del inicio, las teclas y el cambio de pantalla salen solos.
 """
 
 from temple.interfaz.fases.estiramientos import Estiramientos
+from temple.interfaz.fases.flexiones import Flexiones
 from temple.interfaz.fases.meditacion import Meditacion
 from temple.interfaz.fases.respiracion import Respiracion
 
-FASES = (Respiracion, Meditacion, Estiramientos)
+FASES = (Respiracion, Meditacion, Estiramientos, Flexiones)

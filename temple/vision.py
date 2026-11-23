@@ -40,6 +40,8 @@ OREJA_IZQ, OREJA_DER = 7, 8
 HOMBRO_IZQ, HOMBRO_DER = 11, 12
 CODO_IZQ, CODO_DER = 13, 14
 MUNECA_IZQ, MUNECA_DER = 15, 16
+CADERA_IZQ, CADERA_DER = 23, 24
+TOBILLO_IZQ, TOBILLO_DER = 27, 28
 PULGAR_PUNTA = 4
 OTRAS_PUNTAS = {8: "indice", 12: "corazon", 16: "anular", 20: "menique"}
 
@@ -67,6 +69,9 @@ class Lectura:
     codos: tuple[tuple[float, float], tuple[float, float]] | None = None
     munecas: tuple[tuple[float, float], tuple[float, float]] | None = None
     vis_munecas: tuple[float, float] | None = None  # 0 a 1, lo seguro que esta el modelo
+    caderas: tuple[tuple[float, float], tuple[float, float]] | None = None
+    tobillos: tuple[tuple[float, float], tuple[float, float]] | None = None
+    vis_brazos: tuple[float, float] | None = None
 
     @property
     def cuerpo(self) -> bool:
@@ -174,9 +179,16 @@ class Detector:
         def par(i, j):
             return (p[i].x, p[i].y), (p[j].x, p[j].y)
 
+        vis_izq = (p[HOMBRO_IZQ].visibility + p[CODO_IZQ].visibility
+                   + p[MUNECA_IZQ].visibility) / 3
+        vis_der = (p[HOMBRO_DER].visibility + p[CODO_DER].visibility
+                   + p[MUNECA_DER].visibility) / 3
         cuerpo = dict(orejas=par(OREJA_IZQ, OREJA_DER), codos=par(CODO_IZQ, CODO_DER),
                       munecas=par(MUNECA_IZQ, MUNECA_DER),
-                      vis_munecas=(p[MUNECA_IZQ].visibility, p[MUNECA_DER].visibility))
+                      vis_munecas=(p[MUNECA_IZQ].visibility, p[MUNECA_DER].visibility),
+                      caderas=par(CADERA_IZQ, CADERA_DER),
+                      tobillos=par(TOBILLO_IZQ, TOBILLO_DER),
+                      vis_brazos=(vis_izq, vis_der))
 
         if not res_manos.hand_landmarks:
             perdida = ahora - self._visto_mano

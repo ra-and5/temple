@@ -51,8 +51,8 @@ def _ritual(app) -> None:
         hecho = clave is not None and app.progreso.hecha_hoy(clave)
         if clave:
             # Alta, para que el dedo llegue sin tener que subir mucho la mano
-            zona = pygame.Rect(0, 0, Z.ANCHO // len(fases) - 4, 78)
-            zona.midtop = (x, y - 28)
+            zona = pygame.Rect(0, 0, Z.ANCHO // len(fases) - 4, 66)
+            zona.midtop = (x, y - 18)
             indice = len(b.lista)
             marcado = b.marcado(indice)
             encima = marcado or zona.collidepoint(b.raton())
