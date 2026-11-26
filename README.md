@@ -2,167 +2,164 @@
 
 [![Tests](https://github.com/ra-and5/temple/actions/workflows/tests.yml/badge.svg)](https://github.com/ra-and5/temple/actions/workflows/tests.yml)
 
-**Juego serio de respiración, meditación, estiramientos y flexiones que se maneja con la webcam.**
+**Un juego serio que te guía cada día para respirar, meditar, estirar y hacer flexiones, y que comprueba con la webcam que lo haces bien.**
 
-*Temple* es la serenidad para mantener la calma y también el valor para afrontar un reto. En inglés es un templo, el sitio al que vuelves cada día.
+Práctica 2 de Interacción Persona-Máquina (Grado en Ingeniería en Inteligencia Artificial, Universidad de Alicante, curso 2026-2027).
 
-Práctica 2 de **Interacción Persona-Máquina** (Grado en Ingeniería en Inteligencia Artificial, Universidad de Alicante, curso 2026-2027).
+*Temple* es la calma para no perder los nervios y también el valor para afrontar un reto. En inglés es un templo, el sitio al que vuelves cada día.
 
 ## Por qué lo hicimos
 
-Meditar y cuidar el cuerpo cada día es algo que siempre hemos querido hacer y nunca nos hemos atrevido a empezar. Queríamos un entrenador que guiara paso a paso y que comprobara de verdad que lo hacemos bien, sin tocar el teclado y sin tener que fiarnos de nosotros mismos.
+Meditar y cuidar el cuerpo cada día es algo que siempre hemos querido hacer y nunca empezábamos. Queríamos un entrenador que nos guiara paso a paso y que comprobara de verdad que lo hacemos bien, sin tocar el teclado y sin tener que fiarnos de nosotros mismos.
 
-## Qué hace
+## Qué es
 
-Un ritual diario guiado por la cámara, que va de la calma al cuerpo. La cámara no se limita a poner un temporizador. Comprueba que haces lo que pide y solo entonces avanza.
+Un ritual diario de cuatro fases que va de la calma al cuerpo. La cámara no se limita a poner un temporizador. Mira lo que haces y solo avanza cuando lo haces bien.
 
-| Fase | Qué comprueba la cámara | Estado |
+| Fase | Qué haces | Qué comprueba la cámara |
 |---|---|---|
-| **Respiración** | Respiración alterna (Anuloma Viloma). El juego marca el ritmo y la cámara mira qué orificio de la nariz tapas | ✅ |
-| **Meditación** | Que estés quieto, con la espalda recta y los ojos cerrados | ✅ |
-| **Estiramientos** | Siete posturas de cuello, hombros y brazos, sentado | ✅ |
-| **Flexiones** | En el suelo y de lado a la cámara. Cuenta las repeticiones y mira que bajes y que el cuerpo vaya recto | ✅ |
+| **Respiración** | Respiración alterna, un ejercicio de pranayama | Qué lado de la nariz tapas en cada momento |
+| **Meditación** | Sentado, con los ojos cerrados | Que estés quieto, recto y con los ojos cerrados |
+| **Estiramientos** | Siete posturas de cuello, hombros y brazos, sentado | Que estés en la postura, y te dice qué te falta |
+| **Flexiones** | En el suelo, de lado a la cámara | Las cuenta y mira que bajes y que el cuerpo vaya recto |
 
-### El juego en una frase
+Es un **juego serio** porque no está hecho solo para entretener. Sirve para crear un hábito sano. Temple es una ayuda para practicar y no sustituye a un profesional de la salud.
 
-> Cada fase te da de **0 a 3 lotos** según lo bien que lo hagas. **5 días con 3 lotos te suben de nivel.** Haz el ritual cada día para mantener la **racha**.
+> **Documentación.** Para usarlo, sigue este README. Para ver cómo funciona por dentro (la cámara, cada fase y cada archivo), [docs/como-funciona.md](docs/como-funciona.md). Para saber por qué está hecho así, [docs/decisiones.md](docs/decisiones.md).
 
-Es la misma regla en todas las fases que suben, para que se entienda a la primera. Lo que cambia al subir depende de la fase.
+## La respiración alterna
+
+El **pranayama** son los ejercicios de respiración del yoga. La **respiración alterna** (en sánscrito *Anuloma Viloma* o *Nadi Shodhana*) es uno de los más conocidos. Se tapa un lado de la nariz con los dedos, se coge aire por el otro y se va cambiando de lado. Se suele hacer antes de meditar para calmar la mente.
+
+<p align="center">
+  <img src="docs/respiracion-anabel-otero.gif" width="320" alt="Una profesora de yoga hace la respiración alterna tapando la nariz con el pulgar y el anular">
+  <br>
+  <sub>Anabel Otero haciendo la respiración alterna. Fragmento de su vídeo <a href="https://www.youtube.com/watch?v=CacBxE8bXao">Pranayama para principiantes (Anuloma Viloma)</a>, citado con fines educativos.</sub>
+</p>
+
+Temple sigue ese vídeo. Con la mano derecha, el pulgar tapa el lado derecho y el anular el izquierdo. Cada vuelta es así.
+
+1. Inhalas 4 tiempos por la izquierda.
+2. Tapas la izquierda y exhalas 8 por la derecha.
+3. Inhalas 4 por la derecha.
+4. Tapas la derecha y exhalas 8 por la izquierda.
+
+En la variante avanzada, después de cada inhalación se aguanta el aire 16 tiempos con los dos lados tapados.
+
+La cámara no ve el aire. El juego marca el ritmo con una cuenta y la cámara comprueba que tapas el lado que toca.
+
+**Para saber más**
+
+- [Pranayama para principiantes (Anuloma Viloma)](https://www.youtube.com/watch?v=CacBxE8bXao), de Anabel Otero. El vídeo completo en español, primero explicado y luego hecho contigo.
+- [How and Why To Try Alternate Nostril Breathing](https://health.clevelandclinic.org/alternate-nostril-breathing), de la Cleveland Clinic, en inglés. Qué es, cómo se hace y para qué sirve, contado por una médica.
+
+## Cómo se gana
+
+> Cada fase te da de **0 a 3 lotos** según lo bien que lo hagas. **5 días con 3 lotos te suben de nivel.** Hazlo cada día para mantener la **racha**.
+
+Los lotos salen del porcentaje del tiempo (o de las flexiones) que lo haces bien. Con un 40 % sacas 1, con un 65 % sacas 2 y con un 85 % sacas 3. Es la misma regla en todas las fases.
 
 | Fase | Niveles |
 |---|---|
-| Respiración | Principiante → Avanzada (retienes 16 tiempos con los dos lados tapados) |
+| Respiración | Principiante → Avanzada, con el aire aguantado |
 | Meditación | 5 → 8 → 12 → 17 → 23 → 30 → 40 minutos → sin límite |
-| Estiramientos | Sin niveles. Son el calentamiento antes de las flexiones, para no lesionarse |
-| Flexiones | Fácil 5 → Técnico 5 → Técnico 10 |
+| Estiramientos | No suben. Son el calentamiento antes de las flexiones |
+| Flexiones | Fácil, 5 → Técnico, 5 → Técnico, 10 |
 
-Los lotos salen del porcentaje del tiempo (o de las flexiones) que lo haces bien, con los mismos cortes en todas las fases (40, 65 y 85 %). Cada día cuenta una vez, y solo jugando tu nivel más alto. Se puede bajar de nivel para un día flojo, pero así no se sube. Nunca se pierde un nivel.
-
-### Las pantallas
-
-Como el menú de un videojuego, una cosa en cada pantalla.
-
-| Pantalla | Qué tiene |
-|---|---|
-| **Menú** | Ritual de hoy, Practicar una fase, Tu progreso, Ajustes y Salir. Arriba, las cuatro fases con la marca de las hechas hoy |
-| **Ritual de hoy** | Las cuatro fases seguidas, desde la primera que te falta. Antes de cada una, una pantalla dice cómo colocarte. En la fila de arriba (tu práctica de hoy) se puede elegir otra fase con el dedo, el ratón o las flechas, y el ritual empieza desde ella |
-| **Antes de empezar** | Cómo ponerte delante de la cámara (en las flexiones, una silueta de perfil sobre la imagen), lo que te falta para subir, el nivel y Empezar |
-| **Tu progreso** | La racha, los días de esta semana y el nivel de cada fase |
-| **Ajustes** | Sonido, pantalla completa y vueltas de respiración |
-
-### Respiración
-
-Sigue el vídeo [Pranayama para principiantes (Anuloma Viloma)](https://www.youtube.com/watch?v=CacBxE8bXao), de Anabel Otero, que la recomienda justo antes de meditar. Cada vuelta es inhalar 4 tiempos por la izquierda, exhalar 8 por la derecha, inhalar 4 por la derecha y exhalar 8 por la izquierda. Las vueltas se eligen en Ajustes, de 1 a 9 (5 por defecto). Con menos de 5 la sesión vale para la racha pero no para subir.
-
-La cámara no ve el aire. Comprueba qué lado tapas, y el ritmo lo marca el juego. Temple es una ayuda para practicar, no una herramienta médica.
-
-### Meditación
-
-Al empezar mide tu postura recta y arranca cuando cierras los ojos. Si algo falla 3 s seguidos suenan dos golpes suaves, porque con los ojos cerrados no se ve la pantalla, y cada minuto una campana. Cada nivel es más tiempo, y el último es **sin límite**, que se acaba con Terminar en la pausa.
-
-### Estiramientos
-
-Siete posturas sentado, de 20 s cada una. No suben de nivel, porque no son un reto sino el calentamiento que prepara cuello, hombros y brazos antes de las flexiones. La cuenta solo avanza mientras estás en la postura, y abajo te dice qué te falta ("Pon la mano sobre la cabeza", "Sujeta el codo con la otra mano"…). Sobre la cámara, una raya discontinua marca hasta dónde llegar.
-
-| Postura | Cómo la reconoce la cámara |
-|---|---|
-| Cabeza a la derecha y a la izquierda | Las orejas inclinadas 20° respecto a los hombros, con la mano de ese lado sobre la cabeza |
-| Brazos arriba | Los dos codos por encima de la nariz |
-| Brazo derecho e izquierdo cruzados | La muñeca pasa al otro lado del pecho. Se pide sujetar el codo con la otra mano, pero no se comprueba, porque la mano lo tapa y MediaPipe lo coloca mal |
-| Tríceps derecho e izquierdo | El codo por encima de la cabeza, el brazo doblado con la mano a la espalda y la otra mano sujetando el codo |
-
-### Flexiones
-
-Se hacen en el suelo, con el portátil también en el suelo, de lado y a unos 2 m, para que la cámara te vea de la cabeza a los pies. Al empezar tienes 5 s para colocarte, y después hay que aguantar la plancha 2 s antes de que empiece a contar. Cada vez que completas una suena un tono, y si no ha salido bien suenan dos golpes, porque desde el suelo no se ve la pantalla.
-
-| Qué mira | Cómo lo mide la cámara |
-|---|---|
-| Una flexión | El ángulo del codo (hombro, codo y muñeca) baja de un límite y vuelve a subir |
-| Que bajes hasta el suelo | Lo que le queda al hombro hasta la altura de la muñeca |
-| El cuerpo recto | Que la cadera no se salga de la línea entre el hombro y el tobillo |
-
-**Fácil** cuenta casi todo y es para quien está empezando. **Técnico** pide bajar hasta el suelo con el cuerpo recto.
+Cada día cuenta una vez y solo jugando tu nivel más alto. Puedes bajar de nivel un día flojo, pero así no subes. Un nivel ganado no se pierde nunca.
 
 ## Instalación
 
-Funciona en **macOS** (chip de Apple o Intel, macOS 13 o más nuevo) y en **Ubuntu**. Hace falta una webcam e internet para instalar.
+Funciona en **Ubuntu** y en **macOS** 13 o más nuevo, con chip de Apple o Intel. Hace falta una webcam e internet para instalar.
 
-Descomprime el zip, abre una terminal dentro de la carpeta y ejecuta el instalador.
+1. Descomprime el zip.
+2. Abre una terminal dentro de la carpeta `temple`.
+3. Ejecuta el instalador.
 
 ```bash
 bash instalar.sh
 ```
 
-Desde GitHub es lo mismo, después de `git clone https://github.com/ra-and5/temple.git` y `cd temple`.
-
-El script lo hace todo y se puede repetir sin miedo.
-
-1. Busca Conda y, si no está, instala Miniconda en `~/miniconda3` (pregunta antes).
-2. Crea el entorno `temple` con Python 3.12, porque MediaPipe 0.10.21 no funciona con versiones más nuevas.
-3. Instala las librerías de `requirements.txt`, con las versiones fijadas.
-4. Descarga los tres modelos de MediaPipe en `models/` y comprueba que son los mismos con los que probamos el juego.
-5. Pasa todos los tests para confirmar que funciona.
-
-Tarda unos 5 minutos (en nuestro Ubuntu, 2 minutos y medio con Conda ya instalada). Para jugar.
+Desde GitHub es igual, después de clonar el repositorio y entrar en la carpeta.
 
 ```bash
-bash jugar.sh
+git clone https://github.com/ra-and5/temple.git
 ```
 
-En macOS, la primera vez pide permiso para usar la cámara desde la Terminal. Si no sale la imagen, se activa en Ajustes del Sistema → Privacidad y seguridad → Cámara, y se vuelve a abrir.
+El instalador lo hace todo solo y se puede repetir sin miedo.
 
-Para quitarlo todo.
+1. Busca Conda. Si no está, pregunta y instala Miniconda en `~/miniconda3`.
+2. Crea el entorno `temple` con Python 3.12, porque MediaPipe 0.10.21 no funciona con versiones más nuevas.
+3. Instala las librerías de `requirements.txt` con las versiones fijadas.
+4. Baja los tres modelos de MediaPipe a `models/` y comprueba que son los mismos con los que lo probamos.
+5. Pasa todos los tests para confirmar que funciona.
+
+Tarda unos 5 minutos. En nuestro Ubuntu, con Conda ya instalada, 2 minutos y medio.
+
+En macOS, la primera vez pide permiso para usar la cámara desde la Terminal. Si no sale la imagen, actívalo en Ajustes del Sistema → Privacidad y seguridad → Cámara, y vuelve a abrir Temple.
+
+Para quitarlo todo hay otro script. Borra el entorno y los modelos, pregunta antes de borrar tu progreso y solo quita Miniconda si la instaló Temple.
 
 ```bash
 bash desinstalar.sh
 ```
 
-Borra el entorno y los modelos, y pregunta antes de borrar tu progreso. Si Miniconda la instaló Temple, también pregunta si quitarla. Después ya se puede borrar la carpeta.
+## Tu primera vez, paso a paso
 
-## Tu primera sesión
-
-Unos 25 minutos con las duraciones de verdad.
+Unos 25 minutos con las duraciones de verdad. Arranca el juego.
 
 ```bash
 bash jugar.sh
 ```
 
-### Probarlo entero en menos de 10 minutos
+1. **Colócate.** Sentado, a medio metro de la cámara y con luz de frente. Se te tiene que ver de la cabeza al pecho, con los codos.
+2. **Ritual de hoy.** En el menú, señala con el índice el botón «Ritual de hoy» y espera a que se rellene. También vale el ratón o Enter.
+3. **Respiración.** La primera vez cada fase empieza con su tutorial, que aquí te enseña a tapar cada lado. Al acabarlo, pulsa Empezar y haz la sesión.
+4. **Meditación.** «Seguir» te lleva a meditar. Tutorial y sesión con los ojos cerrados. Si te mueves o te encorvas suenan dos golpes suaves.
+5. **Estiramientos.** Tutorial y sesión. Abajo te dice qué te falta en cada postura.
+6. **Flexiones.** Pon el portátil en el suelo a unos 2 m y ponte **de perfil**, como la silueta que sale sobre la cámara. Tutorial y sesión.
+7. **Al acabar las cuatro** sale «Ritual de hoy completo». En «Tu progreso» ves la racha y lo que te falta para subir en cada fase.
 
-Para corregir o enseñar el juego sin meditar 5 minutos ni hacer todas las vueltas, `--rapido` acorta todo a la vez. Son 1 vuelta de respiración, 1 minuto de meditación, 4 s por postura y 2 flexiones, y los mensajes entre paso y paso ("Prepárate", "Muy bien"…) duran 1,5 s en vez de 3 a 6 s. Se ven las cuatro fases con su tutorial, su sesión y su resultado, pero esas sesiones no cuentan para subir de nivel (el resultado lo dice).
+Para pausar en cualquier momento, enseña la palma abierta y quieta a la cámara, o pulsa Espacio. Para seguir, abre la palma y ciérrala en un puño.
+
+Si algo tarda en reconocerse, la tecla **D** enseña los números que mide la cámara.
+
+## Probarlo entero en menos de 10 minutos
+
+Para corregirlo o enseñarlo sin meditar 5 minutos ni hacer todas las vueltas.
 
 ```bash
 bash jugar.sh --rapido
 ```
 
-Se puede combinar con las demás opciones, y lo que se diga aparte manda (`bash jugar.sh --rapido --minutos 3`). Para ver una subida de nivel de verdad, sin `--rapido`, está la demo del final de [Cómo se maneja](#cómo-se-maneja).
+Acorta todo a la vez. 1 vuelta de respiración, 1 minuto de meditación, 4 s por postura y 2 flexiones, y los mensajes entre pasos duran 1,5 s. Se ven las cuatro fases con su tutorial, su sesión y su resultado. Estas sesiones no cuentan para subir de nivel, y el resultado lo dice.
 
-Los pasos, con o sin `--rapido`.
+## Ver una subida de nivel
 
-1. **Colócate.** Sentado, a medio metro de la cámara y con luz de frente, de forma que se te vea de la cabeza al pecho y los codos.
-2. **Ritual de hoy.** En el menú, señala con el índice, apuntando a la pantalla, el botón "Ritual de hoy" y espera a que se rellene. Te lleva a la respiración.
-3. **Respiración.** Pulsa "Aprender con el tutorial", que enseña a tapar cada lado. Al acabar vuelves a la pantalla de la fase. Pulsa Empezar y haz la sesión.
-4. **Meditación.** En el resultado, "Seguir" te lleva a meditar. Tutorial y sesión con los ojos cerrados. Para pausar, palma abierta, quieta y por encima de los hombros. Para seguir, cierra los ojos 2 s, o abre la palma y ciérrala en un puño.
-5. **Estiramientos.** Igual, tutorial y sesión. Abajo te dice qué te falta en cada postura. Para pausar, palma abierta, quieta y por encima de los hombros entre postura y postura, o sal de la cámara.
-6. **Flexiones.** Pon el portátil en el suelo a unos 2 m y ponte **de perfil**, como la silueta que sale sobre la cámara. Tutorial y sesión. Para pausar, ponte de rodillas y enseña la palma, o levántate.
-7. **Al acabar las cuatro**, el resultado dice "Ritual de hoy completo" y vuelves al menú. En Tu progreso salen la racha y lo que te falta para subir en cada fase.
+Para ver cómo se sube sin jugar cinco días hay una demo. Crea en `datos/demo` cuatro días seguidos con 3 lotos en cada fase y arranca con ella. Tu progreso de verdad no se toca.
 
-Si algo tarda en reconocerse, la tecla **D** enseña los números que mide la cámara.
+```bash
+bash jugar.sh --demo
+```
 
-## Si algo falla
+Haz cualquier fase con 3 lotos y subirás de nivel. Cada vez que se usa `--demo` la demo vuelve a empezar.
 
-| Qué pasa | Qué hacer |
-|---|---|
-| "No se puede abrir la cámara" | Cierra los programas que la usan (videollamadas). Si tienes varias, prueba `bash jugar.sh --camara 1` |
-| "La cámara no da imagen" (macOS) | Ajustes del Sistema → Privacidad y seguridad → Cámara, activa la Terminal y vuelve a abrir Temple |
-| En un Mac coge la cámara del iPhone | `bash jugar.sh --camara 1` |
-| "Faltan los modelos de MediaPipe" | `bash instalar.sh` |
-| "Temple no está instalado" al usar `jugar.sh` | `bash instalar.sh` |
-| "No te veo" | Aléjate un poco y pon luz de frente, que se te vea de la cabeza al pecho |
-| "No te veo entero" en las flexiones | Aléjate hasta que se te vean los pies, con el portátil en el suelo y de lado |
-| "No veo tu mano, aléjate un poco" | Muy cerca solo se ve el dedo y no la mano entera |
-| Señalas y no se pulsa | El índice estirado apuntando a la pantalla o hacia arriba, los demás dedos cerrados, y quieto 1,5 s |
-| La instalación falla en los tests | Copia lo que sale en la Terminal y abre un *issue* en el repositorio |
+## Todas las opciones
+
+Se pueden combinar, y lo que se diga aparte manda sobre `--rapido` (por ejemplo `bash jugar.sh --rapido --minutos 3`). Las sesiones con estas opciones no cuentan para subir de nivel.
+
+```bash
+bash jugar.sh --rapido        # todo corto a la vez, para probarlo entero
+bash jugar.sh --demo          # cuatro días de progreso para ver una subida de nivel
+bash jugar.sh --vueltas 2     # vueltas de respiración
+bash jugar.sh --avanzada      # respiración avanzada sin desbloquearla
+bash jugar.sh --tiempo 0.5    # segundos de cada tiempo de la cuenta (1 por defecto)
+bash jugar.sh --minutos 1     # minutos de meditación (0 es sin límite)
+bash jugar.sh --segundos 5    # segundos de cada estiramiento
+bash jugar.sh --flexiones 2   # flexiones de la sesión
+bash jugar.sh --camara 1      # otra cámara, si hay varias
+bash jugar.sh --datos otra    # otra carpeta de progreso
+```
 
 ## Cómo se maneja
 
@@ -170,133 +167,111 @@ De lejos, con la mano. De cerca, con el teclado o el ratón, como cualquier prog
 
 | Gesto o tecla | Qué hace |
 |---|---|
-| Señalar un botón con el índice 1,5 s | Lo pulsa. El dedo tiene que apuntar a la pantalla o hacia arriba. Si la mano no tiene forma de señalar, ni sale el cursor ni se elige nada |
-| Palma abierta, de frente, quieta y lejos de la nariz | Pausa en cualquier fase y en cualquier momento, tutorial o sesión (1 s, y 1,5 s por encima de los hombros al meditar). En los estiramientos, solo entre postura y postura, por encima de los hombros y pasados 2 s de la última |
-| En la pausa, abrir la palma de frente y cerrarla en un puño | Sigue. En la cámara se ve cada paso ("Para seguir, palma abierta…" y "Cierra el puño para seguir") |
+| Señalar un botón con el índice 1,5 s | Lo pulsa. El dedo tiene que apuntar a la pantalla o hacia arriba, con los demás dedos cerrados |
+| Palma abierta, de frente y quieta 1 s | Pausa. Al meditar, por encima de los hombros y 1,5 s. En los estiramientos, solo entre postura y postura |
+| En la pausa, palma abierta y luego puño | Sigue |
 | Cerrar los ojos 2 s en la pausa de la meditación | Sigue meditando |
+| Salir de la cámara | Pausa sola |
 | Espacio | Empezar, pausar o seguir |
 | Flechas o Tab, y Enter | Moverse entre los botones y pulsar |
 | Clic | Pulsar un botón |
 | R, E, I, X | Abrir respiración, meditación, estiramientos o flexiones desde el menú |
+| T y S en la pantalla de una fase | Tutorial o sesión |
 | ← → en la pantalla de una fase | Bajar o subir el nivel que juegas |
 | M | Sonido |
-| F | Pantalla completa, y otra vez para volver a la ventana |
+| F | Pantalla completa |
 | D | Ver los números que mide la cámara |
-| Esc | Volver a la pantalla de antes. En el menú pregunta si quieres salir, igual que el botón Salir |
+| Esc | Volver atrás. En el menú pregunta si quieres salir |
 
-Opciones para probar, que no cuentan para subir de nivel. Para enseñar el juego con unas semanas de progreso inventado, `python herramientas/crear_demo.py` y después `bash jugar.sh --datos datos/demo`. Con `--dia5` deja 4 días con 3 lotos en cada fase, para ver hoy la subida de nivel de todas.
+### Las pantallas
 
-```bash
-bash jugar.sh --rapido        # todo corto a la vez, para probarlo entero
-bash jugar.sh --vueltas 2     # respiración corta
-bash jugar.sh --avanzada      # respiración avanzada sin desbloquearla
-bash jugar.sh --minutos 1     # meditación corta (0 es sin límite)
-bash jugar.sh --segundos 5    # estiramientos cortos
-bash jugar.sh --flexiones 2   # flexiones cortas
-bash jugar.sh --camara 1      # otra cámara, si hay varias
-```
+| Pantalla | Qué tiene |
+|---|---|
+| **Menú** | Ritual de hoy, Practicar una fase, Tu progreso, Ajustes y Salir. Arriba, las cuatro fases con las hechas hoy marcadas |
+| **Antes de empezar** | Cómo colocarte, el nivel, lo que te falta para subir y Empezar |
+| **Tu progreso** | La racha, los días de esta semana y el nivel de cada fase |
+| **Ajustes** | Sonido, pantalla completa y vueltas de respiración |
 
-El progreso se guarda en `datos/progreso.json`, en tu equipo. Cada meditación, sesión de estiramientos y de flexiones apunta además lo que mide la cámara en un CSV de `datos/`, varias veces por segundo, para ajustar los umbrales con números reales.
+## Si algo falla
+
+| Qué pasa | Qué hacer |
+|---|---|
+| «No se puede abrir la cámara» | Cierra las videollamadas. Si tienes varias cámaras, prueba `bash jugar.sh --camara 1` |
+| «La cámara no da imagen» en macOS | Ajustes del Sistema → Privacidad y seguridad → Cámara. Activa la Terminal y vuelve a abrir Temple |
+| En un Mac coge la cámara del iPhone | `bash jugar.sh --camara 1` |
+| «Faltan los modelos de MediaPipe» o «Temple no está instalado» | `bash instalar.sh` |
+| «No te veo» | Aléjate un poco y pon luz de frente |
+| «No te veo entero» en las flexiones | Aléjate hasta que se te vean los pies, con el portátil en el suelo y de lado |
+| «No veo tu mano, aléjate un poco» | Muy cerca solo se ve el dedo y no la mano entera |
+| Señalas y no se pulsa | Índice estirado hacia la pantalla o hacia arriba, los demás dedos cerrados, y quieto 1,5 s |
+| La instalación falla en los tests | Copia lo que sale en la terminal y abre un *issue* |
+
+## Cómo está hecho
+
+Usamos tres modelos de [MediaPipe](https://ai.google.dev/edge/mediapipe) ya entrenados. **Pose** da 33 puntos del cuerpo, **Hands** 21 puntos de cada mano y **Face** dice si los ojos están cerrados. No entrenamos nada. Encima ponemos reglas con distancias y ángulos entre esos puntos, medidas en anchos de hombros para que dé igual lo lejos que estés.
+
+El código va en tres capas.
+
+| Capa | Dónde | Qué hace |
+|---|---|---|
+| Ojos | `temple/camara.py` y `temple/vision.py` | Leen la cámara en un hilo aparte y sacan los puntos |
+| Cerebro | Una lógica por fase en `temple/`, más los gestos y el progreso | Deciden qué pasa. No saben que existe una pantalla, así que se prueban sin cámara |
+| Interfaz | `temple/interfaz/` | Dibuja y suena con Pygame. Una clase por fase |
+
+Todo está explicado en dos guías.
+
+- **[Cómo funciona por dentro](docs/como-funciona.md).** Cómo ve la cámara, qué mide cada fase, una foto de principio a fin, lo que hemos aplicado de la asignatura y qué hace cada archivo.
+- **[Decisiones](docs/decisiones.md).** Todas las decisiones, con el problema que las provocó y lo que descartamos.
+
+## Cómo lo hicimos
+
+| Fecha | Qué pasó |
+|---|---|
+| 05/11 | Propusimos la idea al profesor y le pareció bien. Montamos el entorno y un primer script que dibuja el esqueleto en directo |
+| 11/11 | Un experimento con la cámara decidió cómo detectar qué lado de la nariz se tapa |
+| 12/11 | Respiración terminada, con menús que se manejan con el dedo. Se la enseñamos al profesor, costaba atinar a los botones y rehicimos el puntero |
+| 18/11 | Meditación con tres modelos a la vez. Teclado y ratón para jugar de cerca |
+| 19/11 | Interfaz partida en una clase por fase, tests en GitHub, estiramientos e instalador para un equipo limpio, probado en Ubuntu y en Mac |
+| 23/11 | Flexiones |
+| 25/11 | Una sola regla de niveles y un menú por pantallas. Primeras pruebas de las flexiones en el suelo y sus arreglos |
+| 26/11 | Estiramientos estables gracias a los datos guardados, revisión completa y vídeo |
+
+Cada fase siguió el mismo ciclo. La diseñamos, la probamos con la cámara, apuntamos lo que fallaba con los CSV que guarda cada sesión y la arreglamos.
 
 ## Tests
 
-`instalar.sh` los pasa al final. Para pasarlos otra vez basta con repetirlo, porque lo que ya está instalado se lo salta y en unos 2 minutos solo comprueba.
+`instalar.sh` los pasa al final. Para pasarlos otra vez basta con repetirlo, porque se salta lo que ya está instalado.
 
 ```bash
 bash instalar.sh
 ```
 
-Son 194 y no necesitan cámara. Prueban la lógica de las cuatro fases con cuerpos inventados (cada postura, contar flexiones, la calibración, los avisos, la escalera de minutos y la regla de los niveles), los gestos (señalar, la palma que pausa y la que solo pasa por delante, la mano apoyada en la cabeza), la navegación con el teclado y la instalación (los scripts, las versiones fijadas y que los modelos cargan). `tests/test_interfaz.py` abre la aplicación sin ventana con una cámara falsa y juega como un usuario, sin tocar tu progreso. Recorre todas las pantallas en todos sus estados y comprueba que en ningún botón el texto se sale o se pisa con la tecla. Hace el ritual entero (también elegido desde la fila de arriba con el dedo, el ratón y las flechas), cada fase del tutorial al resultado (en las flexiones, una persona de perfil que baja y sube, con la cadera recta o hundida), la pausa con la palma en las cuatro fases (al empezar y a mitad, en el tutorial y en la sesión, y seguir con la palma y el puño), con Espacio y al salir de la cámara, y comprueba que cerrar la ventana a mitad deja guardado el registro. Con `--rapido` comprueba que cada fase acorta sus textos y que las flexiones acaban en segundos sin subir de nivel. `tests/test_arranque.py` comprueba que las opciones de `main.py` (también `--rapido`) llegan a la aplicación y que la demo de `herramientas/crear_demo.py` deja una racha larga, los niveles subidos y hoy sin hacer.
+No necesitan cámara. Prueban la lógica de las cuatro fases con cuerpos inventados, los gestos, la navegación con el teclado, la instalación y la aplicación entera. `tests/test_interfaz.py` abre Temple sin ventana con una cámara falsa y juega como un usuario. Recorre todas las pantallas, hace el ritual entero, pausa y sigue en las cuatro fases y comprueba que ningún texto se pisa.
 
-En GitHub se pasan solos en cada push (`.github/workflows/tests.yml`), midiendo con `coverage` qué parte del código prueban. El informe sale en el resumen de cada ejecución en la pestaña Actions. Lo único que no se puede probar sin una persona delante es la cámara y la ventana de verdad (`camara.py`, `vision.py` y `ventana.py`). Además, un Ubuntu y un Mac de GitHub ejecutan `instalar.sh` desde cero, arrancan con `jugar.sh` y lo quitan con `desinstalar.sh`, igual que un usuario nuevo.
+`tests/test_documentacion.py` hace con la documentación lo mismo que los demás con el código. Falla si un archivo no sale en la [guía](docs/como-funciona.md), si una función o una clase no tiene su explicación o si un enlace del README o de las guías está roto.
 
-## Arquitectura
-
-Tres capas. Los **ojos** ven puntos, el **cerebro** decide qué pasa y la **interfaz** lo enseña y suena. El cerebro no importa Pygame ni OpenCV, así que se prueba con datos inventados.
-
-```
-main.py                    arranque y opciones
-instalar.sh, jugar.sh      instalación en un equipo limpio, arranque y desinstalar.sh para quitarlo
-temple/
-  camara.py                ojos     cámara y detección en un hilo aparte, y los avisos si fallan
-  vision.py                ojos     Pose (cuerpo, también cadera y tobillo), Hands (mano) y Face (ojos), y qué orificio se tapa
-  respiracion.py           cerebro  guion de la respiración
-  meditacion.py            cerebro  calibración de la postura, quieto, recto y ojos
-  estiramientos.py         cerebro  las siete posturas, qué falta en cada una y su guion
-  flexiones.py             cerebro  el ángulo del codo, lo que bajas, la cadera y el contador
-  puntero.py               cerebro  señalar, el imán de los botones y la palma que pausa
-  navegacion.py            cerebro  moverse por los botones con el teclado
-  progreso.py              cerebro  historial, racha y la regla única de niveles, en JSON
-  interfaz/
-    app.py                 el bucle, las teclas, la pausa, el ritual y el cambio de pantalla
-    menus.py               menú, practicar una fase, antes de empezar, progreso, ajustes y salir
-    fases/                 una clase por fase (respiración, meditación, estiramientos y flexiones)
-    marco.py, botones.py, piezas.py, textos.py, dibujo.py, estilo.py, sonido.py
-herramientas/              scripts de los experimentos
-tests/
-```
-
-La aplicación no sabe nada de respirar ni de estirar. Le pide a la fase activa lo suyo (cómo colocarse, qué cambia en cada nivel, su panel, lo que dibuja sobre la cámara y su resultado). Guardar la sesión con la regla de los niveles es común a todas, en la clase base. Los estiramientos y las flexiones entraron así, con su lógica en `temple/`, su clase en `temple/interfaz/fases/` y una línea en la lista `FASES`, sin tocar las otras fases.
-
-La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por fotograma. El modelo de cara solo trabaja al meditar.
-
-## Decisiones técnicas
-
-| Decisión | Por qué |
-|---|---|
-| Detección por reglas, con distancias entre puntos medidas en anchos de hombros | No hace falta entrenar ningún modelo y da igual lo lejos que estés |
-| En la respiración vale cualquier dedo pegado a la nariz para el lado izquierdo | Con la mano doblada MediaPipe confunde qué dedo es cuál (experimento con `herramientas/explorar_manos.py`) |
-| La espalda se mide por la cabeza, comparada con tu postura recta calibrada al empezar | Sentado cerca la cámara no ve las caderas |
-| Ojos cerrados con los *blendshapes* de Face Landmarker, corte en 0,4 | En nuestras pruebas, abiertos daban 0,15-0,25 y cerrados 0,6-0,77 |
-| Un fallo solo cuenta si dura más de 1 s en la meditación y en los estiramientos | Un parpadeo o un salto del modelo no deben quitar puntos |
-| En los estiramientos el lado sale de dónde está en la pantalla, no de la etiqueta de MediaPipe | Con la imagen en espejo, sus etiquetas de izquierda y derecha se cruzan |
-| La cabeza inclinada se mide contra la línea de los hombros | Así da igual que la cámara esté algo torcida |
-| Las muñecas se usan aunque MediaPipe no esté seguro de verlas | Con el brazo estirado la muñeca se sale de la imagen y el modelo estima bien dónde está |
-| En el tríceps, "sujeta el codo" mira la muñeca más cercana al codo del otro brazo | MediaPipe intercambia a ratos qué muñeca es cuál, así que no se mira cuál es |
-| Señalar solo cuenta con el índice estirado, los demás dedos cerrados y apuntando a la pantalla o hacia arriba | Con la mano apoyada en la cabeza se pulsaban botones solos |
-| La palma que pausa tiene que estar de frente, quieta y lejos de la nariz | Al bajar la mano después de meditar saltaba la pausa. Una mano que pide pausa está quieta, una que baja no |
-| En los estiramientos la palma solo pausa entre postura y postura | En las posturas la mano está abierta en la cabeza, arriba o sujetando el codo, también por encima de los hombros en el tríceps. La mano del codo pausaba. En mitad de una postura se pausa saliendo de la cámara o con Espacio |
-| En los estiramientos los puntos del cuerpo se suavizan y salirse menos de 1 s no corta la cuenta | MediaPipe mueve cada punto unos píxeles en cada fotograma, y más la muñeca escondida detrás de la cabeza en el tríceps (la ve con 0,3 a 0,5 de confianza). Las líneas temblaban y la postura entraba y salía |
-| El tríceps se reconoce por qué brazo está más doblado. En el brazo cruzado solo cuenta el cruce, sin mirar qué muñeca es cuál ni si sujetas el codo | Con los datos de la tecla D, el brazo que estiras está siempre más doblado que el que sujeta. Con los brazos cruzados MediaPipe intercambia las muñecas a ratos, y la mano que sujeta tapa el codo. Sujetando, la distancia de la mano al codo daba de 0,04 a 1,2, y sin sujetar de 0,7 a 0,85, así que no se podía pedir sin cortar la cuenta haciéndolo bien |
-| Cada texto en un hueco fijo que se encoge si no cabe (el título en una línea y el detalle en dos), y el círculo de todas las fases a la misma altura, por debajo | Así nada se pisa, diga lo que diga. Un test recorre los textos de todos los pasos y falla si alguno llegaría al círculo |
-| Una clase por fase y la aplicación solo habla con la fase activa | `app.py` había llegado a 1.300 líneas con dos fases mezcladas |
-| Instalación con Conda y conda-forge, y tests en GitHub en Ubuntu y Mac | Es lo más parecido al equipo limpio que pide la entrega, y conda-forge no pide aceptar condiciones |
-| Sonidos generados con numpy | No hace falta ningún archivo de audio |
-| En las flexiones la regla de medir es el largo del tronco (de hombro a cadera) | De lado los hombros quedan uno encima del otro y su ancho sale casi 0 |
-| Se mide el brazo que MediaPipe ve mejor | De lado un brazo tapa al otro |
-| Una flexión cuenta al bajar de un ángulo y volver a subir de otro distinto | Si fuera el mismo, un temblor del codo contaría dos flexiones |
-| 5 s para colocarse y 2 s de plancha antes de contar | En la primera prueba contaba una flexión mientras nos tumbábamos |
-| Dos niveles en las flexiones | Con los límites del nivel técnico, alguien que empieza no sumaba casi ninguna |
-| En las flexiones, la mediana de los últimos 5 fotogramas, un fallo de menos de 0,3 s no reinicia la plancha y una flexión de menos de 0,4 s no cuenta | En nuestra prueba del 25/11 el ángulo del codo bailaba de 126° a 172° con los brazos estirados, la plancha tardó 18 s en darse por buena y un salto suelto contó una flexión que no existía |
-| Una sola regla para subir de nivel en las cuatro fases (5 días con 3 lotos) | Antes cada fase tenía la suya (sesiones, semanas, mejor marca). Con una sola se explica en una frase y es coherente (consistencia, heurística de Nielsen) |
-| Menú por pantallas en lugar de un inicio con todo | El inicio tenía once cosas a la vez y con el dedo costaba atinar. Una cosa en cada pantalla (diseño minimalista, heurística de Nielsen) y botones grandes y separados |
-| La forma de la mano se mide en la proporción real de la imagen | MediaPipe da los puntos de 0 a 1 en cada eje, y la imagen es más ancha que alta. Medida así, una palma de frente parecía de lado y no pausaba |
-| Seguir desde la pausa con la palma abierta y luego el puño | Un gesto en dos tiempos no salta solo, y se ve en la cámara en qué paso vas |
-| Los estiramientos no suben de nivel | Son el calentamiento antes de las flexiones. Hacerlos más largos no es un reto que tenga sentido |
-| Antes de cada fase, cómo colocarse y una silueta en las flexiones | Al probar las flexiones nos pusimos de frente a la cámara en vez de de perfil |
-| Fondo en tonos de piedra y letra más grande en las sesiones | El violeta no recordaba a un templo, y a 1-2 m la letra pequeña no se leía |
-
-## Tecnología
-
-- [MediaPipe](https://ai.google.dev/edge/mediapipe) (Pose Landmarker, Hand Landmarker y Face Landmarker)
-- OpenCV para la cámara y Pygame para la interfaz
-- Python 3.12 con Conda
-- Fuentes Cormorant Garamond y Nunito, con licencia SIL Open Font License (en `assets/fuentes/`)
+En GitHub se pasan solos en cada push, midiendo con `coverage` qué parte del código prueban. Además, un Ubuntu y un Mac limpios ejecutan `instalar.sh`, arrancan con `jugar.sh` y lo quitan con `desinstalar.sh`, como un usuario nuevo.
 
 ## Lo que aprendimos y lo que haríamos distinto
 
 - **Que pase los tests no significa que funcione.** Una primera versión de la meditación pasaba todos los tests y la borramos entera porque no la habíamos probado con la cámara. Rehecha y probada, salieron fallos que ningún test veía.
-- **Medir antes de ajustar.** El juego apunta lo que mide en un CSV. Con él vimos que los fallos de recto venían de los hombros y no de encorvarse, y que el brazo cruzado fallaba porque la muñeca se salía de la imagen.
-- **Los gestos chocan con los movimientos normales.** La palma que pausa saltaba al estirar con la mano en la cabeza o sujetando el codo y al bajar la mano después de meditar, y señalar se activaba con la mano apoyada. Lo que funcionó fue pensar qué distingue el gesto de verdad (una mano que pide pausa está quieta y de frente, un dedo que señala apunta a la pantalla). Ahora empezaríamos probando cada gesto con lo que el cuerpo hace sin querer.
-- **Los dedos de MediaPipe no son fiables con la mano doblada ni con los brazos cruzados.** Funciona mejor medir algo que no dependa de qué dedo o qué muñeca es cuál.
-- **Si no se ve la palma, no hay mano.** Muy cerca de la cámara solo salía el dedo y MediaPipe no detectaba la mano. Ahora el juego avisa con "No veo tu mano, aléjate un poco".
-- **Manejar menús con la mano es más difícil de lo que parece.** Fueron cuatro intentos (cursor fino, imán largo, gesto de señalar e imán corto) antes de que no se pulsara nada sin querer.
-- **Reorganizar sin cambiar nada, y demostrarlo.** Antes de partir `app.py` grabamos 385 capturas de un recorrido automático por todas las pantallas, y después del cambio salieron idénticas píxel a píxel.
-- **Los límites se ajustan con datos.** En la primera prueba de las flexiones casi todas salían "poco profundas". Mirando el CSV vimos que en el fondo de una flexión normal el hombro quedaba más alto de lo que habíamos supuesto, y cambiamos el límite.
-- **Las coordenadas normalizadas engañan.** Los puntos de MediaPipe van de 0 a 1 tanto a lo ancho como a lo alto. Comparando un ancho con un alto en esas unidades, la palma de frente parecía estrecha. Lo vimos pasando una captura de la prueba por el mismo detector del juego.
-- **Lo que la cámara no ve no se puede exigir.** En el brazo cruzado pedíamos sujetar el codo, pero la propia mano lo tapa y MediaPipe lo coloca donde puede. La postura se cortaba haciéndola bien. Pasando por las reglas nuevas las sesiones guardadas con la tecla D vimos que sujetar y no sujetar daban distancias que se solapan, y dejamos de comprobarlo. Ahora, antes de pedir algo, miraríamos en los datos si la cámara lo distingue.
-- **Suavizar antes de decidir.** Las líneas del cuerpo temblaban aunque estuvieras quieto y la postura entraba y salía. Con una media entre fotogramas y un segundo de margen, las mismas sesiones pasaron de un 26 % del tiempo fuera a un 0 %.
-- **Decir qué hacer, no qué fallaste.** "Lo que más te ha costado, abrir los ojos" se entendía al revés. Ahora dice "Para mejorar, mantén los ojos cerrados", y en los estiramientos, lo que falta para estar en la postura.
+- **Medir antes de ajustar.** Cada sesión guarda lo que mide la cámara en un CSV. Con él vimos que los fallos de recto venían de los hombros y no de encorvarse, y que el brazo cruzado fallaba porque la muñeca se salía de la imagen.
+- **Los gestos chocan con los movimientos normales.** La palma que pausa saltaba al estirar y al bajar la mano después de meditar, y señalar se activaba con la mano apoyada en la cabeza. Funcionó pensar qué distingue el gesto de verdad. Una mano que pide pausa está quieta y de frente, y un dedo que señala apunta a la pantalla. Ahora probaríamos cada gesto desde el principio con lo que el cuerpo hace sin querer.
+- **MediaPipe no es fiable con la mano doblada ni con los brazos cruzados.** Confunde qué dedo o qué muñeca es cuál. Funciona mejor medir algo que no dependa de eso.
+- **Si no se ve la palma, no hay mano.** El detector de manos busca primero la palma. Muy cerca de la cámara solo salía el dedo y no detectaba nada.
+- **Manejar menús con la mano es más difícil de lo que parece.** Fueron cuatro intentos (cursor fino, imán largo, gesto de señalar e imán corto) hasta que nada se pulsó sin querer.
+- **Reorganizar sin cambiar nada, y demostrarlo.** Antes de partir la interfaz grabamos 385 capturas de todas las pantallas, y después salieron idénticas píxel a píxel.
+- **Las coordenadas de 0 a 1 engañan.** MediaPipe da x e y de 0 a 1, pero la imagen es más ancha que alta. Comparando un ancho con un alto así, una palma de frente parecía de lado.
+- **Lo que la cámara no ve no se puede exigir.** En el brazo cruzado pedíamos sujetar el codo, pero la propia mano lo tapa. Los datos de sujetar y de no sujetar se solapaban, así que dejamos de comprobarlo. Ahora miraríamos los datos antes de pedir algo.
+- **Suavizar antes de decidir.** Las líneas del cuerpo temblaban aunque estuvieras quieto. Con una media entre fotos y un segundo de margen, las mismas sesiones pasaron de un 26 % del tiempo fuera de la postura a un 0 %.
+- **Decir qué hacer, no qué fallaste.** «Lo que más te ha costado, abrir los ojos» se entendía al revés. Ahora dice «Para mejorar, mantén los ojos cerrados».
+
+## Tecnología y créditos
+
+- [MediaPipe](https://ai.google.dev/edge/mediapipe) de Google, con Pose Landmarker, Hand Landmarker y Face Landmarker.
+- OpenCV para la cámara y Pygame para la interfaz, con Python 3.12 y Conda.
+- Fuentes Cormorant Garamond y Nunito, con licencia SIL Open Font License, en `assets/fuentes/`.
+- La respiración sigue el vídeo de [Anabel Otero](https://www.youtube.com/watch?v=CacBxE8bXao). El GIF es un fragmento de ese vídeo, citado con fines educativos.
 
 ## Autores
 
