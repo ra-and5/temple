@@ -8,6 +8,7 @@ from temple.respiracion import Guion, estrellas, guion_sesion, guion_tutorial
 
 
 def contar(pasos):
+    """Los pasos de contar como tuplas fáciles de comparar."""
     return [(p.accion, p.abierto, p.tapado, p.tiempos) for p in pasos if p.tipo == "contar"]
 
 

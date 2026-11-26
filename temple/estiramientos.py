@@ -118,10 +118,12 @@ class Cuerpo:
 
     @property
     def escala(self) -> float:
+        """El ancho de hombros. Es la regla con la que se mide todo lo demás."""
         return math.dist(self.hombro_a, self.hombro_b)
 
     @property
     def centro_x(self) -> float:
+        """Dónde está el centro del pecho, a lo ancho."""
         return (self.hombro_a[0] + self.hombro_b[0]) / 2
 
     def brazo(self, lado: str) -> tuple[Punto, Punto, float]:
@@ -163,6 +165,7 @@ class Medida:
 
 
 def medir(c: Cuerpo | None) -> Medida:
+    """Mide un fotograma. La cabeza, los codos y cada brazo, en anchos de hombros."""
     if c is None or c.escala < 1e-3:
         return Medida(cuerpo=False)
     e = c.escala
@@ -256,6 +259,7 @@ class Suavizado:
         self._c: Cuerpo | None = None
 
     def actualizar(self, c: Cuerpo | None, dt: float) -> Cuerpo | None:
+        """Suaviza los puntos con una media que pesa más lo último, para que no tiemblen."""
         if c is None:
             self._c = None  # sin cuerpo se empieza de cero, sin arrastrar el anterior
             return None
@@ -276,6 +280,7 @@ class Suavizado:
 
 
 def cumple(objetivo: str, m: Medida) -> bool:
+    """Si la medida ya está en la postura pedida."""
     return falta(objetivo, m) is None
 
 
@@ -284,6 +289,7 @@ def cumple(objetivo: str, m: Medida) -> bool:
 
 @dataclass(frozen=True)
 class Paso:
+    """Un paso del guion. Un mensaje, esperar a una postura o mantenerla."""
     tipo: str  # mensaje, esperar, mantener
     texto: str
     detalle: str = ""
@@ -293,6 +299,7 @@ class Paso:
 
 
 def guion_sesion(segundos: float = SEGUNDOS) -> list[Paso]:
+    """Los pasos de la sesión. Cada postura, con volver al centro entre una y otra."""
     pasos = [Paso("esperar", "Siéntate recto", "Que se te vean la cabeza y los codos",
                   objetivo="cuerpo")]
     for i, (clave, texto, detalle, _) in enumerate(POSTURAS, start=1):
@@ -307,6 +314,7 @@ def guion_sesion(segundos: float = SEGUNDOS) -> list[Paso]:
 
 
 def guion_tutorial() -> list[Paso]:
+    """Los pasos del tutorial. Las mismas posturas, solo hasta que te pones bien."""
     pasos = [
         Paso("mensaje", "Estiramientos", "Cuello, hombros y brazos, sin levantarte", duracion=5),
         Paso("esperar", "Siéntate recto", "Que se te vean la cabeza y los codos",
@@ -348,6 +356,7 @@ class Estado:
 
 @dataclass
 class Practica:
+    """Lleva los estiramientos paso a paso. La cuenta solo avanza mientras estás en la postura."""
     pasos: list[Paso]
     sostener_s: float = SOSTENER_S
     _indice: int = 0
@@ -364,6 +373,7 @@ class Practica:
 
     @property
     def precision(self) -> float:
+        """Parte del tiempo que estuviste en la postura, de 0 a 1."""
         return self.bien_s / self.contado_s if self.contado_s else 0.0
 
     @property
@@ -383,6 +393,7 @@ class Practica:
         self._llevas = 0.0
 
     def actualizar(self, t: float, cuerpo: Cuerpo | None) -> Estado:
+        """Avanza un fotograma. Mira la postura, suma el tiempo y pasa de paso si toca."""
         if self._inicio is None:
             self._inicio = t
         dt = 0.0 if self._t is None else max(t - self._t, 0.0)
@@ -397,6 +408,7 @@ class Practica:
         transcurrido = t - self._inicio
 
         def estado(hecho, **extra):
+            """El estado de ahora con lo que lleva hecho el paso."""
             return Estado(paso, indice, len(self.pasos), hecho, m, nuevo_paso=nuevo, **extra)
 
         if paso.tipo == "mensaje":
@@ -479,12 +491,14 @@ class Registro:
             self._archivo = None  # sin registro, el juego sigue
 
     def apuntar(self, t: float, e: Estado) -> None:
+        """Apunta una fila en el CSV, como mucho unas veces por segundo."""
         if self._archivo is None or t - self._ultimo < REGISTRO_CADA_S:
             return
         self._ultimo = t
         m = e.medida
 
         def r(v):
+            """Un número con tres decimales, o vacío si no hay."""
             return "" if v is None else f"{v:.3f}"
 
         self._csv.writerow([f"{t:.2f}", e.paso.tipo, e.paso.objetivo or e.paso.texto,
@@ -494,6 +508,7 @@ class Registro:
                             r(m.doblado_izq), r(m.vis_der), r(m.vis_izq), int(e.bien)])
 
     def cerrar(self) -> None:
+        """Cierra el CSV."""
         if self._archivo is not None:
             self._archivo.close()
             self._archivo = None

@@ -29,6 +29,7 @@ from temple.puntero import GestoPalma
 
 
 class Fase:
+    """Lo que tienen todas las fases. La app solo habla con la fase activa a través de estas funciones."""
     clave = ""  # como se guarda en el progreso
     nombre = ""  # como sale en los menus
     tecla = None  # tecla que la abre desde el menu
@@ -92,6 +93,7 @@ class Fase:
     # ---- practica (tutorial o sesion) ----
 
     def empezar(self, modo: str) -> None:
+        """Prepara el guion del tutorial o de la sesión."""
         raise NotImplementedError
 
     def actualizar(self, dt: float, lectura) -> None:
@@ -102,9 +104,11 @@ class Fase:
         """Lo que se dibuja encima de la camara mientras se practica."""
 
     def panel(self, lectura) -> None:
+        """Dibuja el panel de la derecha durante la práctica."""
         raise NotImplementedError
 
     def tecla_practica(self, k) -> bool:
+        """Una tecla propia de la fase. True si la ha usado."""
         return False
 
     def lineas_datos(self) -> list[str]:
@@ -162,6 +166,7 @@ class Fase:
         raise NotImplementedError
 
     def panel_resultado(self) -> None:
+        """Dibuja el resultado con los lotos, la línea de abajo y los botones."""
         self.dibujar_resultado()
         texto, color = self.resultado["linea"]
         Z.linea(self.app.pantalla, texto, "negrita", 16, color, E.PANEL.top + 384)

@@ -20,6 +20,7 @@ MENSAJE_RAPIDO_S = 1.5  # con --rapido, los textos de paso duran como mucho esto
 
 @dataclass(frozen=True)
 class Opciones:
+    """Las opciones de la terminal, para probar el juego sin tocar el progreso."""
     vueltas: int | None = None  # vueltas de respiracion, no se guardan
     tiempo_s: float = TIEMPO_S  # segundos por tiempo de la cuenta
     avanzada: bool = False  # respiracion avanzada sin desbloquearla

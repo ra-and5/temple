@@ -28,6 +28,7 @@ SIN_PERMISO = ("La cámara no da imagen\n"
 
 
 class CamaraHilo(threading.Thread):
+    """Lee la cámara y pasa los modelos en un hilo aparte, para que la ventana no se trabe."""
     def __init__(self, indice: int = 0):
         super().__init__(daemon=True)
         self._indice = indice
@@ -40,6 +41,7 @@ class CamaraHilo(threading.Thread):
         self.cara = False  # la interfaz lo enciende al meditar
 
     def run(self) -> None:
+        """Bucle del hilo. Coge un fotograma, lo pasa por los modelos y guarda la última lectura."""
         if not (MODELO_POSE.exists() and MODELO_MANOS.exists()):
             self.error = SIN_MODELOS
             self.listo.set()
@@ -83,4 +85,5 @@ class CamaraHilo(threading.Thread):
             return self._frame_rgb, self._lectura
 
     def parar(self) -> None:
+        """Pide al hilo que termine."""
         self._parar.set()

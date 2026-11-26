@@ -27,6 +27,7 @@ CONSEJOS = {  # dicho como lo que hay que hacer, no como el fallo
 
 
 class Meditacion(Fase):
+    """La fase de meditación. Quieto, recto y con los ojos cerrados."""
     clave = "meditacion"
     nombre = "Meditación"
     verbo = "Meditar"
@@ -48,6 +49,7 @@ class Meditacion(Fase):
 
     @property
     def minutos(self) -> float:
+        """Los minutos que dura, según el nivel o la opción --minutos."""
         if self.minutos_fijos is not None:
             return self.minutos_fijos
         return NIVELES[self.clave][self.nivel]
@@ -58,16 +60,19 @@ class Meditacion(Fase):
                 and self.estado is not None and self.estado.paso.tipo == "meditar")
 
     def terminar_libre(self) -> None:
+        """Acaba la meditación sin límite y la guarda."""
         self.app.pausa_manual = False
         self.practica.terminar(self.reloj)
 
     def nombre_nivel(self, n: int) -> str:
+        """Cómo se llama ese nivel en el menú."""
         m = NIVELES[self.clave][n]
         return "Sin límite" if m == 0 else texto_minutos(m)
 
     # ================= practica =================
 
     def empezar(self, modo: str) -> None:
+        """Prepara el guion y el registro."""
         pasos = M.guion_tutorial() if modo == "tutorial" else M.guion_sesion(self.minutos)
         self.practica = M.Practica(pasos)
         self._cerrar_registro()
@@ -81,16 +86,19 @@ class Meditacion(Fase):
             self.registro = None
 
     def salir(self) -> None:
+        """Al dejar la fase, cierra el registro."""
         self._cerrar_registro()
         self.estado = None
 
     def tecla_practica(self, k) -> bool:
+        """Enter en la pausa termina la meditación sin límite."""
         if k in (pygame.K_RETURN, pygame.K_KP_ENTER) and self.app.pausa_manual and self.practica.libre:
             self.terminar_libre()
             return True
         return False
 
     def actualizar(self, dt: float, lectura) -> None:
+        """Cada fotograma. Mira la pausa, avanza el guion y suena los avisos."""
         app = self.app
         if app.modo not in ("tutorial", "sesion"):
             return
@@ -155,11 +163,13 @@ class Meditacion(Fase):
         app.modo = "resultado"
 
     def lineas_datos(self) -> list[str]:
+        """Los números que se ven con la tecla D."""
         if self.estado is None:
             return []
         m = self.estado.medida
 
         def f(v):
+            """Un número con dos decimales, o un guion si no hay."""
             return "-" if v is None else f"{v:.2f}"
 
         return [f"movimiento {f(m.movimiento)}  (quieto < {M.MOVIDO})",
@@ -181,6 +191,7 @@ class Meditacion(Fase):
         capa = pygame.Surface(img.get_size(), pygame.SRCALPHA)
 
         def px(punto):
+            """Un punto de 0 a 1 en píxeles de la imagen."""
             return marco.px(img, punto)
 
         pygame.draw.line(capa, (*color, 200), px(a), px(b), 3)
@@ -205,6 +216,7 @@ class Meditacion(Fase):
     # ---- panel ----
 
     def panel(self, lectura) -> None:
+        """El panel con el reloj y cómo vas en quieto, recto y ojos."""
         app, p = self.app, self.app.pantalla
         cx = P.centerx
         e = self.estado
@@ -279,6 +291,7 @@ class Meditacion(Fase):
     # ================= resultado =================
 
     def dibujar_resultado(self) -> None:
+        """El resultado, con lo que más puntos ha quitado."""
         p, r = self.app.pantalla, self.resultado
         Z.resultado(self.app, r, "Meditación completada",
                     "del tiempo quieto, recto y con los ojos cerrados")

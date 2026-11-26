@@ -17,6 +17,7 @@ HOMBRO_A, HOMBRO_B = (0.65, 0.6), (0.35, 0.6)  # a es tu hombro derecho
 
 def cuerpo(oreja_a=(0.56, 0.35), oreja_b=(0.44, 0.35), codo_a=(0.7, 0.85), codo_b=(0.3, 0.85),
            muneca_a=(0.68, 1.05), muneca_b=(0.32, 1.05), vis=(1.0, 1.0)):
+    """Un cuerpo inventado, sentado recto y con los brazos abajo si no se dice otra cosa."""
     return S.Cuerpo((0.5, 0.38), HOMBRO_A, HOMBRO_B, oreja_a, oreja_b, codo_a, codo_b,
                     muneca_a, muneca_b, *vis)
 

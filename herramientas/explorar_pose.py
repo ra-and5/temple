@@ -1,3 +1,4 @@
+"""Primer experimento. Abre la webcam y dibuja el esqueleto que ve MediaPipe Pose."""
 import cv2   #OpenCV, para la camara y para dibujar
 import mediapipe as mp  #MediaPipe, el que reconoce el cuerpo
 import time # para saver en que milisegundo estamos

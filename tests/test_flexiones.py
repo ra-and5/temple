@@ -1,3 +1,5 @@
+"""Pruebas de las flexiones con una persona de perfil inventada, sin cámara."""
+
 import unittest
 
 from temple import flexiones as F
@@ -6,6 +8,7 @@ FPS = 10
 
 
 def cuerpo(hombro, codo, muneca, cadera=(0.55, 0.55), tobillo=(0.8, 0.6), vis=(1.0, 1.0)):
+    """Un cuerpo de perfil inventado, con los dos lados en el mismo sitio."""
     return F.Cuerpo((hombro, hombro), (codo, codo), (muneca, muneca), (cadera, cadera),
                     (tobillo, tobillo), vis)
 
@@ -19,6 +22,7 @@ TEMBLOR = cuerpo((0.3, 0.55), (0.25, 0.62), (0.3, 0.7))
 
 
 def correr(practica, lista):
+    """Pasa una lista de cuerpos por la práctica, una cada fotograma."""
     estados = []
     t = 0.0
     for c in lista:
@@ -28,10 +32,12 @@ def correr(practica, lista):
 
 
 def flexiones(veces, abajo=ABAJO):
+    """Los cuerpos de unas cuantas flexiones seguidas, bajando y subiendo."""
     return ([abajo] * 5 + [ARRIBA] * 5) * veces
 
 
 def sesion(repeticiones=3, nivel="tecnico"):
+    """Una sesión que ya ha pasado la plancha y está lista para contar."""
     p = F.Practica(F.guion_sesion(repeticiones), nivel)
     correr(p, [ARRIBA] * 120)
     return p

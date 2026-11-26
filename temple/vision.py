@@ -182,6 +182,7 @@ class Detector:
         hombros = ((p[HOMBRO_IZQ].x, p[HOMBRO_IZQ].y), (p[HOMBRO_DER].x, p[HOMBRO_DER].y))
 
         def par(i, j):
+            """Los puntos i y j de la cara como pares (x, y)."""
             return (p[i].x, p[i].y), (p[j].x, p[j].y)
 
         vis_izq = (p[HOMBRO_IZQ].visibility + p[CODO_IZQ].visibility
@@ -227,6 +228,7 @@ class Detector:
         )
 
     def cerrar(self) -> None:
+        """Libera los modelos de MediaPipe."""
         self._pose.close()
         self._manos.close()
         if self._cara is not None:
@@ -244,6 +246,7 @@ def dibujar_lectura(frame, lectura: Lectura) -> None:
     h, w = frame.shape[:2]
 
     def px(punto):
+        """Pasa un punto de 0 a 1 a píxeles de la imagen."""
         return int(punto[0] * w), int(punto[1] * h)
 
     if lectura.nariz:

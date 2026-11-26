@@ -36,6 +36,7 @@ DIAS_FLEXIONES = 9  # 5 dias suben al nivel 2 y 4 mas dejan a 1 dia del nivel 3
 
 
 def crear(hoy: date | None = None, carpeta: Path = CARPETA) -> Progreso:
+    """Inventa unas semanas de progreso para enseñar el juego, con hoy todavía sin hacer."""
     hoy = hoy or date.today()
     azar = random.Random(7)
     ruta = carpeta / RUTA.name

@@ -42,6 +42,7 @@ def tarjeta(destino: pygame.Surface, rect: pygame.Rect, alpha: int = 215) -> Non
 
 
 def mascara_redondeada(tam: tuple[int, int], radio: int) -> pygame.Surface:
+    """Una máscara con las esquinas redondeadas, para recortar la imagen de la cámara."""
     mascara = pygame.Surface(tam, pygame.SRCALPHA)
     pygame.draw.rect(mascara, (255, 255, 255, 255), mascara.get_rect(), border_radius=radio)
     return mascara
@@ -50,6 +51,7 @@ def mascara_redondeada(tam: tuple[int, int], radio: int) -> pygame.Surface:
 # ---------- texto ----------
 
 def partir(fuente: pygame.font.Font, texto: str, ancho: int) -> list[str]:
+    """Parte un texto en líneas que quepan en ese ancho."""
     lineas, actual = [], ""
     for palabra in texto.split():
         prueba = f"{actual} {palabra}".strip()
@@ -197,6 +199,7 @@ class Brasas:
                 random.uniform(0, math.tau)]  # fase del parpadeo
 
     def dibujar(self, destino, dt, t):
+        """Dibuja las motas de incienso y las sube un poco."""
         capa = pygame.Surface((E.ANCHO, E.ALTO), pygame.SRCALPHA)
         for m in self.motas:
             m[1] -= m[2] * dt
@@ -216,6 +219,7 @@ class Aire:
         self._acumulado = 0.0
 
     def actualizar(self, dt, activo):
+        """Mueve el hilo de aire y suelta motas nuevas mientras se respira."""
         if activo:
             self._acumulado += dt
             while self._acumulado > 0.06:
@@ -226,6 +230,7 @@ class Aire:
         self.motas = [m for m in self.motas if m[0] < 1]
 
     def dibujar(self, destino, origen, entrando: bool, largo=80):
+        """Dibuja el hilo de aire, subiendo hacia la nariz al inhalar y bajando al exhalar."""
         ox, oy = origen
         for t, dx in self.motas:
             # Entrando suben hacia la nariz, saliendo bajan desde ella

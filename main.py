@@ -23,6 +23,7 @@ from temple.respiracion import TIEMPO_S
 
 
 def main():
+    """Lee las opciones de la terminal y arranca la aplicación."""
     parser = argparse.ArgumentParser(description="Temple, juego serio con la webcam")
     parser.add_argument("--vueltas", type=int, default=None,
                         help="vueltas de respiracion solo para probar (no se guardan)")

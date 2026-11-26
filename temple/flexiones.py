@@ -1,3 +1,4 @@
+"""Las flexiones. Cuenta las repeticiones con el ángulo del codo y mira la técnica."""
 import csv
 import math
 from statistics import median
@@ -19,6 +20,7 @@ REGISTRO = Path(__file__).resolve().parent.parent / "datos" / "ultimas_flexiones
 
 @dataclass
 class Cuerpo:
+    """Los puntos de MediaPipe que hacen falta, de los dos lados del cuerpo."""
     hombros: tuple
     codos: tuple
     munecas: tuple
@@ -29,6 +31,7 @@ class Cuerpo:
 
 @dataclass
 class Medida:
+    """Lo que se mide en un fotograma. El ángulo del codo, lo que bajas y la cadera."""
     cuerpo: bool
     codo: float = 0.0
     profundidad: float = 0.0
@@ -36,6 +39,7 @@ class Medida:
 
 
 def angulo_codo(hombro, codo, muneca):
+    """El ángulo del codo en grados, entre el brazo y el antebrazo. 180 es el brazo estirado."""
     v1 = (hombro[0] - codo[0], hombro[1] - codo[1])
     v2 = (muneca[0] - codo[0], muneca[1] - codo[1])
     largo1 = math.hypot(v1[0], v1[1])
@@ -48,6 +52,7 @@ def angulo_codo(hombro, codo, muneca):
 
 
 def medir(c):
+    """Mide un fotograma con el brazo que mejor se ve, porque de lado uno tapa al otro."""
     if c is None:
         return Medida(cuerpo=False)
 
@@ -77,6 +82,7 @@ def medir(c):
 
 
 def falta(objetivo, m, nivel="facil"):
+    """Lo que falta para cumplir el objetivo, o None si ya está."""
     u = NIVELES[nivel]
     if not m.cuerpo:
         return "No te veo entero"
@@ -92,6 +98,7 @@ def falta(objetivo, m, nivel="facil"):
 
 @dataclass
 class Paso:
+    """Un paso del guion. Un mensaje, esperar a una postura o contar flexiones."""
     tipo: str
     texto: str
     detalle: str = ""
@@ -101,6 +108,7 @@ class Paso:
 
 
 def guion_sesion(repeticiones=REPETICIONES):
+    """Los pasos de la sesión. Colocarse, aguantar la plancha y contar."""
     return [
         Paso("mensaje", "Prepárate", "Tienes 5 segundos para ponerte en el suelo", duracion=5),
         Paso("esperar", "Ponte de perfil", "Que se te vea de la cabeza a los pies",
@@ -114,6 +122,7 @@ def guion_sesion(repeticiones=REPETICIONES):
 
 
 def guion_tutorial():
+    """Los pasos del tutorial. Igual que la sesión, pero con 2 flexiones."""
     return [
         Paso("mensaje", "Flexiones", "Portátil en el suelo, a unos 2 metros", duracion=5),
         Paso("mensaje", "Prepárate", "Tienes 5 segundos para ponerte en el suelo", duracion=5),
@@ -130,6 +139,7 @@ def guion_tutorial():
 
 @dataclass
 class Estado:
+    """Cómo va la sesión en este fotograma, para que la interfaz lo pinte."""
     paso: Paso
     indice: int
     total: int
@@ -146,6 +156,7 @@ class Estado:
 
 @dataclass
 class Practica:
+    """Lleva las flexiones paso a paso y cuenta las hechas y las buenas."""
     pasos: list
     nivel: str = "facil"
     sostener_s: float = SOSTENER_S
@@ -165,16 +176,19 @@ class Practica:
     fallos: dict = field(default_factory=dict)
 
     def precision(self):
+        """Parte de las flexiones que salieron bien, de 0 a 1."""
         if self.hechas == 0:
             return 0.0
         return self.buenas / self.hechas
 
     def peor(self):
+        """El fallo que más se repitió."""
         if not self.fallos:
             return ""
         return max(self.fallos, key=self.fallos.get)
 
     def siguiente_paso(self, t):
+        """Pasa al paso siguiente y deja la cuenta a cero."""
         self.indice += 1
         self.inicio = t
         self.desde = -1.0
@@ -194,6 +208,7 @@ class Practica:
                       cadera=median(h.cadera for h in self.historia))
 
     def contar(self, m, t):
+        """Mira si se ha completado una flexión. Bajar del ángulo de abajo y volver a subir del de arriba."""
         u = NIVELES[self.nivel]
         if not m.cuerpo:
             return False, ""
@@ -232,6 +247,7 @@ class Practica:
         return True, fallo
 
     def actualizar(self, t, cuerpo):
+        """Avanza un fotograma. Mide, cuenta y pasa de paso si toca."""
         if self.inicio < 0:
             self.inicio = t
         m = self.suavizar(medir(cuerpo))
@@ -280,6 +296,7 @@ class Practica:
 
 
 def lotos(precision):
+    """De 0 a 3 lotos según la precisión, con los mismos cortes que las otras fases."""
     if precision >= 0.85:
         return 3
     if precision >= 0.65:
@@ -290,6 +307,7 @@ def lotos(precision):
 
 
 class Registro:
+    """Guarda en un CSV lo que mide la cámara, para ajustar los límites con datos."""
     CAMPOS = ("t", "paso", "cuerpo", "codo", "profundidad", "cadera", "abajo", "hechas",
               "buenas", "fallo")
 
@@ -304,6 +322,7 @@ class Registro:
             self.archivo = None
 
     def apuntar(self, t, e):
+        """Apunta una fila en el CSV, como mucho 10 veces por segundo."""
         if self.archivo is None or t - self.ultimo < 0.1:
             return
         self.ultimo = t
@@ -313,6 +332,7 @@ class Registro:
                            e.buenas, e.fallo])
 
     def cerrar(self):
+        """Cierra el CSV."""
         if self.archivo is not None:
             self.archivo.close()
             self.archivo = None

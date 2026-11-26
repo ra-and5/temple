@@ -66,12 +66,14 @@ class Cuerpo:
 
     @property
     def escala(self) -> float:
+        """El ancho de hombros. Es la regla con la que se mide todo lo demás."""
         dx = self.hombro_a[0] - self.hombro_b[0]
         dy = self.hombro_a[1] - self.hombro_b[1]
         return (dx * dx + dy * dy) ** 0.5
 
     @property
     def centro_hombros(self) -> tuple[float, float]:
+        """El punto medio entre los dos hombros."""
         return ((self.hombro_a[0] + self.hombro_b[0]) / 2,
                 (self.hombro_a[1] + self.hombro_b[1]) / 2)
 
@@ -90,6 +92,7 @@ class Medida:
     parpadeo: float | None = None
 
     def bien(self, criterio: str) -> bool | None:
+        """Cómo va un criterio (quieto, recto u ojos). None si no se puede saber."""
         return getattr(self, criterio)
 
 
@@ -107,19 +110,23 @@ class Evaluador:
 
     @property
     def calibrado(self) -> bool:
+        """Si ya se sabe cómo es tu postura recta."""
         return self.base_altura is not None
 
     # ---- calibracion ----
 
     def muestra_calibracion(self, c: Cuerpo) -> None:
+        """Apunta un fotograma de la postura recta mientras se calibra."""
         if c.escala > 1e-3:
             self._muestras.append((c.centro_hombros[1] - c.nariz[1], c.escala,
                                    (c.hombro_a[1] - c.hombro_b[1]) / c.escala))
 
     def cancelar_calibracion(self) -> None:
+        """Tira lo apuntado para calibrar, por ejemplo si te sales de la cámara."""
         self._muestras.clear()
 
     def fijar_calibracion(self) -> bool:
+        """Fija tu postura recta con la mediana de lo apuntado. False si no hay nada."""
         if not self._muestras:
             return False
         alturas = sorted(m[0] for m in self._muestras)
@@ -135,6 +142,7 @@ class Evaluador:
     # ---- medida ----
 
     def medir(self, t: float, c: Cuerpo | None) -> Medida:
+        """Mide un fotograma. Si estás quieto, si estás recto y si tienes los ojos cerrados."""
         if c is None or c.escala < 1e-3:
             self._suave, self._t = None, None
             self._ventana.clear()
@@ -177,6 +185,7 @@ class Evaluador:
 
 @dataclass(frozen=True)
 class Paso:
+    """Un paso del guion. Un mensaje, esperar a algo, calibrar la postura o meditar."""
     tipo: str  # mensaje, esperar, calibrar, meditar
     texto: str
     detalle: str = ""
@@ -203,6 +212,7 @@ def guion_sesion(minutos: float) -> list[Paso]:
 
 
 def guion_tutorial() -> list[Paso]:
+    """Los pasos del tutorial. Enseña cada aviso haciéndolo mal a propósito."""
     return [
         Paso("mensaje", "Meditación", "Quieto, recto y con los ojos cerrados", duracion=5),
         Paso("esperar", "Siéntate recto", "Que se te vean la cabeza y los hombros",
@@ -258,6 +268,7 @@ class Estado:
 
 @dataclass
 class Practica:
+    """Lleva la meditación paso a paso, cuenta el tiempo bien y decide cuándo avisar."""
     pasos: list[Paso]
     evaluador: Evaluador = field(default_factory=Evaluador)
     sostener_s: float = SOSTENER_S
@@ -275,6 +286,7 @@ class Practica:
 
     @property
     def libre(self) -> bool:
+        """Si la meditación es sin límite, sin cuenta atrás."""
         return any(p.tipo == "meditar" and p.duracion == 0 for p in self.pasos)
 
     @property
@@ -291,6 +303,7 @@ class Practica:
 
     @property
     def precision(self) -> float:
+        """Parte del tiempo que lo hiciste bien, de 0 a 1."""
         return self.bien_s / self.contado_s if self.contado_s else 0.0
 
     def _avanzar(self, t: float) -> None:
@@ -313,6 +326,7 @@ class Practica:
         return frozenset(faltas)
 
     def actualizar(self, t: float, cuerpo: Cuerpo | None) -> Estado:
+        """Avanza un fotograma. Mira la medida, suma el tiempo y pasa de paso si toca."""
         if self._inicio is None:
             self._inicio = t
         dt = 0.0 if self._t is None else max(t - self._t, 0.0)
@@ -328,6 +342,7 @@ class Practica:
         faltas = self._faltas(t, m) if self.evaluador.calibrado else frozenset()
 
         def estado(hecho, **extra):
+            """El estado de ahora con lo que lleva hecho el paso."""
             return Estado(paso, indice, len(self.pasos), hecho, m, faltas,
                           nuevo_paso=nuevo, **extra)
 
@@ -430,12 +445,14 @@ class Registro:
             self._archivo = None  # sin registro, el juego sigue
 
     def apuntar(self, t: float, e: Estado) -> None:
+        """Apunta una fila en el CSV, como mucho unas veces por segundo."""
         if self._archivo is None or t - self._ultimo < REGISTRO_CADA_S:
             return
         self._ultimo = t
         m = e.medida
 
         def r(v):
+            """Un número con tres decimales, o vacío si no hay."""
             return "" if v is None else f"{v:.3f}"
 
         self._csv.writerow([f"{t:.2f}", e.paso.tipo, e.paso.objetivo or e.paso.texto,
@@ -443,6 +460,7 @@ class Registro:
                             r(m.parpadeo), " ".join(sorted(e.faltas))])
 
     def cerrar(self) -> None:
+        """Cierra el CSV."""
         if self._archivo is not None:
             self._archivo.close()
             self._archivo = None

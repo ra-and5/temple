@@ -112,6 +112,7 @@ def veredicto(d_pulgar, d_otro):
 
 
 def main():
+    """Abre la cámara y enseña en directo qué lado de la nariz tapa la mano."""
     pose, manos = crear_modelos()
     print("Modelos preparados")
 

@@ -16,6 +16,7 @@ def recto(ojos=0.9, dx=0.0):
 
 
 def encorvado(ojos=0.9):
+    """Un cuerpo inventado con la cabeza caída, más baja que la recta."""
     return M.Cuerpo((0.5, 0.5), (0.375, 0.6), (0.625, 0.6), ojos)
 
 
@@ -31,6 +32,7 @@ def correr(practica, desde, segundos, cuerpo):
 
 class TestEvaluador(unittest.TestCase):
     def calibrado(self):
+        """Un evaluador ya calibrado con la postura recta."""
         ev = M.Evaluador()
         for _ in range(10):
             ev.muestra_calibracion(recto())
@@ -75,6 +77,7 @@ class TestEvaluador(unittest.TestCase):
 
 class TestPractica(unittest.TestCase):
     def sesion_hasta_meditar(self, minutos=1.0):
+        """Una sesión que ya se ha sentado y calibrado, justo al empezar a meditar."""
         pr = M.Practica(M.guion_sesion(minutos))
         _, t = correr(pr, 0, 1.0, recto())  # sentarse
         _, t = correr(pr, t, M.CALIBRAR_S + 0.2, recto())  # calibrar

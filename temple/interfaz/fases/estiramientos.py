@@ -23,6 +23,7 @@ GRACIA_S = 2.0  # sin pausa con la palma justo despues de una postura bien hecha
 
 
 class Estiramientos(Fase):
+    """La fase de estiramientos. Siete posturas sentado que se mantienen unos segundos."""
     clave = "estiramientos"
     nombre = "Estiramientos"
     verbo = "Estirar"
@@ -51,14 +52,17 @@ class Estiramientos(Fase):
 
     @property
     def segundos(self) -> float:
+        """Los segundos de cada postura."""
         return self.segundos_fijos or NIVELES[self.clave][self.nivel]
 
     def nombre_nivel(self, n: int) -> str:
+        """Cómo se llama ese nivel en el menú."""
         return f"{len(S.POSTURAS)} posturas de {NIVELES[self.clave][n]} s"
 
     # ================= practica =================
 
     def empezar(self, modo: str) -> None:
+        """Prepara el guion, el registro y el suavizado de los puntos."""
         pasos = S.guion_tutorial() if modo == "tutorial" else S.guion_sesion(self.segundos)
         self.practica = S.Practica(pasos)
         self._cerrar_registro()
@@ -89,10 +93,12 @@ class Estiramientos(Fase):
         return e is not None and e.paso.objetivo in S.NOMBRES
 
     def salir(self) -> None:
+        """Al dejar la fase, cierra el registro."""
         self._cerrar_registro()
         self.estado = None
 
     def actualizar(self, dt: float, lectura) -> None:
+        """Cada fotograma. Suaviza el cuerpo, mira la pausa y avanza el guion."""
         app = self.app
         if app.modo not in ("tutorial", "sesion"):
             return
@@ -141,11 +147,13 @@ class Estiramientos(Fase):
         app.modo = "resultado"
 
     def lineas_datos(self) -> list[str]:
+        """Los números que se ven con la tecla D."""
         if self.estado is None:
             return []
         m = self.estado.medida
 
         def f(v):
+            """Un número con dos decimales, o un guion si no hay."""
             return "-" if v is None else f"{v:.2f}"
 
         return [f"inclinacion {f(m.inclinacion)}  (a un lado >= {S.INCLINAR_GRADOS:g})",
@@ -170,9 +178,11 @@ class Estiramientos(Fase):
         capa = pygame.Surface(img.get_size(), pygame.SRCALPHA)
 
         def px(punto):
+            """Un punto de 0 a 1 en píxeles de la imagen."""
             return marco.px(img, punto)
 
         def linea(a, b, col=color):
+            """Una línea entre dos puntos del cuerpo."""
             pygame.draw.line(capa, (*col, 200), px(a), px(b), 3)
 
         def raya(a, b):
@@ -252,6 +262,7 @@ class Estiramientos(Fase):
     # ---- panel ----
 
     def panel(self, lectura) -> None:
+        """El panel con la postura, la cuenta y lo que falta."""
         app, p = self.app, self.app.pantalla
         cx = P.centerx
         e = self.estado
@@ -309,6 +320,7 @@ class Estiramientos(Fase):
     # ================= resultado =================
 
     def dibujar_resultado(self) -> None:
+        """El resultado, con la postura que más ha costado."""
         p, r = self.app.pantalla, self.resultado
         Z.resultado(self.app, r, "Estiramientos completados",
                     "del tiempo aguantaste en la postura")

@@ -38,6 +38,7 @@ COMO_TAPAR = {
 
 @dataclass(frozen=True)
 class Paso:
+    """Un paso del guion. Esperar a que hagas algo, contar tiempos o enseñar un mensaje."""
     tipo: str  # esperar, contar, mensaje
     texto: str  # instruccion principal
     detalle: str = ""  # explicacion corta debajo
@@ -82,6 +83,7 @@ def _con_cambios(pasos: list[Paso]) -> list[Paso]:
 
 
 def guion_sesion(vueltas: int = VUELTAS, avanzado: bool = False) -> list[Paso]:
+    """Los pasos de una sesión. Cada vuelta, los dos lados, con retención si es la avanzada."""
     pasos = [_contar("exhala", "izquierdo", 4, 0)]  # vaciar antes de empezar
     for v in range(1, vueltas + 1):
         for lado, otro in (("izquierdo", "derecho"), ("derecho", "izquierdo")):
@@ -96,6 +98,7 @@ def guion_sesion(vueltas: int = VUELTAS, avanzado: bool = False) -> list[Paso]:
 
 
 def guion_tutorial() -> list[Paso]:
+    """Los pasos del tutorial, que enseña a tapar cada lado antes de contar."""
     return [
         Paso("mensaje", "Respiración alterna",
              "Coges aire por un lado y lo sueltas por el otro", duracion=5),
@@ -130,6 +133,7 @@ class Estado:
 
 @dataclass
 class Guion:
+    """Lleva la sesión paso a paso y apunta cuántas veces tapas el lado correcto."""
     pasos: list[Paso]
     tiempo_s: float = TIEMPO_S
     sostener_s: float = SOSTENER_S
@@ -142,6 +146,7 @@ class Guion:
 
     @property
     def vueltas(self) -> int:
+        """Cuántas vueltas tiene el guion."""
         return max((p.vuelta for p in self.pasos if p.tipo == "contar"), default=0)
 
     def _avanzar(self, t: float, llenado: float) -> None:
@@ -208,6 +213,7 @@ class Guion:
 
     @property
     def precision(self) -> float:
+        """Parte del tiempo de contar en que tapabas el lado correcto, de 0 a 1."""
         total = sum(self._muestras.values())
         return sum(self._aciertos.values()) / total if total else 0.0
 

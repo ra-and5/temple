@@ -19,6 +19,7 @@ from temple.interfaz.textos import AYUDA_PAUSA, AYUDAS
 
 
 def barra_superior(app) -> None:
+    """La barra de arriba con el nombre, el lema, la racha y el sonido."""
     p = app.pantalla
     D.loto(p, (62, 62), 30)
     ancho = D.texto_espaciado(p, E.fuente("titulo", 34), "TEMPLE", E.CREMA, (92, 26), espacio=6)

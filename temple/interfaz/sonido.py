@@ -38,6 +38,7 @@ def _dos_golpes():
 
 
 class Sonidos:
+    """Los sonidos del juego, generados con numpy al arrancar. Si no hay audio, el juego sigue mudo."""
     def __init__(self):
         self.activo = True
         self._sonidos = {}
@@ -63,6 +64,7 @@ class Sonidos:
             self._sonidos[nombre].play()
 
     def alternar(self) -> bool:
+        """Pone o quita el sonido. Devuelve cómo queda."""
         self.activo = not self.activo
         if not self.activo:
             pygame.mixer.stop() if pygame.mixer.get_init() else None

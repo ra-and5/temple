@@ -1,3 +1,5 @@
+"""Pruebas de moverse entre los botones con las flechas y el tabulador."""
+
 import unittest
 
 from temple.navegacion import fila_de, lateral, mover, paradas

@@ -24,6 +24,7 @@ LETRA, LETRA_MIN = 19, 15  # tamano del texto, y lo mas que se reduce si no cabe
 
 @dataclass
 class Boton:
+    """Un botón de la pantalla, con lo que hace al pulsarlo y dónde cuenta el dedo."""
     rect: pygame.Rect
     accion: Callable[[], None]
     zona: pygame.Rect | None = None  # donde cuenta el dedo, si es distinta del dibujo
@@ -34,6 +35,7 @@ class Boton:
 
 
 class Botonera:
+    """Los botones de la pantalla y las tres formas de pulsarlos, con el dedo, el ratón y el teclado."""
     def __init__(self, area: pygame.Rect, sonido: Callable[[str], None],
                  raton: Callable[[], tuple[int, int]] = pygame.mouse.get_pos):
         self.lista: list[Boton] = []
@@ -48,6 +50,7 @@ class Botonera:
     # ---- fotograma ----
 
     def empezar_fotograma(self, pantalla, dedo: bool) -> None:
+        """Vacía la lista al empezar a dibujar. Cada pantalla vuelve a añadir sus botones."""
         if pantalla != self._pantalla:
             self._pantalla = pantalla
             self.foco = None  # al entrar en una pantalla no hay nada marcado
@@ -55,6 +58,7 @@ class Botonera:
         self.dedo = dedo
 
     def terminar_fotograma(self) -> None:
+        """Al acabar de dibujar, ajusta el foco y pone la mano del ratón si está encima de un botón."""
         if self.foco is not None and self.foco >= len(self.lista):
             self.foco = None
         # Mano al pasar el raton por un boton, como en una web
@@ -69,15 +73,18 @@ class Botonera:
                 pass  # hay escritorios sin cursores del sistema, se queda la flecha
 
     def anadir(self, boton: Boton) -> None:
+        """Añade un botón a la pantalla de ahora."""
         self.lista.append(boton)
 
     # ---- como se ve cada boton ----
 
     def por_dedo(self, indice: int) -> bool:
+        """Si el dedo está resaltando ese botón."""
         p = self.puntero
         return self.dedo and p.pos is not None and p.objetivo == indice
 
     def marcado(self, indice: int) -> bool:
+        """Si ese botón está marcado, con el teclado o con el dedo."""
         return self.foco == indice or self.por_dedo(indice)
 
     def dibujar(self, destino, rect, texto, tecla, accion, principal=False, etiqueta=None,
@@ -122,6 +129,7 @@ class Botonera:
         ancho = E.fuente("negrita", LETRA).size(texto)[0]
 
         def sitio(con_tecla: bool) -> int:
+            """El ancho que queda para el texto, con o sin la tecla al lado."""
             fin = derecha
             if con_tecla and k:
                 fin -= k.get_width() + HUECO
@@ -198,12 +206,15 @@ class Botonera:
         return None if i is None else self.lista[i]
 
     def ocultar_dedo(self) -> None:
+        """Quita el cursor del dedo."""
         self.puntero.ocultar()
 
     def mover_raton(self) -> None:
+        """Al mover el ratón, el teclado deja de marcar."""
         self.foco = None  # con el raton manda el raton
 
     def clic(self, pos) -> bool:
+        """Pulsa el botón que está debajo del clic. True si había alguno."""
         for b in self.lista:
             if b.rect.collidepoint(pos):
                 self.foco = None

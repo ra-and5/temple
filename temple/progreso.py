@@ -62,6 +62,7 @@ def nivel_de_sesion(s: dict) -> int | None:
 
 @dataclass
 class Progreso:
+    """Lo que el juego recuerda entre días. Tutoriales vistos, sesiones y ajustes, en un JSON."""
     ruta: Path = RUTA
     tutoriales: set[str] = field(default_factory=set)
     sesiones: list[dict] = field(default_factory=list)
@@ -69,6 +70,7 @@ class Progreso:
 
     @classmethod
     def cargar(cls, ruta: Path = RUTA) -> "Progreso":
+        """Lee el progreso del disco. Si no existe o está roto, empieza de cero."""
         try:
             datos = json.loads(ruta.read_text(encoding="utf-8"))
         except (OSError, ValueError):
@@ -77,6 +79,7 @@ class Progreso:
                    dict(datos.get("ajustes", {})))
 
     def guardar(self) -> None:
+        """Escribe el progreso en el JSON."""
         self.ruta.parent.mkdir(parents=True, exist_ok=True)
         datos = {"tutoriales": sorted(self.tutoriales), "sesiones": self.sesiones,
                  "ajustes": self.ajustes}
@@ -85,6 +88,7 @@ class Progreso:
     # ---- registrar ----
 
     def marcar_tutorial(self, fase: str) -> None:
+        """Apunta que esa fase ya tiene el tutorial visto."""
         self.tutoriales.add(fase)
         self.guardar()
 
@@ -110,6 +114,7 @@ class Progreso:
         self.guardar()
 
     def elegir_vueltas(self, n: int) -> int:
+        """Guarda las vueltas de respiración, siempre entre el mínimo y el máximo."""
         n = min(max(n, VUELTAS_MIN), VUELTAS_MAX)
         self.ajustes["vueltas"] = n
         self.guardar()
@@ -118,9 +123,11 @@ class Progreso:
     # ---- consultar ----
 
     def tutorial_hecho(self, fase: str) -> bool:
+        """Si ya se vio el tutorial de esa fase."""
         return fase in self.tutoriales
 
     def dias_practicados(self) -> set[date]:
+        """Los días en los que se hizo alguna sesión."""
         return {date.fromisoformat(s["fecha"]) for s in self.sesiones}
 
     def racha(self, hoy: date | None = None) -> int:
@@ -142,14 +149,17 @@ class Progreso:
         return [lunes + timedelta(days=i) in dias for i in range(7)]
 
     def vueltas(self, por_defecto: int) -> int:
+        """Las vueltas de respiración guardadas en Ajustes."""
         return self.ajustes.get("vueltas", por_defecto)
 
     def mejor(self, fase: str, variante: str) -> float | None:
+        """La mejor precisión en esa fase y variante, o None si no hay ninguna."""
         precisiones = [s["precision"] for s in self.sesiones
                        if s["fase"] == fase and s["variante"] == variante]
         return max(precisiones) if precisiones else None
 
     def hecha_hoy(self, fase: str, hoy: date | None = None) -> bool:
+        """Si esa fase ya se hizo hoy."""
         hoy = (hoy or date.today()).isoformat()
         return any(s["fecha"] == hoy and s["fase"] == fase for s in self.sesiones)
 
@@ -183,6 +193,7 @@ class Progreso:
         return self._subida(fase)[1]
 
     def nivel_maximo(self, fase: str) -> bool:
+        """Si la fase ya está en su último nivel."""
         return self.nivel(fase) >= len(NIVELES[fase]) - 1
 
     def nivel_elegido(self, fase: str) -> int:
@@ -192,6 +203,7 @@ class Progreso:
         return alto if elegido is None else min(elegido, alto)
 
     def elegir_nivel(self, fase: str, paso: int) -> int:
+        """Sube o baja el nivel que se juega, sin pasar del más alto desbloqueado."""
         alto = self.nivel(fase)
         n = min(max(self.nivel_elegido(fase) + paso, 0), alto)
         niveles = self.ajustes.setdefault("niveles", {})

@@ -1,3 +1,4 @@
+"""La fase de flexiones en la interfaz. Panel, silueta de perfil y resultado."""
 
 import pygame
 
@@ -21,6 +22,7 @@ CONSEJOS = {
 
 
 class Flexiones(Fase):
+    """La fase de flexiones. En el suelo, de lado a la cámara."""
     clave = "flexiones"
     nombre = "Flexiones"
     verbo = "Empezar"
@@ -40,9 +42,11 @@ class Flexiones(Fase):
 
     @property
     def variante(self):
+        """Fácil o técnico, según el nivel."""
         return NIVELES[self.clave][self.nivel][0]
 
     def nombre_nivel(self, n):
+        """Cómo se llama ese nivel en el menú."""
         tipo, repeticiones = NIVELES[self.clave][n]
         return f"{NOMBRES[tipo]}, {repeticiones} flexiones"
 
@@ -70,6 +74,7 @@ class Flexiones(Fase):
         img.blit(capa, (0, 0))
 
     def empezar(self, modo):
+        """Prepara el guion y el registro con las flexiones del nivel."""
         tipo, repeticiones = NIVELES[self.clave][self.nivel]
         if modo == "tutorial":
             pasos = F.guion_tutorial()
@@ -83,15 +88,18 @@ class Flexiones(Fase):
         self.ultimo = ""
 
     def cerrar_registro(self):
+        """Cierra el CSV si estaba abierto."""
         if self.registro is not None:
             self.registro.cerrar()
             self.registro = None
 
     def salir(self):
+        """Al dejar la fase, cierra el registro."""
         self.cerrar_registro()
         self.estado = None
 
     def actualizar(self, dt, lectura):
+        """Cada fotograma. Mira la pausa, avanza el guion y suena al contar."""
         app = self.app
         if app.modo not in ("tutorial", "sesion"):
             return
@@ -123,6 +131,7 @@ class Flexiones(Fase):
                 app.sonido("tic")
 
     def terminar(self):
+        """Al acabar, guarda la sesión o marca el tutorial como visto."""
         app = self.app
         app.sonido("cuenco")
         self.cerrar_registro()
@@ -137,6 +146,7 @@ class Flexiones(Fase):
         app.modo = "resultado"
 
     def lineas_datos(self):
+        """Los números que se ven con la tecla D."""
         if self.estado is None:
             return []
         m = self.estado.medida
@@ -147,6 +157,7 @@ class Flexiones(Fase):
                 f"cadera {m.cadera:.2f}  (recta entre -{u['cadera']} y {u['cadera']})"]
 
     def pistas(self, img, lectura):
+        """Las líneas del brazo y del cuerpo sobre la cámara, en verde si van bien."""
         c = cuerpo_de(lectura)
         if c is None or self.estado is None:
             return
@@ -175,6 +186,7 @@ class Flexiones(Fase):
         img.blit(capa, (0, 0))
 
     def panel(self, lectura):
+        """El panel con la cuenta de flexiones y lo que falta."""
         app = self.app
         p = app.pantalla
         e = self.estado
@@ -221,6 +233,7 @@ class Flexiones(Fase):
             Z.barra_mensaje(p, e.hecho)
 
     def dibujar_resultado(self):
+        """El resultado, con un consejo para el fallo que más se repitió."""
         app = self.app
         r = self.resultado
         Z.resultado(app, r, "Flexiones completadas", "de las flexiones fueron buenas")
@@ -229,6 +242,7 @@ class Flexiones(Fase):
 
 
 def cuerpo_de(lectura):
+    """Saca de la lectura de la cámara los puntos que hacen falta, o None si falta alguno."""
     if (not lectura.cuerpo or not lectura.hombros or not lectura.codos or not lectura.munecas
             or not lectura.caderas or not lectura.tobillos):
         return None

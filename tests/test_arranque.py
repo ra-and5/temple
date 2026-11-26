@@ -22,6 +22,7 @@ HOY = date(2026, 11, 26)  # un jueves, el dia del video
 
 
 def cargar_demo():
+    """Carga herramientas/crear_demo.py como un módulo, porque no está dentro del paquete."""
     spec = importlib.util.spec_from_file_location("crear_demo",
                                                   RAIZ / "herramientas" / "crear_demo.py")
     modulo = importlib.util.module_from_spec(spec)
@@ -31,6 +32,7 @@ def cargar_demo():
 
 class TestMain(unittest.TestCase):
     def arrancar(self, *argumentos):
+        """Llama a main.py con esas opciones sin abrir la ventana y devuelve las opciones que llegan."""
         with mock.patch.object(sys, "argv", ["main.py", *argumentos]), \
                 mock.patch.object(main, "App") as App:
             main.main()

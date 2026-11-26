@@ -1,3 +1,5 @@
+"""Pruebas de los gestos de la mano. Señalar, el imán de los botones, la palma que pausa y el puño que sigue."""
+
 import unittest
 
 from temple.puntero import (GestoPalma, GestoPuno, Puntero, a_area, apunta_a_pantalla, de_frente, distancia_a_rect,
@@ -32,6 +34,7 @@ def mano_hacia(px, py, **kw):
 
 
 def correr(p, segundos, mano, botones):
+    """Pasa la misma mano por el puntero durante unos segundos."""
     return [p.actualizar(DT, mano, botones) for _ in range(int(segundos / DT))]
 
 
@@ -251,6 +254,7 @@ class TestPalmaYPuno(unittest.TestCase):
     SENALA = mano_en(0.6, 0.5)
 
     def correr(self, g, segundos, mano):
+        """Pasa la misma mano por el gesto durante unos segundos."""
         return [g.actualizar(DT, mano) for _ in range(int(segundos / DT))]
 
     def test_reconoce_el_puno(self):

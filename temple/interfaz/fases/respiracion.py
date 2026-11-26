@@ -20,6 +20,7 @@ P = E.PANEL
 
 
 class Respiracion(Fase):
+    """La fase de respiración alterna (Anuloma Viloma)."""
     clave = "respiracion"
     nombre = "Respiración"
     verbo = "Respirar"
@@ -39,13 +40,16 @@ class Respiracion(Fase):
 
     @property
     def vueltas(self) -> int:
+        """Las vueltas de la sesión, de la opción --vueltas o de Ajustes."""
         return self.vueltas_fijas or self.app.progreso.vueltas(VUELTAS)
 
     @property
     def variante(self) -> str:
+        """Principiante o avanzada, según el nivel."""
         return "avanzada" if self.nivel >= 1 else "principiante"
 
     def nombre_nivel(self, n: int) -> str:
+        """Cómo se llama ese nivel en el menú."""
         return "Avanzada, retienes 16 tiempos" if n >= 1 else "Principiante"
 
     def cambiar_vueltas(self, paso: int) -> None:
@@ -56,6 +60,7 @@ class Respiracion(Fase):
     # ================= practica =================
 
     def empezar(self, modo: str) -> None:
+        """Prepara el guion del tutorial o de la sesión."""
         if self.forzar_avanzada:
             self.nivel = 1
         if modo == "tutorial":
@@ -67,12 +72,15 @@ class Respiracion(Fase):
         self.estado = self.estado_previo = None
 
     def pasos(self) -> list:
+        """Los pasos del guion de ahora."""
         return self.guion.pasos
 
     def salir(self) -> None:
+        """Al dejar la fase, se olvida del estado."""
         self.estado = self.estado_previo = None
 
     def actualizar(self, dt: float, lectura) -> None:
+        """Cada fotograma. Mueve el hilo de aire, mira la pausa y avanza la cuenta."""
         app = self.app
         en_cuenta = self.estado is not None and self.estado.paso.tipo == "contar"
         # El hilo de aire se mueve aunque estes en el inicio, para que se apague despacio
@@ -163,6 +171,7 @@ class Respiracion(Fase):
     # ---- panel ----
 
     def panel(self, lectura) -> None:
+        """El panel con la vuelta, la cuenta y qué lado tapar."""
         app, p = self.app, self.app.pantalla
         cx = P.centerx
         e = self.estado
@@ -224,5 +233,6 @@ class Respiracion(Fase):
     # ================= resultado =================
 
     def dibujar_resultado(self) -> None:
+        """El resultado de la sesión."""
         Z.resultado(self.app, self.resultado, "Sesión completada",
                     "del tiempo tapaste el lado correcto")

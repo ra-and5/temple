@@ -48,6 +48,7 @@ MENUS = ("menu", "fases", "previa", "progreso", "ajustes", "salir")
 
 
 class App:
+    """La aplicación. El bucle del juego, las teclas, la pausa, el ritual y el cambio de pantalla."""
     def __init__(self, opciones: Opciones | None = None, camara=None):
         opciones = opciones or Opciones()
         pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -86,6 +87,7 @@ class App:
     # ================= bucle =================
 
     def ejecutar(self) -> None:
+        """Bucle principal, unas 30 veces por segundo, hasta que se cierra."""
         try:
             while True:
                 dt = self.reloj.tick(E.FPS) / 1000
@@ -117,9 +119,11 @@ class App:
         return [c for c in self.fases if not self.progreso.hecha_hoy(c)]
 
     def ir(self, modo: str) -> None:
+        """Cambia de pantalla."""
         self.modo = modo
 
     def ir_menu(self) -> None:
+        """Vuelve al menú y deja la fase que estuviera a medias."""
         self._dejar_practica()
         self.ritual = False
         self.modo = "menu"
@@ -147,6 +151,7 @@ class App:
         self.modo = "previa"
 
     def cambiar_nivel(self, paso: int) -> None:
+        """Sube o baja el nivel que se juega en la fase abierta."""
         if self.fase.con_niveles:
             self.progreso.elegir_nivel(self.fase.clave, paso)
 
@@ -155,6 +160,7 @@ class App:
         self.empezar("sesion" if self.progreso.tutorial_hecho(self.fase.clave) else "tutorial")
 
     def empezar(self, modo: str) -> None:
+        """Empieza el tutorial o la sesión de la fase abierta."""
         self.modo = modo
         self.fase.nivel = self.progreso.nivel_elegido(self.fase.clave)
         self.fase.prueba = self.prueba
@@ -215,14 +221,17 @@ class App:
             self.modo = "menu"
 
     def pedir_salir(self) -> None:
+        """Abre la pregunta de si de verdad quieres salir."""
         self.modo = "salir"
 
     def salir(self) -> None:
+        """Cierra Temple al acabar el fotograma."""
         self.cerrar = True
 
     # ================= pausa y avisos =================
 
     def seguir(self) -> None:
+        """Quita la pausa."""
         self.pausa_manual = False
         self.puno.reiniciar()
 
@@ -235,6 +244,7 @@ class App:
             self.sin_cuerpo_desde = None
 
     def pausado(self) -> bool:
+        """Si está en pausa, con la palma o Espacio, o porque te has ido de la cámara."""
         return self.pausa_manual or (
             self.sin_cuerpo_desde is not None
             and self.t - self.sin_cuerpo_desde > PAUSA_SIN_CUERPO_S)
@@ -244,9 +254,11 @@ class App:
         return self.modo in MENUS or self.modo == "resultado" or self.pausa_manual
 
     def avisar(self, texto: str, segundos: float = 3.5) -> None:
+        """Enseña un aviso corto arriba durante unos segundos."""
         self.aviso = (texto, self.t + segundos)
 
     def alternar_sonido(self) -> None:
+        """Pone o quita el sonido y lo dice."""
         self.avisar("Sonido activado" if self.sonido.alternar() else "Sonido apagado")
 
     # ================= eventos =================
@@ -329,6 +341,7 @@ class App:
                     self.abrir_fase(fase.clave)
 
     def cambiar_vueltas(self, paso: int) -> None:
+        """Cambia las vueltas de respiración desde Ajustes."""
         self.fases["respiracion"].cambiar_vueltas(paso)
 
     # ================= actualizar y dibujar =================

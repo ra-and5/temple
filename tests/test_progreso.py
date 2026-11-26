@@ -76,6 +76,7 @@ class TestNiveles(unittest.TestCase):
         self.dir.cleanup()
 
     def dias(self, fase, n, desde=0, lotos=3, nivel=None):
+        """Apunta n días seguidos de esa fase con esos lotos."""
         for i in range(n):
             nivel_jugado = self.p.nivel(fase) if nivel is None else nivel
             self.p.registrar(fase, "normal", 0.9, lotos, self.lunes + timedelta(days=desde + i),

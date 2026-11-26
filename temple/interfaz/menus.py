@@ -28,6 +28,7 @@ P = E.PANEL
 
 
 def dibujar(app) -> None:
+    """Dibuja el menú que toque según la pantalla en la que estás."""
     {"menu": _menu, "fases": _fases, "previa": _previa, "progreso": _progreso,
      "ajustes": _ajustes, "salir": _salir}[app.modo](app)
 

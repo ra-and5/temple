@@ -134,6 +134,7 @@ def puno(mano) -> bool:
 
 
 def largo_palma(mano) -> float:
+    """Lo que mide la palma, de la muñeca a la base del dedo corazón."""
     return _dist(mano[MUNECA], mano[CENTRO_PALMA])
 
 
@@ -145,6 +146,7 @@ def de_frente(mano, aspecto: float = 1.0) -> bool:
     una palma de frente parecia estrecha y no pausaba (le paso a Rares el 25/11).
     """
     def real(q):
+        """El punto con el ancho corregido, para medir en la proporción real de la imagen."""
         return (q[0] * aspecto, q[1])
     largo = _dist(real(mano[MUNECA]), real(mano[CENTRO_PALMA]))
     ancho = _dist(real(mano[NUDILLO_INDICE]), real(mano[NUDILLO_MENIQUE]))
@@ -152,6 +154,7 @@ def de_frente(mano, aspecto: float = 1.0) -> bool:
 
 
 class Puntero:
+    """El cursor que mueve el índice. Resalta el botón más cercano y lo pulsa si te quedas quieto."""
     def __init__(self, area, espera_s: float = ESPERA_S):
         self.area = tuple(area)  # (x, y, ancho, alto) de la pantalla que cubre la mano
         self.espera_s = espera_s
@@ -166,6 +169,7 @@ class Puntero:
         self._sin_senalar = 0.0
 
     def ocultar(self) -> None:
+        """Quita el cursor cuando no se ve la mano."""
         self.pos = None
         self.senala = False
         self.objetivo = None
@@ -251,6 +255,7 @@ class Puntero:
 
 
 class GestoPalma:
+    """La palma abierta, de frente y quieta que pausa."""
     def __init__(self, segundos: float = PALMA_S):
         self.segundos = segundos
         self.llenado = 0.0
@@ -304,6 +309,7 @@ class GestoPuno:
         self.reiniciar()
 
     def reiniciar(self) -> None:
+        """Vuelve a empezar el gesto de seguir."""
         self.estado = "nada"
         self.llenado = 0.0
         self._queda = 0.0  # tiempo que queda para cerrar el puno

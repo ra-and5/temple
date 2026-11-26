@@ -35,6 +35,7 @@ def _fila(foco: int, filas: list[list[int]]) -> int:
 
 
 def fila_de(foco: int | None, grupos: list[str | None]) -> list[int]:
+    """Los botones que están en la misma fila que el marcado."""
     if foco is None or not 0 <= foco < len(grupos):
         return []
     filas = paradas(grupos)

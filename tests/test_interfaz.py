@@ -57,15 +57,19 @@ class CamaraFalsa:
         self.flexionando = False
 
     def start(self):
+        """La cámara falsa no tiene hilo que arrancar."""
         pass
 
     def parar(self):
+        """Ni que parar."""
         pass
 
     def join(self, timeout=None):
+        """Ni que esperar."""
         pass
 
     def ultimo(self):
+        """Una lectura inventada según lo que esté haciendo la persona falsa."""
         lado = ("derecho", "izquierdo")[int(self.t / 2) % 2]
         lectura = Lectura(tapado=lado, nariz=(0.5, 0.38), escala=0.3,
                           hombros=((0.35, 0.62), (0.65, 0.62)), ojos=0.9)
@@ -105,6 +109,7 @@ class ConApp(unittest.TestCase):
         self.dir.cleanup()
 
     def abrir(self, **opciones):
+        """Abre una aplicación nueva con la cámara falsa y una carpeta de datos temporal."""
         pygame.display.quit()  # cada app abre su ventana
         if self.app is not None:
             self.app._dejar_practica()
@@ -112,18 +117,22 @@ class ConApp(unittest.TestCase):
         return self.app
 
     def correr(self, app, segundos):
+        """Deja correr la aplicación unos segundos, fotograma a fotograma."""
         for _ in range(int(segundos / DT)):
             self.camara.t += DT
             self.assertTrue(app.paso(DT))
 
     def tecla(self, app, k):
+        """Pulsa una tecla y deja pasar un fotograma."""
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=k, mod=0))
         self.correr(app, DT)
 
     def progreso(self):
+        """El progreso guardado en la carpeta temporal."""
         return Progreso.cargar(Path(self.dir.name) / "progreso.json")
 
     def boton(self, app, accion):
+        """El botón de la pantalla que hace esa acción."""
         return next(b for b in app.botonera.lista if b.accion == accion)
 
 
@@ -576,6 +585,7 @@ class TestInterfaz(ConApp):
                          PZ.ZONA_Y[0] + fy * (PZ.ZONA_Y[1] - PZ.ZONA_Y[0]))
 
     def casilla(self, app, texto):
+        """La casilla de una fase en la fila del ritual."""
         return next(b for b in app.botonera.lista if b.grupo == "ritual" and b.texto == texto)
 
     def test_fila_del_ritual_con_las_flechas(self):
@@ -628,6 +638,7 @@ class TestInterfaz(ConApp):
         app = self.abrir()
 
         def hacia(accion):
+            """Mueve el dedo falso hacia el botón de esa acción."""
             boton = self.boton(app, accion)
             x, y, w, h = E.PANEL
             fx, fy = (boton.rect.centerx - x) / w, (boton.rect.centery - y) / h
@@ -667,6 +678,7 @@ class TestInterfaz(ConApp):
         self.fail(f"las flexiones no acaban en {segundos} s")
 
     def hasta_contar(self, app):
+        """Hace la plancha hasta que la sesión empieza a contar flexiones."""
         self.camara.flexionando = True
         self.camara.perfil = TF.ARRIBA
         for _ in range(int(20 / DT)):
@@ -831,6 +843,7 @@ class TestTodosLosBotones(ConApp):
         self.vistos = {}  # texto del boton -> pantalla donde se vio
 
     def mirar(self, app, pantalla):
+        """Comprueba que en esa pantalla ningún botón tiene el texto salido o pisado."""
         self.correr(app, DT)
         lista = app.botonera.lista
         self.assertTrue(lista, f"{pantalla} sin botones")
