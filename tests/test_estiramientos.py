@@ -96,9 +96,11 @@ class TestMedir(unittest.TestCase):
         c = cuerpo(codo_a=(0.66, 0.3), muneca_a=(0.45, 0.22))  # mano puesta, cabeza recta
         self.assertEqual(S.falta("cuello_der", S.medir(c)), "Inclina más la cabeza")
 
-    def test_cruzado_sin_sujetar_el_codo_no_vale(self):
+    def test_cruzado_no_depende_de_ver_la_mano_en_el_codo(self):
+        """La mano tapa el codo y MediaPipe lo coloca mal, asi que en el cruzado solo
+        cuenta el cruce (prueba de Rares del 26/11)."""
         c = cuerpo(codo_a=(0.48, 0.72), muneca_a=(0.36, 0.66))
-        self.assertEqual(S.falta("cruzado_der", S.medir(c)), "Sujeta el codo con la otra mano")
+        self.assertTrue(S.cumple("cruzado_der", S.medir(c)))
         c = cuerpo(codo_a=(0.55, 0.72), muneca_a=(0.48, 0.66), muneca_b=(0.55, 0.76))
         self.assertEqual(S.falta("cruzado_der", S.medir(c)), "Cruza más el brazo")
 
@@ -108,6 +110,32 @@ class TestMedir(unittest.TestCase):
         cambiado = S.Cuerpo(c.nariz, c.hombro_a, c.hombro_b, c.oreja_a, c.oreja_b, c.codo_a,
                             c.codo_b, c.muneca_b, c.muneca_a)
         self.assertLessEqual(S.medir(cambiado).sujeta, S.SUJETAR)
+
+    def test_cruzado_vale_aunque_mediapipe_cambie_las_munecas(self):
+        """El cruce tampoco depende de cual llama derecha (prueba de Rares del 26/11)."""
+        c = CRUZADO_DER
+        cambiado = S.Cuerpo(c.nariz, c.hombro_a, c.hombro_b, c.oreja_a, c.oreja_b, c.codo_a,
+                            c.codo_b, c.muneca_b, c.muneca_a)
+        self.assertTrue(S.cumple("cruzado_der", S.medir(cambiado)))
+        self.assertFalse(S.cumple("cruzado_izq", S.medir(cambiado)))
+
+    def test_triceps_con_la_muneca_escondida_tras_la_cabeza(self):
+        """MediaPipe pone la muneca escondida a la altura del codo, y un poco por
+        encima a ratos. Sigue contando (prueba de Rares del 26/11)."""
+        c = cuerpo(codo_a=(0.55, 0.15), muneca_a=(0.5, 0.10), codo_b=(0.38, 0.20),
+                   muneca_b=(0.53, 0.05), vis=(0.35, 1.0))
+        self.assertTrue(S.cumple("triceps_der", S.medir(c)))
+        self.assertFalse(S.cumple("triceps_izq", S.medir(c)))
+
+    def test_el_suavizado_quita_el_temblor(self):
+        """Un salto de un fotograma en la muneca apenas mueve el punto suavizado."""
+        suave = S.Suavizado()
+        for _ in range(30):
+            suave.actualizar(CRUZADO_DER, 1 / 30)
+        salto = cuerpo(codo_a=(0.48, 0.72), muneca_a=(0.66, 0.66), muneca_b=(0.5, 0.76))
+        c = suave.actualizar(salto, 1 / 30)
+        self.assertLess(abs(c.muneca_a[0] - CRUZADO_DER.muneca_a[0]), 0.3 / 4)  # salta 0.3
+        self.assertIsNone(suave.actualizar(None, 1 / 30))
 
     def test_muneca_fuera_de_la_imagen_sigue_contando(self):
         """El brazo izquierdo muy estirado saca la muneca por el borde (prueba del 19/11)."""

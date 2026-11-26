@@ -19,6 +19,9 @@ from temple.puntero import PALMA_S
 P = E.PANEL
 
 
+GRACIA_S = 2.0  # sin pausa con la palma justo despues de una postura bien hecha
+
+
 class Estiramientos(Fase):
     clave = "estiramientos"
     nombre = "Estiramientos"
@@ -28,8 +31,11 @@ class Estiramientos(Fase):
     con_niveles = False
     sin_niveles = "Calentamiento hecho. Listo para las flexiones"
     # Al estirar las manos van a la cabeza, al codo y arriba con la palma
-    # abierta. Por eso la palma pausa siempre menos mientras haces bien una postura
-    ayuda = "Palma abierta y quieta para pausar, fuera de la postura"
+    # abierta. Por eso la palma no pausa durante una postura ni en los GRACIA_S
+    # siguientes, y tiene que estar por encima de los hombros, como en la
+    # meditacion. Si no, la mano que sujeta el codo pausaba (pruebas de Rares del
+    # 26/11). En mitad de una postura se pausa saliendo de la camara o con Espacio
+    ayuda = "Palma arriba entre postura y postura, o sal de la cámara, para pausar"
 
     def __init__(self, app, opciones: Opciones):
         super().__init__(app, PALMA_S)
@@ -39,6 +45,9 @@ class Estiramientos(Fase):
         self.registro: S.Registro | None = None
         self.reloj = 0.0  # tiempo del guion, se para en la pausa
         self.estado: S.Estado | None = None
+        self._sin_postura = GRACIA_S  # segundos desde la ultima postura bien hecha
+        self._suavizado = S.Suavizado()
+        self._cuerpo: S.Cuerpo | None = None  # el ultimo, ya suavizado
 
     @property
     def segundos(self) -> float:
@@ -56,6 +65,9 @@ class Estiramientos(Fase):
         self.registro = S.Registro(self.ruta_registro)
         self.reloj = 0.0
         self.estado = None
+        self._sin_postura = GRACIA_S
+        self._suavizado = S.Suavizado()
+        self._cuerpo = None
 
     def _cerrar_registro(self) -> None:
         if self.registro is not None:
@@ -65,8 +77,16 @@ class Estiramientos(Fase):
     def estirando(self) -> bool:
         """Si ahora mismo haces bien una de las posturas."""
         e = self.estado
-        return (e is not None and e.paso.objetivo in S.NOMBRES
-                and S.falta(e.paso.objetivo, e.medida) is None)
+        if e is None or e.paso.objetivo not in S.NOMBRES:
+            return False
+        if e.paso.tipo == "mantener":
+            return e.bien  # con la tolerancia, que no parpadee por un salto del modelo
+        return S.falta(e.paso.objetivo, e.medida) is None
+
+    def en_postura(self) -> bool:
+        """Si el paso de ahora pide una postura (colocarse en ella o mantenerla)."""
+        e = self.estado
+        return e is not None and e.paso.objetivo in S.NOMBRES
 
     def salir(self) -> None:
         self._cerrar_registro()
@@ -81,16 +101,21 @@ class Estiramientos(Fase):
         if app.pausado():
             self.palma.actualizar(0, None)
             return
-        if self.estirando():
-            # Con la postura bien hecha, la mano abierta es parte del estiramiento
-            # (sobre la cabeza o arriba), asi que no pausa (prueba de Rares del 19/11)
+        self._sin_postura = 0.0 if self.estirando() else self._sin_postura + dt
+        techo = min(lectura.hombros[0][1], lectura.hombros[1][1]) if lectura.hombros else -1
+        if self._sin_postura < GRACIA_S or self.en_postura():
+            # Durante una postura la mano abierta es parte del estiramiento (sobre
+            # la cabeza, arriba o en el codo), asi que no pausa (pruebas de Rares
+            # del 19/11 y el 26/11). Se pausa entre postura y postura, saliendo
+            # de la camara o con Espacio
             self.palma.actualizar(0, None)
-        elif self.pausa_con_palma(dt, lectura):
+        elif self.pausa_con_palma(dt, lectura, techo):
             return
 
         self.reloj += dt
         antes = self.estado
-        self.estado = e = self.practica.actualizar(self.reloj, _cuerpo(lectura))
+        self._cuerpo = self._suavizado.actualizar(_cuerpo(lectura), dt)
+        self.estado = e = self.practica.actualizar(self.reloj, self._cuerpo)
         if self.registro is not None:
             self.registro.apuntar(self.reloj, e)
         if e.terminado:
@@ -127,7 +152,7 @@ class Estiramientos(Fase):
                 f"mano en la cabeza der {f(m.mano_der)}  izq {f(m.mano_izq)}  (>= {S.MANO_CABEZA})",
                 f"codos {f(m.codos)}  (arriba > 0)",
                 f"cruce der {f(m.cruce_der)}  izq {f(m.cruce_izq)}  (cruzado >= {S.CRUZAR})",
-                f"sujeta el codo {f(m.sujeta)}  (<= {S.SUJETAR})",
+                f"sujeta el codo {f(m.sujeta)}  (<= {S.SUJETAR}, triceps <= {S.SUJETAR_ARRIBA})",
                 f"triceps codo der {f(m.codo_der)} izq {f(m.codo_izq)}  (>= {S.CODO_ARRIBA})",
                 f"triceps doblado der {f(m.doblado_der)} izq {f(m.doblado_izq)}  (>= {S.DOBLADO})"]
 
@@ -135,11 +160,12 @@ class Estiramientos(Fase):
 
     def pistas(self, img, lectura) -> None:
         """Hombros, orejas y el brazo que toca, y una raya discontinua con la meta."""
-        c = _cuerpo(lectura)
+        c = self._cuerpo if _cuerpo(lectura) is not None else None
         if c is None or self.estado is None:
             return
         objetivo = self.estado.paso.objetivo
-        bien = objetivo is not None and S.cumple(objetivo, self.estado.medida)
+        bien = objetivo is not None and (self.estado.bien if self.estado.paso.tipo == "mantener"
+                                         else S.cumple(objetivo, self.estado.medida))
         color = E.JADE if bien else E.ORO
         capa = pygame.Surface(img.get_size(), pygame.SRCALPHA)
 

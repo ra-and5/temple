@@ -8,7 +8,8 @@ La camara solo ve de la cabeza al pecho, asi que todo se mide con Pose.
   - cuello_izq   lo mismo hacia el izquierdo
   - arriba       los dos brazos arriba, con los codos por encima de la nariz
   - cruzado_der  el brazo derecho cruzado por delante del pecho, con la muneca
-                 pasada al otro lado del cuerpo y la otra mano sujetando el codo
+                 pasada al otro lado del cuerpo. Se pide sujetar el codo con la
+                 otra mano, pero no se comprueba (la mano lo tapa)
   - cruzado_izq  lo mismo con el izquierdo
   - triceps_der  el codo derecho por encima de la cabeza y el brazo doblado (la
                  muneca por debajo del codo, la mano a la espalda), con la otra
@@ -40,23 +41,36 @@ from __future__ import annotations
 
 import csv
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 
 INCLINAR_GRADOS = 20.0  # cabeza inclinada a un lado
 RECTA_GRADOS = 10.0  # cabeza recta para volver al centro
 CRUZAR = 0.35  # la muneca pasa del centro del pecho al otro lado (en anchos de hombros)
+CENTRO_PECHO = -0.2  # una muneca por delante del pecho, no colgando a su lado
+COLGANDO = -1.3  # una muneca mas baja que esto respecto a la nariz cuelga con el brazo abajo
 # Con Rares (19/11) la mano sobre la cabeza daba 0,6-0,7 y bajada -2. Sujetando
 # el codo 0,33-0,5 y sin sujetarlo 1,3
 MANO_CABEZA = 0.3  # la muneca por encima de la nariz, mano sobre la cabeza
-SUJETAR = 0.6  # una muneca a menos de esto del codo del otro brazo
+SUJETAR = 0.6  # una muneca a menos de esto del codo del otro brazo (solo informativo)
+# En el triceps la mano que sujeta queda detras de la cabeza y MediaPipe la ve
+# mal. Sujetando, la distancia va de 0.4 a 0.65 y con 0.6 la postura entraba y
+# salia (prueba de Rares del 26/11). Sin sujetar, la mano cae al lado y pasa de
+# 1.5. Con el brazo cruzado no se puede subir tanto, porque la muneca que cruza
+# queda cerca del codo del otro brazo aunque no lo sujete
+SUJETAR_ARRIBA = 0.8
 CODO_ARRIBA = 0.0  # triceps, el codo por encima de la nariz
-DOBLADO = 0.0  # triceps, la muneca por debajo de su codo
+# Triceps, el brazo doblado. La muneca esta detras de la cabeza, MediaPipe la
+# ve con 0.3 a 0.5 de confianza y la pone a la altura del codo, entre -0.4 y
+# 0.2 (prueba del 26/11). Con el brazo estirado hacia arriba sale de -0.8 a
+# -1, asi que solo se pide que la muneca no este muy por encima del codo
+DOBLADO = -0.45
 SEGUNDOS = 20.0  # lo que se mantiene cada postura
-TOLERANCIA_S = 0.5
+TOLERANCIA_S = 1.0  # con 0.5 los saltos del modelo en el triceps cortaban la cuenta (26/11)
 AVISO_S = 3.0
 REPETIR_AVISO_S = 10.0
 SOSTENER_S = 0.8
+SUAVIZAR_S = 0.25  # constante de tiempo del suavizado de los puntos del cuerpo
 MAX_VECES = 2.0  # una postura que no sale se deja pasada esta vez su duracion
 REGISTRO = Path(__file__).resolve().parent.parent / "datos" / "ultimos_estiramientos.csv"
 REGISTRO_CADA_S = 0.25
@@ -190,16 +204,35 @@ def falta(objetivo: str, m: Medida) -> str | None:
         return None if m.codos > 0 else "Sube más los codos"
     if objetivo in ("cruzado_der", "cruzado_izq"):
         der = objetivo == "cruzado_der"
-        if (m.cruce_der if der else m.cruce_izq) < CRUZAR:
-            return "Cruza más el brazo"
-        return None if m.sujeta <= SUJETAR else "Sujeta el codo con la otra mano"
+        # Con los brazos cruzados MediaPipe cambia a ratos una muneca por la otra
+        # (26/11). Entonces la que llama de este brazo es la mano que sujeta, en el
+        # centro del pecho, y la que llama del otro esta donde estaria la de este
+        # cruzada, a la altura del hombro. Una muneca que cuelga a su lado queda
+        # muy por debajo (la mano bajada da -2), asi que no se confunde con cruzar
+        propio, otro = (m.cruce_der, m.cruce_izq) if der else (m.cruce_izq, m.cruce_der)
+        altura_otro = m.mano_izq if der else m.mano_der
+        cambiadas = propio > CENTRO_PECHO and altura_otro > COLGANDO
+        cruce = max(propio, -otro) if cambiadas else propio
+        # Que sujetes el codo no se comprueba. La mano tapa el codo y MediaPipe lo
+        # coloca donde puede, asi que sujetando da de 0.04 a 1.2 y sin sujetar
+        # de 0.7 a 0.85 (la muneca que cruza queda cerca del otro codo). Pedirlo
+        # cortaba la cuenta haciendolo bien (pruebas de Rares del 26/11). El cruce
+        # si se ve siempre, de 0.5 a 1.2. El texto sigue pidiendo sujetarlo
+        return None if cruce >= CRUZAR else "Cruza más el brazo"
     if objetivo in ("triceps_der", "triceps_izq"):
         der = objetivo == "triceps_der"
         if (m.codo_der if der else m.codo_izq) < CODO_ARRIBA:
             return "Sube el codo por encima de la cabeza"
-        if (m.doblado_der if der else m.doblado_izq) < DOBLADO:
+        doblado, el_otro = ((m.doblado_der, m.doblado_izq) if der
+                            else (m.doblado_izq, m.doblado_der))
+        if doblado < DOBLADO:
             return "Dobla el brazo, la mano a la espalda"
-        return None if m.sujeta <= SUJETAR else "Sujeta el codo con la otra mano"
+        if m.sujeta > SUJETAR_ARRIBA:
+            return "Sujeta el codo con la otra mano"
+        # Sujetando, el brazo que estiras esta mas doblado que el que sujeta, que
+        # sube la mano hasta el codo. Es lo que distingue el derecho del izquierdo
+        # (en las pruebas del 26/11, -0.01 frente a -0.37 de mediana)
+        return None if doblado > el_otro else "Dobla el brazo, la mano a la espalda"
     if objetivo == "neutro":
         if abs(m.inclinacion) >= RECTA_GRADOS:
             return "Pon la cabeza recta"
@@ -208,6 +241,38 @@ def falta(objetivo: str, m: Medida) -> str | None:
             return "Baja los brazos"
         return None
     raise ValueError(objetivo)
+
+
+class Suavizado:
+    """Media movil exponencial de los puntos del cuerpo entre fotogramas.
+
+    MediaPipe mueve cada punto unos pixeles en cada fotograma aunque estes
+    quieto, y mas en los que ve mal (la muneca detras de la cabeza). Sin
+    suavizar, las lineas temblaban y la postura entraba y salia (26/11).
+    """
+
+    def __init__(self, tau_s: float = SUAVIZAR_S):
+        self.tau_s = tau_s
+        self._c: Cuerpo | None = None
+
+    def actualizar(self, c: Cuerpo | None, dt: float) -> Cuerpo | None:
+        if c is None:
+            self._c = None  # sin cuerpo se empieza de cero, sin arrastrar el anterior
+            return None
+        if self._c is None or dt <= 0:
+            self._c = c
+            return c
+        a = 1 - math.exp(-dt / self.tau_s)
+        valores = {}
+        for f in fields(c):
+            nuevo, viejo = getattr(c, f.name), getattr(self._c, f.name)
+            if isinstance(nuevo, tuple):
+                valores[f.name] = (viejo[0] + (nuevo[0] - viejo[0]) * a,
+                                   viejo[1] + (nuevo[1] - viejo[1]) * a)
+            else:
+                valores[f.name] = viejo + (nuevo - viejo) * a
+        self._c = Cuerpo(**valores)
+        return self._c
 
 
 def cumple(objetivo: str, m: Medida) -> bool:

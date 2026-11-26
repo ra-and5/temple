@@ -352,9 +352,10 @@ class TestInterfaz(ConApp):
         self.camara.mano = None
 
     def test_la_palma_pausa_en_cualquier_paso_de_cada_fase(self):
-        """En el tutorial y en la sesion, nada mas empezar y a mitad."""
+        """En el tutorial y en la sesion, nada mas empezar y a mitad. En los
+        estiramientos va aparte, porque la palma solo pausa entre posturas."""
         for clave, tecla in (("respiracion", pygame.K_r), ("meditacion", pygame.K_e),
-                             ("estiramientos", pygame.K_i), ("flexiones", pygame.K_x)):
+                             ("flexiones", pygame.K_x)):
             for modo in (pygame.K_t, pygame.K_s):
                 for espera in (0.2, 4):
                     app = self.abrir(minutos=1, segundos=30)
@@ -373,8 +374,7 @@ class TestInterfaz(ConApp):
         self.tecla(app, pygame.K_i)
         self.tecla(app, pygame.K_s)
         self.correr(app, 1)
-        self.camara.mano = palma_en(0.8, 0.4)
-        self.correr(app, 1.3)
+        self.tecla(app, pygame.K_SPACE)
         self.assertTrue(app.pausa_manual)
         reloj = app.fase.reloj
         self.camara.mano = None
@@ -463,6 +463,55 @@ class TestInterfaz(ConApp):
         self.correr(app, 2)
         self.assertFalse(app.pausado())
         self.assertEqual(app.fase.palma.llenado, 0)
+
+    def _con_palma(self, cx, muneca_y):
+        """La camara ve ademas una palma abierta y de frente con la muneca ahi."""
+        palma = [(cx, muneca_y)] + [(cx + (i // 4 - 2) * 0.03, muneca_y - 0.04 * (i % 4 + 1))
+                                    for i in range(20)]
+        ultimo = self.camara.ultimo
+        self.camara.ultimo = lambda: (ultimo()[0], Lectura(**{**ultimo()[1].__dict__,
+                                                               "mano": palma}))
+
+    def test_al_estirar_la_mano_en_el_codo_no_pausa(self):
+        """La mano abierta que sujeta el codo, por debajo de los hombros, no pausa
+        aunque la postura falle un momento (prueba de Rares del 26/11)."""
+        app = self.abrir(segundos=30)
+        self.camara.postura = T.NEUTRO
+        self.tecla(app, pygame.K_i)
+        self.tecla(app, pygame.K_s)
+        self.estirar_hasta(app, "cuello_der")
+        self.camara.postura = T.NEUTRO  # la postura se pierde
+        self._con_palma(0.8, 0.9)  # palma abierta a la altura del pecho
+        self.correr(app, 4)
+        self.assertFalse(app.pausado())
+
+    def test_al_estirar_la_palma_no_pausa_en_mitad_de_una_postura(self):
+        """Ni colocandote ni manteniendo una postura, aunque este por encima de los
+        hombros (la mano en el codo del triceps, prueba de Rares del 26/11)."""
+        app = self.abrir(segundos=30)
+        self.camara.postura = T.NEUTRO
+        self.tecla(app, pygame.K_i)
+        self.tecla(app, pygame.K_s)
+        self.estirar_hasta(app, "cuello_der")
+        self.camara.postura = T.NEUTRO
+        self._con_palma(0.85, 0.4)
+        self.correr(app, 5)
+        self.assertFalse(app.pausado())
+
+    def test_al_estirar_la_palma_pausa_entre_posturas(self):
+        app = self.abrir(segundos=1)
+        self.camara.postura = T.NEUTRO
+        self.tecla(app, pygame.K_i)
+        self.tecla(app, pygame.K_s)
+        self.estirar_hasta(app, "cuello_der")
+        self.correr(app, 1.5)  # acaba la postura y pide volver al centro
+        self.assertEqual(app.fase.estado.paso.objetivo, "neutro")
+        self.camara.mano = palma_en(0.85, 0.4)  # sigue inclinado, sin volver al centro
+        self.correr(app, 1.5)  # dentro del margen despues de la postura, no pausa
+        self.assertFalse(app.pausado())
+        self.correr(app, 2.5)
+        self.assertTrue(app.pausado())
+        self.camara.mano = None
 
     def test_escape_va_hacia_atras_hasta_salir(self):
         app = self.abrir()
