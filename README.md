@@ -248,11 +248,11 @@ La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por f
 | En la respiración vale cualquier dedo pegado a la nariz para el lado izquierdo | Con la mano doblada MediaPipe confunde qué dedo es cuál (experimento con `herramientas/explorar_manos.py`) |
 | La espalda se mide por la cabeza, comparada con tu postura recta calibrada al empezar | Sentado cerca la cámara no ve las caderas |
 | Ojos cerrados con los *blendshapes* de Face Landmarker, corte en 0,4 | En nuestras pruebas, abiertos daban 0,15-0,25 y cerrados 0,6-0,77 |
-| Un fallo solo cuenta si dura más de 1 s en la meditación y 0,5 s en los estiramientos | Un parpadeo o un salto del modelo no deben quitar puntos |
+| Un fallo solo cuenta si dura más de 1 s en la meditación y en los estiramientos | Un parpadeo o un salto del modelo no deben quitar puntos |
 | En los estiramientos el lado sale de dónde está en la pantalla, no de la etiqueta de MediaPipe | Con la imagen en espejo, sus etiquetas de izquierda y derecha se cruzan |
 | La cabeza inclinada se mide contra la línea de los hombros | Así da igual que la cámara esté algo torcida |
 | Las muñecas se usan aunque MediaPipe no esté seguro de verlas | Con el brazo estirado la muñeca se sale de la imagen y el modelo estima bien dónde está |
-| "Sujeta el codo" mira la muñeca más cercana al codo del otro brazo | Con los brazos cruzados MediaPipe intercambia a ratos qué muñeca es cuál |
+| En el tríceps, "sujeta el codo" mira la muñeca más cercana al codo del otro brazo | MediaPipe intercambia a ratos qué muñeca es cuál, así que no se mira cuál es |
 | Señalar solo cuenta con el índice estirado, los demás dedos cerrados y apuntando a la pantalla o hacia arriba | Con la mano apoyada en la cabeza se pulsaban botones solos |
 | La palma que pausa tiene que estar de frente, quieta y lejos de la nariz | Al bajar la mano después de meditar saltaba la pausa. Una mano que pide pausa está quieta, una que baja no |
 | En los estiramientos la palma solo pausa entre postura y postura | En las posturas la mano está abierta en la cabeza, arriba o sujetando el codo, también por encima de los hombros en el tríceps. La mano del codo pausaba. En mitad de una postura se pausa saliendo de la cámara o con Espacio |
@@ -294,6 +294,8 @@ La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por f
 - **Reorganizar sin cambiar nada, y demostrarlo.** Antes de partir `app.py` grabamos 385 capturas de un recorrido automático por todas las pantallas, y después del cambio salieron idénticas píxel a píxel.
 - **Los límites se ajustan con datos.** En la primera prueba de las flexiones casi todas salían "poco profundas". Mirando el CSV vimos que en el fondo de una flexión normal el hombro quedaba más alto de lo que habíamos supuesto, y cambiamos el límite.
 - **Las coordenadas normalizadas engañan.** Los puntos de MediaPipe van de 0 a 1 tanto a lo ancho como a lo alto. Comparando un ancho con un alto en esas unidades, la palma de frente parecía estrecha. Lo vimos pasando una captura de la prueba por el mismo detector del juego.
+- **Lo que la cámara no ve no se puede exigir.** En el brazo cruzado pedíamos sujetar el codo, pero la propia mano lo tapa y MediaPipe lo coloca donde puede. La postura se cortaba haciéndola bien. Pasando por las reglas nuevas las sesiones guardadas con la tecla D vimos que sujetar y no sujetar daban distancias que se solapan, y dejamos de comprobarlo. Ahora, antes de pedir algo, miraríamos en los datos si la cámara lo distingue.
+- **Suavizar antes de decidir.** Las líneas del cuerpo temblaban aunque estuvieras quieto y la postura entraba y salía. Con una media entre fotogramas y un segundo de margen, las mismas sesiones pasaron de un 26 % del tiempo fuera a un 0 %.
 - **Decir qué hacer, no qué fallaste.** "Lo que más te ha costado, abrir los ojos" se entendía al revés. Ahora dice "Para mejorar, mantén los ojos cerrados", y en los estiramientos, lo que falta para estar en la postura.
 
 ## Autores
