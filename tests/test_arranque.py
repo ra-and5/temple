@@ -99,6 +99,26 @@ class TestDemo(unittest.TestCase):
         self.assertTrue(dias)
         self.assertGreaterEqual(min(dias), (HOY - timedelta(days=10)).isoformat())
 
+    def test_flexiones_a_un_dia_de_subir_cualquier_dia(self):
+        """Para grabar la subida al nivel 3 en directo, sea el dia de la semana que sea."""
+        for i in range(7):
+            hoy = HOY + timedelta(days=i)
+            with tempfile.TemporaryDirectory() as d:
+                p = cargar_demo().crear(hoy, Path(d))
+                self.assertEqual((p.nivel("flexiones"), p.dias_para_subir("flexiones")), (1, 4),
+                                 hoy)
+
+    def test_dia5_cada_fase_a_un_dia_de_subir(self):
+        """El dia 5 del guion: 4 dias de racha y cada fase sube hoy con 3 lotos."""
+        with tempfile.TemporaryDirectory() as d:
+            p = cargar_demo().crear_dia5(HOY, Path(d))
+            self.assertEqual(p.racha(HOY - timedelta(days=1)), 4)
+            self.assertFalse(any(p.hecha_hoy(f, HOY) for f in NIVELES))
+            for fase in ("respiracion", "meditacion", "flexiones"):
+                self.assertEqual((p.nivel(fase), p.dias_para_subir(fase)), (0, 4), fase)
+            p.registrar("meditacion", "normal", 0.95, 3, HOY, minutos=5, nivel=0)
+            self.assertEqual(p.nivel("meditacion"), 1)
+
     def test_se_puede_crear_otra_vez_sin_duplicar(self):
         antes = len(self.p.sesiones)
         cargar_demo().crear(HOY, self.carpeta)

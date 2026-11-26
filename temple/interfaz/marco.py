@@ -25,6 +25,7 @@ def barra_superior(app) -> None:
     lema = E.fuente("cursiva", 22).render("respira · medita · estira · fortalece", True,
                                           E.ORO_SUAVE)
     p.blit(lema, (92 + ancho + 24, 36))
+    derecha = E.ANCHO - 40
     racha = app.progreso.racha(date.today())
     if racha:
         etiqueta = f"Racha de {racha} {'día' if racha == 1 else 'días'}"
@@ -32,6 +33,9 @@ def barra_superior(app) -> None:
         x = E.ANCHO - 40 - s.get_width()
         p.blit(s, (x, 40))
         D.llama(p, (x - 18, 50), 22)
+        derecha = x - 34
+    # El hueco libre entre el lema y la racha, donde van los avisos sin pisar nada
+    app.hueco_aviso = (92 + ancho + 24 + lema.get_width() + 16, derecha)
 
 
 def altavoz(p, centro, activo, col) -> None:
@@ -166,8 +170,14 @@ def aviso(app) -> None:
         app.aviso = None
         return
     alpha = int(255 * min(1.0, resto / 0.6))
-    s = E.fuente("negrita", 18).render(texto, True, E.NOCHE_ARRIBA)
-    caja = s.get_rect(midtop=(E.ANCHO // 2, 30)).inflate(36, 18)
+    izq, der = getattr(app, "hueco_aviso", (0, E.ANCHO))
+    # En el hueco de la barra de arriba, con la letra mas pequena si no cabe
+    for tam in range(18, 12, -1):
+        s = E.fuente("negrita", tam).render(texto, True, E.NOCHE_ARRIBA)
+        if s.get_width() + 36 <= der - izq:
+            break
+    caja = s.get_rect(midtop=((izq + der) // 2, 30)).inflate(36, 18)
+    app.caja_aviso = caja
     capa = pygame.Surface(caja.size, pygame.SRCALPHA)
     pygame.draw.rect(capa, (*E.ORO, 255), capa.get_rect(), border_radius=caja.h // 2)
     capa.blit(s, s.get_rect(center=(caja.w // 2, caja.h // 2)))

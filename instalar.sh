@@ -108,7 +108,7 @@ face_landmarker face_landmarker/face_landmarker 64184e229b263107bc2b804c6625db13
 MODELOS
 
 # ---------- 5. Comprobar ----------
-paso "5/5 Comprobando que todo funciona (tarda menos de un minuto)"
+paso "5/5 Comprobando que todo funciona (unos 2 minutos)"
 # Los tests abren la interfaz sin ventana ni sonido
 if ! salida="$(SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy "$PYTHON" -m unittest discover tests 2>&1)"; then
   echo "$salida" | tail -n 40

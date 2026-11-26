@@ -33,7 +33,7 @@ class Meditacion(Fase):
     tecla = pygame.K_e
     colocacion = "Sentado y de frente, que se te vea de la cintura para arriba"
     usa_cara = True
-    motivo_pausa = "Cierra los ojos, o abre la palma y cierra el puño, para seguir"
+    motivo_pausa = "Cierra los ojos 2 s, o abre la palma y ciérrala en un puño, para seguir"
     ayuda = "Palma abierta y quieta, por encima de los hombros, para pausar"
 
     def __init__(self, app, opciones: Opciones):
@@ -223,8 +223,6 @@ class Meditacion(Fase):
             # En el centro, a la altura de los hombros, que es donde llega el dedo
             # estando sentado cerca de la camara
             Z.botones_pausa(app, P.top + 250, self.terminar_libre if self._libre() else None)
-            D.texto(p, E.fuente("texto", 17), "o abre la palma y ciérrala en un puño, o cierra los ojos 2 s",
-                    E.APAGADO, cx, P.top + 322, P.w - 60)
             return
 
         centro, radio = Z.CENTRO, Z.RADIO

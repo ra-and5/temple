@@ -129,6 +129,19 @@ class ConApp(unittest.TestCase):
 
 class TestInterfaz(ConApp):
 
+    def test_los_avisos_no_pisan_la_barra_de_arriba(self):
+        """El aviso dorado tapaba el lema (captura del 26/11). Va en el hueco libre."""
+        app = self.abrir()
+        app.progreso.registrar("meditacion", "normal", 1.0, 3)  # con racha, el hueco es menor
+        textos = ["Ya sabes hacer flexiones. Ahora, la sesión completa",
+                  "Ya sabes respirar. Ahora, la sesión completa", "Sonido apagado"]
+        for texto in textos:
+            app.avisar(texto, 5)
+            self.correr(app, DT)
+            izq, der = app.hueco_aviso
+            self.assertGreaterEqual(app.caja_aviso.left, izq, texto)
+            self.assertLessEqual(app.caja_aviso.right, der, texto)
+
     def test_respiracion_hasta_el_resultado(self):
         app = self.abrir(vueltas=1, tiempo_s=0.1)
         self.correr(app, 0.5)
