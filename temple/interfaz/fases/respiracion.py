@@ -12,7 +12,6 @@ from temple.interfaz import marco
 from temple.interfaz import piezas as Z
 from temple.interfaz.fases.base import Fase
 from temple.interfaz.opciones import Opciones
-from temple.progreso import PERFECTAS_PARA_AVANZADA, VUELTAS_MAX, VUELTAS_MIN, VUELTAS_NIVEL
 from temple.puntero import PALMA_S
 from temple.respiracion import (COMO_TAPAR, VUELTAS, Guion, estrellas, guion_sesion,
                                 guion_tutorial)
@@ -23,8 +22,9 @@ P = E.PANEL
 class Respiracion(Fase):
     clave = "respiracion"
     nombre = "Respiración"
+    verbo = "Respirar"
     tecla = pygame.K_r
-    motivo_pausa = "Señala Seguir con el índice y espera"
+    colocacion = "Sentado, de frente y cerca, que se vean tu cara y tu mano"
 
     def __init__(self, app, opciones: Opciones):
         super().__init__(app, PALMA_S)
@@ -33,72 +33,41 @@ class Respiracion(Fase):
         self.forzar_avanzada = opciones.avanzada
         self.aire = D.Aire()
         self.guion: Guion | None = None
-        self.variante = "principiante"
         self.reloj = 0.0  # tiempo del guion, se para en la pausa
         self.estado = None
         self.estado_previo = None
-        self.ofrecer_meditar = False  # al acabar, si lo siguiente del ritual es meditar
 
     @property
     def vueltas(self) -> int:
         return self.vueltas_fijas or self.app.progreso.vueltas(VUELTAS)
 
-    def avanzada_disponible(self) -> bool:
-        return self.forzar_avanzada or self.app.progreso.avanzada_desbloqueada()
+    @property
+    def variante(self) -> str:
+        return "avanzada" if self.nivel >= 1 else "principiante"
 
-    # ================= inicio =================
+    def nombre_nivel(self, n: int) -> str:
+        return "Avanzada, retienes 16 tiempos" if n >= 1 else "Principiante"
 
-    def cambiar(self, paso: int) -> None:
+    def cambiar_vueltas(self, paso: int) -> None:
+        """Menos y mas de las vueltas, en Ajustes."""
         self.vueltas_fijas = None
         self.app.progreso.elegir_vueltas(self.vueltas + paso)
 
-    def tecla_inicio(self, k) -> bool:
-        if k == pygame.K_a and self.avanzada_disponible():
-            self.app.empezar("sesion", "avanzada")
-            return True
-        return False
-
-    def resumen(self) -> str:
-        if self.app.progreso.avanzada_desbloqueada():
-            return "Tienes la respiración avanzada"
-        hechas = min(self.app.progreso.perfectas(self.clave, "principiante"),
-                     PERFECTAS_PARA_AVANZADA)
-        return f"{hechas} de {PERFECTAS_PARA_AVANZADA} sesiones con 3 lotos para la avanzada"
-
-    def panel_inicio(self) -> None:
-        app, p = self.app, self.app.pantalla
-        primera = not app.progreso.tutorial_hecho(self.clave)
-        Z.botones_empezar(app, primera, "Aprender a respirar", "Empezar a respirar")
-
-        # Nivel siguiente
-        y = P.top + 252
-        if self.avanzada_disponible():
-            app.botonera.dibujar(p, pygame.Rect(Z.IZQ, y, Z.ANCHO, 46), "Respiración avanzada",
-                                 "A", lambda: app.empezar("sesion", "avanzada"))
-        else:
-            hechas = min(app.progreso.perfectas(self.clave, "principiante"),
-                         PERFECTAS_PARA_AVANZADA)
-            Z.linea(p, f"{PERFECTAS_PARA_AVANZADA} sesiones con 3 lotos desbloquean la avanzada",
-                    "texto", 15, E.APAGADO, y - 4)
-            Z.fila_lotos(p, y, hechas, PERFECTAS_PARA_AVANZADA)
-
-        v = self.vueltas
-        nota = ("no suben de nivel" if v < VUELTAS_NIVEL
-                else "mínimo" if v == VUELTAS_MIN else "máximo" if v == VUELTAS_MAX else "")
-        nombre = "vuelta" if v == 1 else "vueltas"
-        Z.fila_mas_menos(app, f"{v} {nombre}", nota, self.cambiar, "vueltas")
-
     # ================= practica =================
 
-    def empezar(self, modo: str, variante: str) -> None:
-        self.variante = variante
+    def empezar(self, modo: str) -> None:
+        if self.forzar_avanzada:
+            self.nivel = 1
         if modo == "tutorial":
             self.guion = Guion(guion_tutorial(), tiempo_s=self.tiempo_s)
         else:
-            self.guion = Guion(guion_sesion(self.vueltas, variante == "avanzada"),
+            self.guion = Guion(guion_sesion(self.vueltas, self.nivel >= 1),
                                tiempo_s=self.tiempo_s)
         self.reloj = 0.0
         self.estado = self.estado_previo = None
+
+    def pasos(self) -> list:
+        return self.guion.pasos
 
     def salir(self) -> None:
         self.estado = self.estado_previo = None
@@ -117,9 +86,7 @@ class Respiracion(Fase):
         if app.pausado():
             self.palma.actualizar(0, None)
             return
-        if self.palma.actualizar(dt, lectura.mano, lectura.nariz, lectura.escala):
-            app.pausa_manual = True
-            app.sonido("toque")
+        if self.pausa_con_palma(dt, lectura):
             return
 
         self.reloj += dt
@@ -142,27 +109,14 @@ class Respiracion(Fase):
     def _terminar(self) -> None:
         app = self.app
         app.sonido("cuenco")
+        self.estado = None
         if app.modo == "tutorial":
             app.progreso.marcar_tutorial(self.clave)
-            app.modo = "inicio"
-            app.avisar("Ya sabes respirar. Ahora, la sesión completa", 5)
+            app.fin_tutorial("Ya sabes respirar. Ahora, la sesión completa")
             return
-        antes = app.progreso.avanzada_desbloqueada()
         precision = self.guion.precision
-        n = estrellas(precision)
-        mejor_antes = app.progreso.mejor(self.clave, self.variante)
-        app.progreso.registrar(self.clave, self.variante, precision, n, vueltas=self.vueltas)
-        self.resultado = {
-            "pocas_vueltas": self.vueltas < VUELTAS_NIVEL,
-            "precision": precision,
-            "estrellas": n,
-            "record": mejor_antes is not None and precision > mejor_antes,
-            "desbloqueada": not antes and app.progreso.avanzada_desbloqueada(),
-        }
-        # Despues de respirar, lo siguiente del ritual es meditar
-        self.ofrecer_meditar = not app.progreso.hecha_hoy("meditacion")
+        self.guardar(precision, estrellas(precision), vueltas=self.vueltas)
         app.modo = "resultado"
-        self.estado = None
 
     # ---- camara ----
 
@@ -238,7 +192,7 @@ class Respiracion(Fase):
                                    (x, P.top + 56), 4 if actual else 3, 0 if hecho or actual else 1)
         Z.instruccion(p, paso)
 
-        centro, radio = (cx, P.top + 318), 88
+        centro, radio = Z.CENTRO, Z.RADIO
         if paso.tipo == "contar":
             color = E.COLOR_ACCION[paso.accion]
             D.halo(p, centro, 150, color, 0.25 + 0.75 * e.llenado)
@@ -269,35 +223,6 @@ class Respiracion(Fase):
 
     # ================= resultado =================
 
-    def accion_resultado(self) -> None:
-        if self.ofrecer_meditar:
-            self.app.elegir_fase("meditacion")
-            self.app.accion_principal()
-        else:
-            self.app.volver_inicio()
-
-    def panel_resultado(self) -> None:
-        app, p = self.app, self.app.pantalla
-        r = self.resultado
-        Z.resultado(app, r, "Sesión completada", "del tiempo tapaste el lado correcto")
-
-        hechas = min(app.progreso.perfectas(self.clave, "principiante"), PERFECTAS_PARA_AVANZADA)
-        if r["desbloqueada"]:
-            texto, color = "Has desbloqueado la respiración avanzada", E.AZAFRAN
-        elif self.variante == "avanzada" or self.avanzada_disponible():
-            texto, color = "", E.APAGADO
-        elif r.get("pocas_vueltas"):
-            texto, color = (f"Con menos de {VUELTAS_NIVEL} vueltas no cuenta para la avanzada",
-                            E.APAGADO)
-        elif r["estrellas"] < 3:
-            texto, color = "Para la avanzada cuentan las de 3 lotos", E.APAGADO
-        else:
-            texto, color = (f"Cuenta para la avanzada, {hechas} de {PERFECTAS_PARA_AVANZADA}",
-                            E.JADE)
-        if texto:
-            Z.linea(p, texto, "negrita", 16, color, P.top + 384)
-
-        if self.ofrecer_meditar:
-            Z.botones_seguir(app, "Meditar", self.accion_resultado)
-        else:
-            Z.boton_volver(app)
+    def dibujar_resultado(self) -> None:
+        Z.resultado(self.app, self.resultado, "Sesión completada",
+                    "del tiempo tapaste el lado correcto")

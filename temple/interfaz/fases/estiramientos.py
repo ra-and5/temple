@@ -13,6 +13,7 @@ from temple.interfaz import marco
 from temple.interfaz import piezas as Z
 from temple.interfaz.fases.base import Fase
 from temple.interfaz.opciones import Opciones
+from temple.progreso import NIVELES
 from temple.puntero import PALMA_S
 
 P = E.PANEL
@@ -21,48 +22,34 @@ P = E.PANEL
 class Estiramientos(Fase):
     clave = "estiramientos"
     nombre = "Estiramientos"
+    verbo = "Estirar"
     tecla = pygame.K_i
-    motivo_pausa = "Señala Seguir con el índice y espera"
+    colocacion = "Sentado y de frente, que se vean tu cabeza y tus brazos"
+    con_niveles = False
+    sin_niveles = "Calentamiento hecho. Listo para las flexiones"
     # Al estirar las manos van a la cabeza, al codo y arriba con la palma
-    # abierta, asi que aqui la palma no pausa. Se pausa con Espacio o saliendo
-    # de la camara
-    ayuda = ("Sal de la cámara para pausar (aquí la palma no pausa)",
-             "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio")
+    # abierta. Por eso la palma pausa siempre menos mientras haces bien una postura
+    ayuda = "Palma abierta y quieta para pausar, fuera de la postura"
 
     def __init__(self, app, opciones: Opciones):
         super().__init__(app, PALMA_S)
-        self.segundos = opciones.segundos or S.SEGUNDOS  # --segundos para probar
+        self.segundos_fijos = opciones.segundos  # --segundos para probar
         self.ruta_registro = opciones.datos / S.REGISTRO.name
         self.practica: S.Practica | None = None
         self.registro: S.Registro | None = None
         self.reloj = 0.0  # tiempo del guion, se para en la pausa
         self.estado: S.Estado | None = None
 
-    # ================= inicio =================
+    @property
+    def segundos(self) -> float:
+        return self.segundos_fijos or NIVELES[self.clave][self.nivel]
 
-    def resumen(self) -> str:
-        mejor = self.app.progreso.mejor(self.clave, "normal")
-        if mejor is None:
-            return "Todavía sin sesiones"
-        return f"Tu mejor marca, {math.floor(mejor * 100)} % del tiempo en la postura"
-
-    def panel_inicio(self) -> None:
-        app, p = self.app, self.app.pantalla
-        primera = not app.progreso.tutorial_hecho(self.clave)
-        Z.botones_empezar(app, primera, "Aprender a estirar", "Empezar a estirar")
-        mejor = app.progreso.mejor(self.clave, "normal")
-        if mejor is None:
-            texto = (f"{len(S.POSTURAS)} posturas de {self.segundos:g} segundos. "
-                     "Gana hasta 3 lotos")
-        else:
-            texto = f"Tu mejor marca, {math.floor(mejor * 100)} % del tiempo en la postura"
-        Z.linea(p, texto, "texto", 15, E.APAGADO, P.top + 248)
-        Z.linea(p, "Cuello  ·  brazos arriba  ·  brazos cruzados  ·  tríceps", "texto", 15,
-                E.CREMA, P.top + 290)
+    def nombre_nivel(self, n: int) -> str:
+        return f"{len(S.POSTURAS)} posturas de {NIVELES[self.clave][n]} s"
 
     # ================= practica =================
 
-    def empezar(self, modo: str, variante: str) -> None:
+    def empezar(self, modo: str) -> None:
         pasos = S.guion_tutorial() if modo == "tutorial" else S.guion_sesion(self.segundos)
         self.practica = S.Practica(pasos)
         self._cerrar_registro()
@@ -74,6 +61,12 @@ class Estiramientos(Fase):
         if self.registro is not None:
             self.registro.cerrar()
             self.registro = None
+
+    def estirando(self) -> bool:
+        """Si ahora mismo haces bien una de las posturas."""
+        e = self.estado
+        return (e is not None and e.paso.objetivo in S.NOMBRES
+                and S.falta(e.paso.objetivo, e.medida) is None)
 
     def salir(self) -> None:
         self._cerrar_registro()
@@ -88,7 +81,12 @@ class Estiramientos(Fase):
         if app.pausado():
             self.palma.actualizar(0, None)
             return
-        self.palma.actualizar(0, None)  # aqui la palma no pausa (ver ayuda)
+        if self.estirando():
+            # Con la postura bien hecha, la mano abierta es parte del estiramiento
+            # (sobre la cabeza o arriba), asi que no pausa (prueba de Rares del 19/11)
+            self.palma.actualizar(0, None)
+        elif self.pausa_con_palma(dt, lectura):
+            return
 
         self.reloj += dt
         antes = self.estado
@@ -107,26 +105,15 @@ class Estiramientos(Fase):
         app = self.app
         app.sonido("cuenco")
         self._cerrar_registro()
+        self.estado = None
         if app.modo == "tutorial":
             app.progreso.marcar_tutorial(self.clave)
-            app.modo = "inicio"
-            app.elegir_fase(self.clave)
-            self.estado = None
-            app.avisar("Ya sabes estirar. Ahora, la sesión completa", 5)
+            app.fin_tutorial("Ya sabes estirar. Ahora, la sesión completa")
             return
         pr = self.practica
-        precision = pr.precision
-        n = S.lotos(precision)
-        mejor_antes = app.progreso.mejor(self.clave, "normal")
-        app.progreso.registrar(self.clave, "normal", precision, n)
-        self.resultado = {
-            "precision": precision,
-            "estrellas": n,
-            "record": mejor_antes is not None and precision > mejor_antes,
-            "peor": pr.peor,
-        }
+        self.guardar(pr.precision, S.lotos(pr.precision))
+        self.resultado["peor"] = pr.peor
         app.modo = "resultado"
-        self.estado = None
 
     def lineas_datos(self) -> list[str]:
         if self.estado is None:
@@ -265,7 +252,7 @@ class Estiramientos(Fase):
             Z.botones_pausa(app, P.top + 250)
             return
 
-        centro, radio = (cx, P.top + 310), 88
+        centro, radio = Z.CENTRO, Z.RADIO
         if paso.tipo == "mantener":
             color = E.JADE if e.bien else E.TERRACOTA
             D.halo(p, centro, 150, color, 0.3 if e.bien else 0.2)
@@ -295,24 +282,14 @@ class Estiramientos(Fase):
 
     # ================= resultado =================
 
-    def panel_resultado(self) -> None:
-        app, p = self.app, self.app.pantalla
-        r = self.resultado
-        Z.resultado(app, r, "Estiramientos completados", "del tiempo aguantaste en la postura")
+    def dibujar_resultado(self) -> None:
+        p, r = self.app.pantalla, self.resultado
+        Z.resultado(self.app, r, "Estiramientos completados",
+                    "del tiempo aguantaste en la postura")
         peor = r.get("peor")
         if r["estrellas"] < 3 and peor and peor[1] >= 1:
             Z.linea(p, f"Para mejorar, aguanta más {S.NOMBRES[peor[0]]} "
                        f"({round(peor[1])} s fuera)", "texto", 15, E.APAGADO, P.top + 326)
-
-        # Como va el ritual de hoy, en una frase
-        faltan = [f.nombre.lower() for f in app.fases.values()
-                  if not app.progreso.hecha_hoy(f.clave)]
-        if not faltan:
-            texto, color = "Ritual de hoy completo", E.ORO
-        else:
-            texto, color = f"Hoy aún te queda {' y '.join(faltan)}", E.APAGADO
-        Z.linea(p, texto, "negrita", 16, color, P.top + 384)
-        Z.boton_volver(app)
 
 
 def _angulo_hombros(c: S.Cuerpo) -> float:

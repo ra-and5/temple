@@ -8,6 +8,9 @@
                  el mismo boton lo pulsa. Para volver a pulsar hay que dejar de
                  senalar un momento, y al cambiar de pantalla igual, para que
                  nada se pulse solo (por ejemplo con la mano aun en la nariz).
+                 Llevar el dedo a otro boton que no pisa al pulsado tambien
+                 cuenta como soltar, asi en "¿Salir de Temple?" se llega al Si
+                 sin bajar la mano (a Rares no le dejaba pulsarlo, 19/11).
                  Los botones repetibles (menos y mas) no piden soltar, y seguir
                  senalando vuelve a pulsar cada REPETIR_S segundos.
   - GestoPalma   la palma abierta, de frente a la camara, quieta y lejos de la
@@ -18,7 +21,13 @@
                  Lejos de la nariz para no confundirlo con la mano que esta
                  tapando. Al meditar ademas tiene que estar por encima de los
                  hombros (techo), porque las manos en el regazo pueden parecer
-                 una palma abierta. En los estiramientos no se usa.
+                 una palma abierta. En los estiramientos no cuenta mientras
+                 haces bien una postura, porque la mano abierta es parte del
+                 estiramiento. Vale en las cuatro fases (pedido el 25/11).
+  - GestoPuno    en la pausa, abrir la palma de frente (ABIERTA_S) y cerrarla
+                 en un puno antes de CERRAR_S sigue. Se pidio asi el 25/11
+                 para que seguir sea un gesto claro, que no salte solo, y que
+                 se vea en la camara cada momento (abierta y luego puno).
 
 Las manos llegan como 21 puntos (x, y) normalizados de 0 a 1 sobre la imagen
 ya en espejo, igual que la pantalla. Los botones son rectangulos (x, y, ancho,
@@ -48,8 +57,10 @@ QUIETA = 0.35  # lo que puede moverse el centro de la palma, en largos de palma
 REPETIR_S = 0.8  # menos y mas, cada cuanto se repite si sigues senalando
 PERDIDA_S = 0.4  # si no se ve la mano este rato, el cursor desaparece
 SUAVIDAD = 14.0  # cuanto mas alto, antes alcanza el cursor al dedo
-LEJOS_NARIZ = 0.6  # en anchos de hombros
+LEJOS_NARIZ = 0.45  # en anchos de hombros. Con 0.6 la mano junto a la cara no pausaba (25/11)
 REPOSO = 0.06  # el dedo por debajo de la zona esto o mas es la mano en reposo
+ABIERTA_S = 0.4  # palma abierta este rato antes de cerrar el puno
+CERRAR_S = 2.0  # tiempo para cerrar el puno despues de abrir la palma
 
 
 def _dist(a, b) -> float:
@@ -70,6 +81,11 @@ def distancia_a_rect(rect, pos) -> float:
     dx = max(x - pos[0], 0, pos[0] - (x + w))
     dy = max(y - pos[1], 0, pos[1] - (y + h))
     return math.hypot(dx, dy)
+
+
+def se_pisan(a, b) -> bool:
+    """Si dos rectangulos (x, y, ancho, alto) se tocan."""
+    return a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
 
 
 def senalando(mano) -> bool:
@@ -111,14 +127,28 @@ def palma_abierta(mano) -> bool:
     return all(_dist(mano[t], m) > 1.15 * _dist(mano[n], m) for t, n in PUNTAS_Y_NUDILLOS)
 
 
+def puno(mano) -> bool:
+    """Los cuatro dedos doblados, cada punta mas cerca de la muneca que su nudillo."""
+    m = mano[MUNECA]
+    return all(_dist(mano[t], m) < _dist(mano[n], m) for t, n in PUNTAS_Y_NUDILLOS)
+
+
 def largo_palma(mano) -> float:
     return _dist(mano[MUNECA], mano[CENTRO_PALMA])
 
 
-def de_frente(mano) -> bool:
-    """La palma se ve ancha, o sea que mira a la camara y no esta de lado."""
-    largo = largo_palma(mano)
-    return largo > 1e-6 and _dist(mano[NUDILLO_INDICE], mano[NUDILLO_MENIQUE]) / largo >= DE_FRENTE
+def de_frente(mano, aspecto: float = 1.0) -> bool:
+    """La palma se ve ancha, o sea que mira a la camara y no esta de lado.
+
+    Los puntos van de 0 a 1 en x y en y, pero la imagen es mas ancha que alta.
+    aspecto (ancho / alto) devuelve las medidas a su proporcion real; sin el,
+    una palma de frente parecia estrecha y no pausaba (le paso a Rares el 25/11).
+    """
+    def real(q):
+        return (q[0] * aspecto, q[1])
+    largo = _dist(real(mano[MUNECA]), real(mano[CENTRO_PALMA]))
+    ancho = _dist(real(mano[NUDILLO_INDICE]), real(mano[NUDILLO_MENIQUE]))
+    return largo > 1e-6 and ancho / largo >= DE_FRENTE
 
 
 class Puntero:
@@ -131,6 +161,7 @@ class Puntero:
         self.llenado = 0.0  # de 0 a 1, lo que lleva en ese boton
         self._listo = False  # se ha soltado desde la ultima pulsacion o cambio de pantalla
         self._clave = None
+        self._pulsado = None  # el ultimo boton pulsado, hasta soltar
         self._sin_mano = 0.0
         self._sin_senalar = 0.0
 
@@ -141,6 +172,7 @@ class Puntero:
         self.llenado = 0.0
         self._listo = False
         self._clave = None
+        self._pulsado = None
 
     def _soltar(self) -> None:
         self.senala = False
@@ -148,6 +180,7 @@ class Puntero:
         self.llenado = 0.0
         self._clave = None
         self._listo = True
+        self._pulsado = None
 
     def actualizar(self, dt: float, mano, botones, mano_3d=None,
                    repetibles=frozenset()) -> int | None:
@@ -195,6 +228,9 @@ class Puntero:
             self.objetivo, self.llenado, self._clave = None, 0.0, None
             return None
         self.objetivo = i
+        if not self._listo and self._pulsado is not None and not se_pisan(botones[i],
+                                                                          self._pulsado):
+            self._listo = True  # se ha ido a otro boton, cuenta como soltar
         if not self._listo:
             return None
 
@@ -209,6 +245,7 @@ class Puntero:
                 return i
             self.llenado, self._clave = 0.0, None
             self._listo = False  # hay que soltar antes de la siguiente
+            self._pulsado = tuple(botones[i][:4])
             return i
         return None
 
@@ -220,13 +257,14 @@ class GestoPalma:
         self._armado = True
         self._desde: tuple[float, float] | None = None  # donde empezo a llenarse
 
-    def actualizar(self, dt: float, mano, nariz=None, escala=None, techo=None) -> bool:
+    def actualizar(self, dt: float, mano, nariz=None, escala=None, techo=None,
+                   aspecto: float = 1.0) -> bool:
         """True en el momento en que se completa el gesto.
 
         techo, si llega, es la altura (y de 0 a 1) por encima de la que tiene
         que estar el centro de la palma.
         """
-        abierta = mano is not None and palma_abierta(mano) and de_frente(mano)
+        abierta = mano is not None and palma_abierta(mano) and de_frente(mano, aspecto)
         if abierta and nariz is not None and escala:
             abierta = _dist(mano[CENTRO_PALMA], nariz) / escala > LEJOS_NARIZ
         if abierta and techo is not None:
@@ -249,3 +287,47 @@ class GestoPalma:
             self._armado = False  # hay que cerrar la mano antes de repetirlo
             return True
         return False
+
+
+class GestoPuno:
+    """Seguir desde la pausa. Primero la palma abierta y luego el puno.
+
+    estado dice por donde vas, para dibujarlo en la camara
+      "nada"       no hay palma abierta
+      "abriendo"   palma abierta, llenandose (llenado de 0 a 1)
+      "cierra"     ya vale, ahora hay que cerrar el puno
+    """
+
+    def __init__(self, abierta_s: float = ABIERTA_S, cerrar_s: float = CERRAR_S):
+        self.abierta_s = abierta_s
+        self.cerrar_s = cerrar_s
+        self.reiniciar()
+
+    def reiniciar(self) -> None:
+        self.estado = "nada"
+        self.llenado = 0.0
+        self._queda = 0.0  # tiempo que queda para cerrar el puno
+
+    def actualizar(self, dt: float, mano, aspecto: float = 1.0) -> bool:
+        """True en el momento en que se cierra el puno despues de la palma."""
+        abierta = mano is not None and palma_abierta(mano) and de_frente(mano, aspecto)
+        if self.estado == "cierra":
+            if mano is not None and puno(mano):
+                self.reiniciar()
+                return True
+            if abierta:
+                self._queda = self.cerrar_s  # sigue abierta, se le espera
+            else:
+                self._queda -= dt
+                if self._queda <= 0:
+                    self.reiniciar()
+            return False
+        if abierta:
+            self.estado = "abriendo"
+            self.llenado += dt / self.abierta_s
+            if self.llenado >= 1:
+                self.estado, self.llenado, self._queda = "cierra", 1.0, self.cerrar_s
+        else:
+            self.reiniciar()
+        return False
+

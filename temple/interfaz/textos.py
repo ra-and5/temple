@@ -5,31 +5,28 @@ Estan juntos para que cambiar una frase o un formato se haga en un solo sitio.
 
 from __future__ import annotations
 
-from temple.progreso import LIBRE
+from temple.progreso import LIBRE  # noqa: F401
 
 DIAS = "LMXJVSD"  # iniciales de la semana, de lunes a domingo
 CORTES = (40, 65, 85)  # % para 1, 2 y 3 lotos (respiracion.estrellas y meditacion.lotos)
 
-# Fases que todavia no existen. Salen apagadas en la fila del ritual
-PROXIMAS = ()
-
-# Ayuda de la linea de abajo en cada pantalla
+# Ayuda de abajo, en dos lineas. Con la mano, para manejarlo de lejos, y con el
+# teclado solo los atajos que sirven en esa pantalla, para quien este cerca
+SENALA = "Señala un botón con el índice y espera"
+VOLVER = "Flechas y Enter  ·  Esc volver"
+PRACTICA = "Espacio pausar  ·  D datos de la cámara  ·  Esc salir"
 AYUDAS = {
-    "inicio": ("Señala un botón con el índice y espera",
-               "Flechas y Enter, o el ratón  ·  F pantalla completa  ·  M sonido  ·  Esc salir"),
-    "tutorial": ("Palma abierta y quieta para pausar",
-                 "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio"),
-    "sesion": ("Palma abierta y quieta para pausar",
-               "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio"),
-    "resultado": ("Señala un botón con el índice y espera",
-                  "Enter continuar  ·  Esc volver al inicio"),
+    "menu": (SENALA, "Flechas y Enter  ·  F pantalla completa  ·  M sonido  ·  Esc salir"),
+    "fases": (SENALA, VOLVER),
+    "progreso": (SENALA, VOLVER),
+    "ajustes": (SENALA, "Flechas y Enter  ·  Izquierda y derecha vueltas  ·  Esc volver"),
+    "salir": ("Señala Sí o No con el índice y espera", "Enter salir  ·  Esc seguir aquí"),
+    "previa": (SENALA, "Espacio empezar  ·  Izquierda y derecha nivel  ·  T tutorial  ·  Esc volver"),
+    "practica": ("Palma abierta y quieta para pausar", PRACTICA),
+    "resultado": (SENALA, "Espacio seguir  ·  Esc menú"),
 }
-AYUDA_PROGRESO = ("Señala Volver con el índice y espera",
-                  "Esc o Enter volver")
-AYUDA_SALIR = ("Señala Sí o No con el índice y espera",
-               "Enter salir  ·  Esc seguir aquí")
-AYUDA_PAUSA = ("Señala Seguir o Salir con el índice y espera",
-               "Espacio seguir  ·  Esc volver al inicio")
+AYUDA_PAUSA = ("Abre la palma y ciérrala en un puño para seguir, o señala un botón",
+               "Espacio seguir  ·  Esc salir")
 
 
 def minutos(m: float) -> str:

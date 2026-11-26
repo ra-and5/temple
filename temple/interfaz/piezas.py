@@ -37,12 +37,46 @@ def cabecera(p, texto) -> None:
                       espacio=3, centrado=True)
 
 
+# El circulo del centro de las fases, igual en todas. Su borde de arriba queda
+# por debajo de las dos lineas del detalle, para que nunca las pise
+CENTRO = (P.centerx, P.top + 332)
+RADIO = 88
+FIN_TEXTO = P.top + 220  # lo mas abajo que llega el detalle
+
+
+def partir(texto, fuente, ancho) -> list[str]:
+    """Parte un texto en lineas que caben en ese ancho, sin cortar palabras."""
+    lineas, actual = [], ""
+    for palabra in texto.split():
+        prueba = f"{actual} {palabra}".strip()
+        if actual and fuente.size(prueba)[0] > ancho:
+            lineas.append(actual)
+            actual = palabra
+        else:
+            actual = prueba
+    return lineas + [actual] if actual else lineas
+
+
+def parrafo(p, texto, tipo, tam, color, y, max_lineas=2, minimo=16, ancho=P.w - 70) -> int:
+    """Texto centrado en como mucho max_lineas. Si no cabe, se encoge. Devuelve la y de debajo."""
+    while True:
+        f = E.fuente(tipo, tam)
+        lineas = partir(texto, f, ancho)
+        if len(lineas) <= max_lineas or tam <= minimo:
+            break
+        tam -= 1
+    alto = int(f.get_linesize() * 1.05)
+    for i, t in enumerate(lineas[:max_lineas]):
+        s = f.render(t, True, color)
+        p.blit(s, s.get_rect(midtop=(P.centerx, y + i * alto)))
+    return y + alto * min(len(lineas), max_lineas)
+
+
 def instruccion(p, paso) -> None:
-    """Lo que hay que hacer ahora, en grande, y debajo el detalle."""
-    linea(p, paso.texto, "titulo", 52, E.CREMA, P.top + 84)
+    """Lo que hay que hacer ahora, en grande y en una linea, y debajo el detalle en dos."""
+    linea(p, paso.texto, "titulo", 52, E.CREMA, P.top + 80)
     if paso.detalle:
-        D.texto(p, E.fuente("texto", 26), paso.detalle, E.APAGADO, P.centerx, P.top + 156,
-                P.w - 70)
+        parrafo(p, paso.detalle, "texto", 24, E.APAGADO, P.top + 150)
 
 
 def chip(app, texto, color, suave=False) -> None:
@@ -106,9 +140,9 @@ def fila_lotos(p, y, hechos, total) -> None:
 
 # ---------- botones que comparten las fases ----------
 
-def botones_empezar(app, primera, aprender, empezar) -> None:
+def botones_empezar(app, primera, aprender, empezar, y=P.top + 128) -> None:
     """La primera vez se ofrece el tutorial, y despues la sesion."""
-    b, y = app.botonera, P.top + 128
+    b = app.botonera
     if primera:
         b.dibujar(app.pantalla, pygame.Rect(IZQ, y, ANCHO, 52), aprender, "Espacio",
                   lambda: app.empezar("tutorial"), True, "primera vez")
@@ -121,13 +155,13 @@ def botones_empezar(app, primera, aprender, empezar) -> None:
                   lambda: app.empezar("tutorial"))
 
 
-def fila_mas_menos(app, texto, nota, cambiar, grupo) -> None:
+def fila_mas_menos(app, texto, nota, cambiar, grupo, y=P.top + 318) -> None:
     """Fila de menos y mas (vueltas o minutos).
 
     Los botones van a los lados para que esten lejos entre si, y para el dedo
     cuenta la fila entera, mitad izquierda menos y mitad derecha mas.
     """
-    y, lado, mitad = P.top + 318, 92, ANCHO // 2
+    lado, mitad = 92, ANCHO // 2
     b = app.botonera
     b.dibujar(app.pantalla, pygame.Rect(IZQ, y, lado, 46), "−", None, lambda: cambiar(-1),
               centrado=True, zona=pygame.Rect(IZQ, y, mitad, 46), grupo=grupo)
@@ -136,7 +170,8 @@ def fila_mas_menos(app, texto, nota, cambiar, grupo) -> None:
               zona=pygame.Rect(IZQ + mitad, y, ANCHO - mitad, 46), grupo=grupo)
     D.texto(app.pantalla, E.fuente("negrita", 19), texto, E.CREMA, P.centerx, y + 4)
     if nota:
-        D.texto(app.pantalla, E.fuente("texto", 13), nota, E.APAGADO, P.centerx, y + 28)
+        D.texto(app.pantalla, E.fuente("texto", 13), nota, E.APAGADO, P.centerx, y + 28,
+                ANCHO - 2 * lado - 8)
 
 
 def botones_pausa(app, y=None, terminar=None) -> None:
@@ -154,21 +189,31 @@ def botones_pausa(app, y=None, terminar=None) -> None:
             linea(app.pantalla, "Si sales, esta sesión no se guarda", "texto", 15, E.APAGADO,
                   y - 30)
         b.dibujar(app.pantalla, pygame.Rect(P.right - 36 - ancho, y, ancho, 54), "Salir",
-                  "Esc", app.volver_inicio, grupo="pausa")
+                  "Esc", app.volver_previa, grupo="pausa")
 
 
-def botones_seguir(app, siguiente, accion) -> None:
-    """Lo siguiente del ritual (Meditar, Estirar) y al lado la vuelta al inicio."""
-    p, ancho = app.pantalla, (P.w - 72 - 12) // 2
-    app.botonera.dibujar(p, pygame.Rect(P.left + 36, P.bottom - 82, ancho + 40, 54),
-                         siguiente, "Espacio", accion, True, grupo="fin")
-    app.botonera.dibujar(p, pygame.Rect(P.right - 36 - ancho + 40, P.bottom - 82, ancho - 40, 54),
-                         "Inicio", "Esc", app.volver_inicio, grupo="fin")
+def botones_fin(app) -> None:
+    """Abajo del resultado. En el ritual, seguir con la siguiente fase o ir al menu.
+    Practicando una fase suelta, volver a ella o ir al menu."""
+    p = app.pantalla
+    siguiente = app.siguiente_del_ritual()
+    if siguiente is None and app.ritual:
+        app.botonera.dibujar(p, pygame.Rect(P.left + 36, P.bottom - 82, P.w - 72, 54),
+                             "Ritual de hoy completo", "Espacio", app.tras_resultado, True)
+        return
+    # Menu ocupa poco y deja sitio a "Seguir: Estiramientos", el texto mas largo
+    texto = f"Seguir: {siguiente.nombre}" if siguiente else "Otra vez"
+    menu = 136
+    app.botonera.dibujar(p, pygame.Rect(P.left + 36, P.bottom - 82, P.w - 72 - 12 - menu, 54),
+                         texto, "Espacio", app.tras_resultado, True, grupo="fin")
+    app.botonera.dibujar(p, pygame.Rect(P.right - 36 - menu, P.bottom - 82, menu, 54),
+                         "Menú", "Esc", app.ir_menu, grupo="fin")
 
 
-def boton_volver(app) -> None:
-    app.botonera.dibujar(app.pantalla, pygame.Rect(P.left + 36, P.bottom - 82, P.w - 72, 54),
-                         "Volver al inicio", "Espacio", app.volver_inicio, True)
+def boton_atras(app, texto="Volver", accion=None) -> None:
+    """Boton de abajo del todo para volver atras (Esc)."""
+    app.botonera.dibujar(app.pantalla, pygame.Rect(P.left + 36, P.bottom - 70, P.w - 72, 48),
+                         texto, "Esc", accion or app.atras)
 
 
 # ---------- resultado ----------

@@ -15,24 +15,49 @@ from pathlib import Path
 
 RUTA = Path(__file__).resolve().parent.parent / "datos" / "progreso.json"
 
-# Sesiones de respiracion con 3 estrellas que desbloquean la variante avanzada
-PERFECTAS_PARA_AVANZADA = 5
-# Las vueltas se eligen en el juego, pero solo las sesiones de al menos estas
-# cuentan para subir de nivel. Asi un dia con prisa vale para la racha sin
-# abaratar el reto
+# Las vueltas de respiracion se eligen en Ajustes, pero solo las sesiones de al
+# menos VUELTAS_NIVEL cuentan para subir. Asi un dia con prisa vale para la
+# racha sin abaratar el reto
 VUELTAS_MIN, VUELTAS_MAX, VUELTAS_NIVEL = 1, 9, 5
 
-# Meditacion. Una escalera de minutos que se va desbloqueando. Si una semana
-# (de lunes a domingo) meditas 5 dias con el escalon mas alto que tienes y
-# sacando al menos 2 lotos, la siguiente se desbloquea el de arriba. Despues
-# del ultimo llega el modo libre, sin cuenta atras. Nunca baja. Se puede elegir
-# menos tiempo (y 1, 2 o 3 minutos para un dia con prisa o para probar), pero
-# eso no cuenta para subir
+# La meditacion sube por esta escalera de minutos y al final llega el modo
+# libre, sin cuenta atras
 ESCALERA = (5, 8, 12, 17, 23, 30, 40)
-CORTOS = (1, 2, 3)
-LIBRE = 0  # en los ajustes y en las opciones, el modo sin cuenta atras
+LIBRE = 0
+
+# Una sola regla para subir de nivel en todas las fases. 5 dias distintos con
+# 3 lotos jugando tu nivel mas alto te suben al siguiente. Nunca baja
 DIAS_PARA_SUBIR = 5
-LOTOS_PARA_CONTAR = 2  # un dia de meditacion cuenta para subir con 2 lotos o mas
+LOTOS_PARA_SUBIR = 3
+
+# Los niveles de cada fase, del primero al ultimo. Los estiramientos tienen uno
+# solo, porque son el calentamiento antes de las flexiones y no un reto
+NIVELES = {
+    "respiracion": ("principiante", "avanzada"),
+    "meditacion": ESCALERA + (LIBRE,),
+    "estiramientos": (20,),  # segundos en cada postura
+    "flexiones": (("facil", 5), ("tecnico", 5), ("tecnico", 10)),  # tipo y repeticiones
+}
+
+
+def nivel_de_sesion(s: dict) -> int | None:
+    """El nivel al que se jugo una sesion, o None si no cuenta para subir.
+
+    Las sesiones nuevas lo guardan. Las de antes del 25/11 no, y se deduce de
+    lo que guardaban (variante, vueltas o minutos).
+    """
+    if s["fase"] == "respiracion" and s.get("vueltas", VUELTAS_NIVEL) < VUELTAS_NIVEL:
+        return None
+    if "nivel" in s:
+        return s["nivel"]
+    if s["fase"] == "respiracion":
+        return 1 if s["variante"] == "avanzada" else 0
+    if s["fase"] == "meditacion":
+        cumplidos = [i for i, m in enumerate(ESCALERA) if m <= s.get("minutos", 0) + 1e-6]
+        return cumplidos[-1] if cumplidos else None
+    if s["fase"] == "flexiones":
+        return 1 if s["variante"] == "tecnico" else 0
+    return 0
 
 
 @dataclass
@@ -65,7 +90,9 @@ class Progreso:
 
     def registrar(self, fase: str, variante: str, precision: float, estrellas: int,
                   dia: date | None = None, vueltas: int | None = None,
-                  minutos: float | None = None) -> None:
+                  minutos: float | None = None, nivel=...) -> None:
+        """Guarda una sesion. nivel es al que se ha jugado, o None si no cuenta para subir
+        (opciones de prueba como --minutos). Sin darlo, se deduce como en las antiguas."""
         sesion = {
             "fecha": (dia or date.today()).isoformat(),
             "fase": fase,
@@ -77,6 +104,8 @@ class Progreso:
             sesion["vueltas"] = vueltas
         if minutos is not None:
             sesion["minutos"] = round(minutos, 2)
+        if nivel is not ...:
+            sesion["nivel"] = nivel
         self.sesiones.append(sesion)
         self.guardar()
 
@@ -115,15 +144,6 @@ class Progreso:
     def vueltas(self, por_defecto: int) -> int:
         return self.ajustes.get("vueltas", por_defecto)
 
-    def perfectas(self, fase: str, variante: str) -> int:
-        """Sesiones con 3 estrellas y vueltas suficientes. Las antiguas sin vueltas valen."""
-        return sum(1 for s in self.sesiones
-                   if s["fase"] == fase and s["variante"] == variante and s["estrellas"] == 3
-                   and s.get("vueltas", VUELTAS_NIVEL) >= VUELTAS_NIVEL)
-
-    def avanzada_desbloqueada(self) -> bool:
-        return self.perfectas("respiracion", "principiante") >= PERFECTAS_PARA_AVANZADA
-
     def mejor(self, fase: str, variante: str) -> float | None:
         precisiones = [s["precision"] for s in self.sesiones
                        if s["fase"] == fase and s["variante"] == variante]
@@ -133,67 +153,51 @@ class Progreso:
         hoy = (hoy or date.today()).isoformat()
         return any(s["fecha"] == hoy and s["fase"] == fase for s in self.sesiones)
 
-    # ---- meditacion ----
+    # ---- niveles ----
 
-    def _dias_meditados(self, lunes: date, minutos: float) -> int:
-        """Dias de la semana que empieza en lunes con una sesion de al menos esos minutos."""
-        domingo = lunes + timedelta(days=6)
-        return len({s["fecha"] for s in self.sesiones
-                    if s["fase"] == "meditacion" and s.get("minutos", 0) >= minutos
-                    and s["estrellas"] >= LOTOS_PARA_CONTAR
-                    and lunes <= date.fromisoformat(s["fecha"]) <= domingo})
+    def _subida(self, fase: str) -> tuple[int, int]:
+        """(nivel desbloqueado, dias que ya cuentan para el siguiente).
 
-    def _escalon(self, hoy: date) -> int:
-        """Indice del escalon de esta semana. len(ESCALERA) es el modo libre."""
-        fechas = [date.fromisoformat(s["fecha"]) for s in self.sesiones
-                  if s["fase"] == "meditacion"]
-        n = 0
-        if not fechas:
-            return n
-        lunes_hoy = hoy - timedelta(days=hoy.weekday())
-        primera = min(fechas)
-        lunes = primera - timedelta(days=primera.weekday())
-        while lunes < lunes_hoy and n < len(ESCALERA):
-            if self._dias_meditados(lunes, ESCALERA[n]) >= DIAS_PARA_SUBIR:
-                n += 1
-            lunes += timedelta(days=7)
-        return n
+        Recorre las sesiones en orden. Cuenta los dias con 3 lotos jugando al
+        nivel mas alto que tenias ese dia, y con 5 sube y empieza de cero.
+        """
+        maximo = len(NIVELES[fase]) - 1
+        n, dias = 0, set()
+        for s in sorted(self.sesiones, key=lambda s: s["fecha"]):
+            if s["fase"] != fase or s["estrellas"] < LOTOS_PARA_SUBIR or n >= maximo:
+                continue
+            jugado = nivel_de_sesion(s)
+            if jugado is None or jugado < n:
+                continue
+            dias.add(s["fecha"])
+            if len(dias) >= DIAS_PARA_SUBIR:
+                n, dias = n + 1, set()
+        return n, len(dias)
 
-    def minutos_meditacion(self, hoy: date | None = None) -> int:
-        """El escalon mas alto desbloqueado (el ultimo si ya tienes el libre)."""
-        return ESCALERA[min(self._escalon(hoy or date.today()), len(ESCALERA) - 1)]
+    def nivel(self, fase: str) -> int:
+        """El nivel mas alto desbloqueado, empezando en 0."""
+        return self._subida(fase)[0]
 
-    def libre_desbloqueado(self, hoy: date | None = None) -> bool:
-        return self._escalon(hoy or date.today()) >= len(ESCALERA)
+    def dias_para_subir(self, fase: str) -> int:
+        """Dias que ya cuentan para el siguiente nivel, de 0 a DIAS_PARA_SUBIR - 1."""
+        return self._subida(fase)[1]
 
-    def siguiente_escalon(self, hoy: date | None = None) -> int | None:
-        """Minutos del escalon que se desbloquea, LIBRE para el libre, o None si ya esta todo."""
-        n = self._escalon(hoy or date.today())
-        if n >= len(ESCALERA):
-            return None
-        return ESCALERA[n + 1] if n + 1 < len(ESCALERA) else LIBRE
+    def nivel_maximo(self, fase: str) -> bool:
+        return self.nivel(fase) >= len(NIVELES[fase]) - 1
 
-    def opciones_minutos(self, hoy: date | None = None) -> list[int]:
-        hoy = hoy or date.today()
-        nivel = self.minutos_meditacion(hoy)
-        opciones = list(CORTOS) + [m for m in ESCALERA if m <= nivel]
-        if self.libre_desbloqueado(hoy):
-            opciones.append(LIBRE)
-        return opciones
+    def nivel_elegido(self, fase: str) -> int:
+        """El que se juega. El mas alto, salvo que hayas elegido uno mas bajo."""
+        elegido = self.ajustes.get("niveles", {}).get(fase)
+        alto = self.nivel(fase)
+        return alto if elegido is None else min(elegido, alto)
 
-    def minutos_elegidos(self, hoy: date | None = None) -> int:
-        """Los que elegiste la ultima vez si siguen disponibles, si no el escalon mas alto."""
-        elegido = self.ajustes.get("minutos")
-        return elegido if elegido in self.opciones_minutos(hoy) else self.minutos_meditacion(hoy)
-
-    def cambiar_minutos(self, paso: int, hoy: date | None = None) -> int:
-        opciones = self.opciones_minutos(hoy)
-        i = opciones.index(self.minutos_elegidos(hoy)) + paso
-        self.ajustes["minutos"] = opciones[min(max(i, 0), len(opciones) - 1)]
+    def elegir_nivel(self, fase: str, paso: int) -> int:
+        alto = self.nivel(fase)
+        n = min(max(self.nivel_elegido(fase) + paso, 0), alto)
+        niveles = self.ajustes.setdefault("niveles", {})
+        if n == alto:
+            niveles.pop(fase, None)  # sin guardar, asi sube solo al desbloquear otro
+        else:
+            niveles[fase] = n
         self.guardar()
-        return self.ajustes["minutos"]
-
-    def dias_meditados_semana(self, hoy: date | None = None) -> int:
-        hoy = hoy or date.today()
-        lunes = hoy - timedelta(days=hoy.weekday())
-        return self._dias_meditados(lunes, self.minutos_meditacion(hoy))
+        return n

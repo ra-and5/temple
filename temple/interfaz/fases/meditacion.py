@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-from datetime import date
 
 import pygame
 from mediapipe.python.solutions.hands import HAND_CONNECTIONS
@@ -16,8 +15,7 @@ from temple.interfaz import piezas as Z
 from temple.interfaz.fases.base import Fase
 from temple.interfaz.opciones import Opciones
 from temple.interfaz.textos import minutos as texto_minutos
-from temple.interfaz.textos import premio
-from temple.progreso import DIAS_PARA_SUBIR, LIBRE, LOTOS_PARA_CONTAR
+from temple.progreso import NIVELES
 
 P = E.PANEL
 INDICADORES = (("quieto", "Quieto"), ("recto", "Recto"), ("ojos", "Ojos cerrados"))
@@ -31,11 +29,12 @@ CONSEJOS = {  # dicho como lo que hay que hacer, no como el fallo
 class Meditacion(Fase):
     clave = "meditacion"
     nombre = "Meditación"
+    verbo = "Meditar"
     tecla = pygame.K_e
+    colocacion = "Sentado y de frente, que se te vea de la cintura para arriba"
     usa_cara = True
-    motivo_pausa = "Cierra los ojos para seguir, o señala un botón"
-    ayuda = ("Palma abierta y quieta, por encima de los hombros, para pausar",
-             "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio")
+    motivo_pausa = "Cierra los ojos, o abre la palma y cierra el puño, para seguir"
+    ayuda = "Palma abierta y quieta, por encima de los hombros, para pausar"
 
     def __init__(self, app, opciones: Opciones):
         super().__init__(app, M.PALMA_MEDITAR_S)
@@ -46,13 +45,12 @@ class Meditacion(Fase):
         self.reloj = 0.0  # tiempo del guion, se para en la pausa
         self.estado: M.Estado | None = None
         self._ojos_desde: float | None = None  # en la pausa, cerrar los ojos sigue
-        self.ofrecer_estirar = False  # al acabar, si lo siguiente del ritual es estirar
 
     @property
     def minutos(self) -> float:
         if self.minutos_fijos is not None:
             return self.minutos_fijos
-        return self.app.progreso.minutos_elegidos(date.today())
+        return NIVELES[self.clave][self.nivel]
 
     def _libre(self) -> bool:
         """Meditando sin cuenta atras. Se acaba con Terminar en la pausa."""
@@ -63,57 +61,13 @@ class Meditacion(Fase):
         self.app.pausa_manual = False
         self.practica.terminar(self.reloj)
 
-    # ================= inicio =================
-
-    def cambiar(self, paso: int) -> None:
-        self.minutos_fijos = None
-        self.app.progreso.cambiar_minutos(paso, date.today())
-
-    def resumen(self) -> str:
-        hoy = date.today()
-        siguiente = self.app.progreso.siguiente_escalon(hoy)
-        if siguiente is None:
-            return "Lo tienes todo. Medita sin límite"
-        dias = min(self.app.progreso.dias_meditados_semana(hoy), DIAS_PARA_SUBIR)
-        return f"{dias} de {DIAS_PARA_SUBIR} días esta semana para {premio(siguiente)}"
-
-    def panel_inicio(self) -> None:
-        app = self.app
-        primera = not app.progreso.tutorial_hecho(self.clave)
-        Z.botones_empezar(app, primera, "Aprender a meditar",
-                          f"Meditar {texto_minutos(self.minutos)}")
-        self._meta(P.top + 252)
-
-        # Minutos, como las vueltas. Solo salen los desbloqueados
-        m = self.minutos
-        hoy = date.today()
-        if m != LIBRE and m < app.progreso.minutos_meditacion(hoy):
-            nota = "no sube de nivel"
-        elif m == app.progreso.opciones_minutos(hoy)[-1]:
-            nota = "lo máximo que tienes"
-        else:
-            nota = ""
-        Z.fila_mas_menos(app, texto_minutos(m), nota, self.cambiar, "minutos")
-
-    def _meta(self, y) -> None:
-        """La meta de la semana en una frase, y debajo un loto por cada dia que ya cuenta."""
-        p, hoy = self.app.pantalla, date.today()
-        siguiente = self.app.progreso.siguiente_escalon(hoy)
-        if siguiente is None:
-            Z.linea(p, "Lo tienes todo. Medita sin límite", "texto", 16, E.ORO, y + 14)
-            return
-        dias = min(self.app.progreso.dias_meditados_semana(hoy), DIAS_PARA_SUBIR)
-        if dias >= DIAS_PARA_SUBIR:
-            texto, color = f"Meta cumplida. La semana que viene, {premio(siguiente)}", E.JADE
-        else:
-            texto, color = (f"{DIAS_PARA_SUBIR} días con {LOTOS_PARA_CONTAR} lotos "
-                            f"desbloquean {premio(siguiente)}"), E.APAGADO
-        Z.linea(p, texto, "texto", 15, color, y - 4)
-        Z.fila_lotos(p, y, dias, DIAS_PARA_SUBIR)
+    def nombre_nivel(self, n: int) -> str:
+        m = NIVELES[self.clave][n]
+        return "Sin límite" if m == 0 else texto_minutos(m)
 
     # ================= practica =================
 
-    def empezar(self, modo: str, variante: str) -> None:
+    def empezar(self, modo: str) -> None:
         pasos = M.guion_tutorial() if modo == "tutorial" else M.guion_sesion(self.minutos)
         self.practica = M.Practica(pasos)
         self._cerrar_registro()
@@ -151,9 +105,7 @@ class Meditacion(Fase):
         # La palma solo cuenta por encima de los hombros, para que las manos en
         # el regazo no pausen solas
         techo = min(lectura.hombros[0][1], lectura.hombros[1][1]) if lectura.hombros else -1
-        if self.palma.actualizar(dt, lectura.mano, lectura.nariz, lectura.escala, techo):
-            app.pausa_manual = True
-            app.sonido("toque")
+        if self.pausa_con_palma(dt, lectura, techo):
             return
 
         self.reloj += dt
@@ -192,31 +144,15 @@ class Meditacion(Fase):
         app.sonido("cuenco")
         app.camara.cara = False
         self._cerrar_registro()
+        self.estado = None
         if app.modo == "tutorial":
             app.progreso.marcar_tutorial(self.clave)
-            app.modo = "inicio"
-            app.elegir_fase(self.clave)
-            self.estado = None
-            app.avisar("Ya sabes meditar. Ahora, la sesión completa", 5)
+            app.fin_tutorial("Ya sabes meditar. Ahora, la sesión completa")
             return
         pr = self.practica
-        nivel = app.progreso.minutos_meditacion(date.today())
-        precision = pr.precision
-        n = M.lotos(precision)
-        mejor_antes = app.progreso.mejor(self.clave, "normal")
-        app.progreso.registrar(self.clave, "normal", precision, n, minutos=pr.minutos)
-        self.resultado = {
-            "precision": precision,
-            "estrellas": n,
-            "record": mejor_antes is not None and precision > mejor_antes,
-            "mal_s": dict(pr.mal_s),
-            "corta": pr.minutos < nivel,
-            "nivel": nivel,
-        }
-        # Despues de meditar, lo siguiente del ritual es estirar
-        self.ofrecer_estirar = not app.progreso.hecha_hoy("estiramientos")
+        self.guardar(pr.precision, M.lotos(pr.precision), minutos=pr.minutos)
+        self.resultado["mal_s"] = dict(pr.mal_s)
         app.modo = "resultado"
-        self.estado = None
 
     def lineas_datos(self) -> list[str]:
         if self.estado is None:
@@ -287,11 +223,11 @@ class Meditacion(Fase):
             # En el centro, a la altura de los hombros, que es donde llega el dedo
             # estando sentado cerca de la camara
             Z.botones_pausa(app, P.top + 250, self.terminar_libre if self._libre() else None)
-            D.texto(p, E.fuente("texto", 17), "o cierra los ojos 2 segundos para seguir",
+            D.texto(p, E.fuente("texto", 17), "o abre la palma y ciérrala en un puño, o cierra los ojos 2 s",
                     E.APAGADO, cx, P.top + 322, P.w - 60)
             return
 
-        centro, radio = (cx, P.top + 310), 88
+        centro, radio = Z.CENTRO, Z.RADIO
         if paso.tipo == "meditar":
             # El halo respira despacio (unas 6 veces por minuto) para acompañar
             D.halo(p, centro, 150, E.JADE, 0.35 + 0.25 * math.sin(app.t * 2 * math.pi / 10))
@@ -344,12 +280,10 @@ class Meditacion(Fase):
 
     # ================= resultado =================
 
-    def panel_resultado(self) -> None:
-        app, p = self.app, self.app.pantalla
-        r = self.resultado
-        Z.resultado(app, r, "Meditación completada",
+    def dibujar_resultado(self) -> None:
+        p, r = self.app.pantalla, self.resultado
+        Z.resultado(self.app, r, "Meditación completada",
                     "del tiempo quieto, recto y con los ojos cerrados")
-
         # Lo que mas puntos ha quitado, para saber que mejorar
         if r["estrellas"] < 3:
             peor = max(r["mal_s"], key=r["mal_s"].get)
@@ -357,34 +291,6 @@ class Meditacion(Fase):
             if segundos >= 1:
                 Z.linea(p, f"Para mejorar, {CONSEJOS[peor].format(segundos)}", "texto", 15,
                         E.APAGADO, P.top + 326)
-
-        # La meta de la semana, en una frase
-        hoy = date.today()
-        siguiente = app.progreso.siguiente_escalon(hoy)
-        dias = min(app.progreso.dias_meditados_semana(hoy), DIAS_PARA_SUBIR)
-        if siguiente is None:
-            texto, color = "Ya meditas sin límite. Cuida tu racha", E.ORO
-        elif r["corta"]:
-            texto, color = f"Con menos de {texto_minutos(r['nivel'])} el día no cuenta", E.APAGADO
-        elif r["estrellas"] < LOTOS_PARA_CONTAR:
-            texto, color = (f"Hacen falta {LOTOS_PARA_CONTAR} lotos para que el día cuente",
-                            E.APAGADO)
-        elif dias >= DIAS_PARA_SUBIR:
-            texto, color = f"Meta cumplida. La semana que viene, {premio(siguiente)}", E.AZAFRAN
-        else:
-            texto, color = f"Día contado, {dias} de {DIAS_PARA_SUBIR} esta semana", E.JADE
-        Z.linea(p, texto, "negrita", 16, color, P.top + 384)
-        if self.ofrecer_estirar:
-            Z.botones_seguir(app, "Estirar", self.accion_resultado)
-        else:
-            Z.boton_volver(app)
-
-    def accion_resultado(self) -> None:
-        if self.ofrecer_estirar:
-            self.app.elegir_fase("estiramientos")
-            self.app.accion_principal()
-        else:
-            self.app.volver_inicio()
 
 
 def _cuerpo(lectura) -> M.Cuerpo | None:

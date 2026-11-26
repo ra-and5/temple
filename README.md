@@ -23,21 +23,46 @@ Un ritual diario guiado por la cámara, que va de la calma al cuerpo. La cámara
 | **Estiramientos** | Siete posturas de cuello, hombros y brazos, sentado | ✅ |
 | **Flexiones** | En el suelo y de lado a la cámara. Cuenta las repeticiones y mira que bajes y que el cuerpo vaya recto | ✅ |
 
-Las cuatro fases tienen **tutorial** la primera vez, **lotos** de 0 a 3 según lo bien que lo haces, **racha** de días seguidos y los días de la semana practicados.
+### El juego en una frase
+
+> Cada fase te da de **0 a 3 lotos** según lo bien que lo hagas. **5 días con 3 lotos te suben de nivel.** Haz el ritual cada día para mantener la **racha**.
+
+Es la misma regla en todas las fases que suben, para que se entienda a la primera. Lo que cambia al subir depende de la fase.
+
+| Fase | Niveles |
+|---|---|
+| Respiración | Principiante → Avanzada (retienes 16 tiempos con los dos lados tapados) |
+| Meditación | 5 → 8 → 12 → 17 → 23 → 30 → 40 minutos → sin límite |
+| Estiramientos | Sin niveles. Son el calentamiento antes de las flexiones, para no lesionarse |
+| Flexiones | Fácil 5 → Técnico 5 → Técnico 10 |
+
+Los lotos salen del porcentaje del tiempo (o de las flexiones) que lo haces bien, con los mismos cortes en todas las fases (40, 65 y 85 %). Cada día cuenta una vez, y solo jugando tu nivel más alto. Se puede bajar de nivel para un día flojo, pero así no se sube. Nunca se pierde un nivel.
+
+### Las pantallas
+
+Como el menú de un videojuego, una cosa en cada pantalla.
+
+| Pantalla | Qué tiene |
+|---|---|
+| **Menú** | Ritual de hoy, Practicar una fase, Tu progreso, Ajustes y Salir. Arriba, las cuatro fases con la marca de las hechas hoy |
+| **Ritual de hoy** | Las cuatro fases seguidas, desde la primera que te falta. Antes de cada una, una pantalla dice cómo colocarte. En la fila de arriba (tu práctica de hoy) se puede elegir otra fase con el dedo, el ratón o las flechas, y el ritual empieza desde ella |
+| **Antes de empezar** | Cómo ponerte delante de la cámara (en las flexiones, una silueta de perfil sobre la imagen), lo que te falta para subir, el nivel y Empezar |
+| **Tu progreso** | La racha, los días de esta semana y el nivel de cada fase |
+| **Ajustes** | Sonido, pantalla completa y vueltas de respiración |
 
 ### Respiración
 
-Sigue el vídeo [Pranayama para principiantes (Anuloma Viloma)](https://www.youtube.com/watch?v=CacBxE8bXao), de Anabel Otero, que la recomienda justo antes de meditar. Cada vuelta es inhalar 4 tiempos por la izquierda, exhalar 8 por la derecha, inhalar 4 por la derecha y exhalar 8 por la izquierda. Se eligen de 1 a 9 vueltas (5 por defecto). Con 5 sesiones de 3 lotos se desbloquea la **avanzada**, que retiene 16 tiempos con los dos lados tapados.
+Sigue el vídeo [Pranayama para principiantes (Anuloma Viloma)](https://www.youtube.com/watch?v=CacBxE8bXao), de Anabel Otero, que la recomienda justo antes de meditar. Cada vuelta es inhalar 4 tiempos por la izquierda, exhalar 8 por la derecha, inhalar 4 por la derecha y exhalar 8 por la izquierda. Las vueltas se eligen en Ajustes, de 1 a 9 (5 por defecto). Con menos de 5 la sesión vale para la racha pero no para subir.
 
 La cámara no ve el aire. Comprueba qué lado tapas, y el ritmo lo marca el juego. Temple es una ayuda para practicar, no una herramienta médica.
 
 ### Meditación
 
-Al empezar mide tu postura recta y arranca cuando cierras los ojos. Si algo falla 3 s seguidos suenan dos golpes suaves, porque con los ojos cerrados no se ve la pantalla, y cada minuto una campana. El tiempo sube por una **escalera** de 5, 8, 12, 17, 23, 30 y 40 minutos, y después **sin límite**. Si una semana meditas 5 días con tu tiempo más alto y al menos 2 lotos, la siguiente se desbloquea el de arriba.
+Al empezar mide tu postura recta y arranca cuando cierras los ojos. Si algo falla 3 s seguidos suenan dos golpes suaves, porque con los ojos cerrados no se ve la pantalla, y cada minuto una campana. Cada nivel es más tiempo, y el último es **sin límite**, que se acaba con Terminar en la pausa.
 
 ### Estiramientos
 
-Siete posturas sentado, de 20 s cada una. La cuenta solo avanza mientras estás en la postura, y abajo te dice qué te falta ("Pon la mano sobre la cabeza", "Sujeta el codo con la otra mano"…). Sobre la cámara, una raya discontinua marca hasta dónde llegar.
+Siete posturas sentado, de 20 s cada una. No suben de nivel, porque no son un reto sino el calentamiento que prepara cuello, hombros y brazos antes de las flexiones. La cuenta solo avanza mientras estás en la postura, y abajo te dice qué te falta ("Pon la mano sobre la cabeza", "Sujeta el codo con la otra mano"…). Sobre la cámara, una raya discontinua marca hasta dónde llegar.
 
 | Postura | Cómo la reconoce la cámara |
 |---|---|
@@ -48,7 +73,7 @@ Siete posturas sentado, de 20 s cada una. La cuenta solo avanza mientras estás 
 
 ### Flexiones
 
-Se hacen en el suelo, con el portátil también en el suelo, de lado y a unos 2 m, para que la cámara te vea de la cabeza a los pies. Al empezar tienes 5 s para colocarte, y después hay que aguantar la plancha 2 s antes de que empiece a contar. Son 5 flexiones. Cada vez que completas una suena un tono, y si no ha salido bien suenan dos golpes, porque desde el suelo no se ve la pantalla.
+Se hacen en el suelo, con el portátil también en el suelo, de lado y a unos 2 m, para que la cámara te vea de la cabeza a los pies. Al empezar tienes 5 s para colocarte, y después hay que aguantar la plancha 2 s antes de que empiece a contar. Cada vez que completas una suena un tono, y si no ha salido bien suenan dos golpes, porque desde el suelo no se ve la pantalla.
 
 | Qué mira | Cómo lo mide la cámara |
 |---|---|
@@ -56,7 +81,7 @@ Se hacen en el suelo, con el portátil también en el suelo, de lado y a unos 2 
 | Que bajes hasta el suelo | Lo que le queda al hombro hasta la altura de la muñeca |
 | El cuerpo recto | Que la cadera no se salga de la línea entre el hombro y el tobillo |
 
-Hay dos niveles, que se cambian con los botones de menos y más del inicio. **Fácil** cuenta casi todo y es para quien está empezando. **Técnico** pide bajar hasta el suelo con el cuerpo recto. Cada nivel guarda su mejor marca.
+**Fácil** cuenta casi todo y es para quien está empezando. **Técnico** pide bajar hasta el suelo con el cuerpo recto.
 
 > Capturas pendientes. Se añadirán con el vídeo.
 
@@ -96,18 +121,31 @@ Borra el entorno y los modelos, y pregunta antes de borrar tu progreso. Si Minic
 
 ## Tu primera sesión
 
-Unos 25 minutos. Para que no se haga largo, arráncalo con la meditación y los estiramientos acortados.
+Unos 25 minutos con las duraciones de verdad.
 
 ```bash
-bash jugar.sh --segundos 5 --minutos 1
+bash jugar.sh
 ```
 
+### Probarlo entero en menos de 10 minutos
+
+Para corregir o enseñar el juego sin meditar 5 minutos ni hacer todas las vueltas, `--rapido` acorta todo a la vez. Son 1 vuelta de respiración, 1 minuto de meditación, 4 s por postura y 2 flexiones, y los mensajes entre paso y paso ("Prepárate", "Muy bien"…) duran 1,5 s en vez de 3 a 6 s. Se ven las cuatro fases con su tutorial, su sesión y su resultado, pero esas sesiones no cuentan para subir de nivel (el resultado lo dice).
+
+```bash
+bash jugar.sh --rapido
+```
+
+Se puede combinar con las demás opciones, y lo que se diga aparte manda (`bash jugar.sh --rapido --minutos 3`). Para ver una subida de nivel de verdad, sin `--rapido`, está la demo del final de [Cómo se maneja](#cómo-se-maneja).
+
+Los pasos, con o sin `--rapido`.
+
 1. **Colócate.** Sentado, a medio metro de la cámara y con luz de frente, de forma que se te vea de la cabeza al pecho y los codos.
-2. **Respiración.** Señala con el índice, apuntando a la pantalla, el botón "Aprender a respirar" y espera a que se rellene. El tutorial enseña a tapar cada lado. Después haz una sesión.
-3. **Meditación.** Al acabar la respiración, un botón te lleva a meditar. Haz el tutorial y una sesión con los ojos cerrados. Para pausar, palma abierta, quieta y por encima de los hombros. Para seguir, cierra los ojos 2 s.
-4. **Estiramientos.** Al acabar la meditación, un botón te lleva a estirar. Haz el tutorial y una sesión. Abajo te dice qué te falta en cada postura. Aquí se pausa con Espacio.
-5. **Flexiones.** Pon el portátil en el suelo, de lado y a unos 2 m. Elige el nivel Fácil, haz el tutorial y una sesión. Aquí se pausa con Espacio o levantándote.
-6. **Al acabar las cuatro**, el resultado dice "Ritual de hoy completo" y en el inicio sale tu racha.
+2. **Ritual de hoy.** En el menú, señala con el índice, apuntando a la pantalla, el botón "Ritual de hoy" y espera a que se rellene. Te lleva a la respiración.
+3. **Respiración.** Pulsa "Aprender con el tutorial", que enseña a tapar cada lado. Al acabar vuelves a la pantalla de la fase. Pulsa Empezar y haz la sesión.
+4. **Meditación.** En el resultado, "Seguir" te lleva a meditar. Tutorial y sesión con los ojos cerrados. Para pausar, palma abierta, quieta y por encima de los hombros. Para seguir, cierra los ojos 2 s.
+5. **Estiramientos.** Igual, tutorial y sesión. Abajo te dice qué te falta en cada postura. Para pausar, palma abierta y quieta cuando no estés en una postura.
+6. **Flexiones.** Pon el portátil en el suelo a unos 2 m y ponte **de perfil**, como la silueta que sale sobre la cámara. Tutorial y sesión. Para pausar, ponte de rodillas y enseña la palma, o levántate.
+7. **Al acabar las cuatro**, el resultado dice "Ritual de hoy completo" y vuelves al menú. En Tu progreso salen la racha y lo que te falta para subir en cada fase.
 
 Si algo tarda en reconocerse, la tecla **D** enseña los números que mide la cámara.
 
@@ -132,26 +170,29 @@ De lejos, con la mano. De cerca, con el teclado o el ratón, como cualquier prog
 
 | Gesto o tecla | Qué hace |
 |---|---|
-| Señalar un botón con el índice 1,5 s | Lo pulsa. El dedo tiene que apuntar a la pantalla o hacia arriba |
-| Palma abierta, de frente, quieta y lejos de la nariz | Pausa la respiración (1 s) y la meditación (1,5 s, por encima de los hombros) |
+| Señalar un botón con el índice 1,5 s | Lo pulsa. El dedo tiene que apuntar a la pantalla o hacia arriba. Si la mano no tiene forma de señalar, ni sale el cursor ni se elige nada |
+| Palma abierta, de frente, quieta y lejos de la nariz | Pausa en cualquier fase y en cualquier momento, tutorial o sesión (1 s, y 1,5 s por encima de los hombros al meditar). En los estiramientos, mientras haces bien una postura no cuenta |
+| En la pausa, abrir la palma de frente y cerrarla en un puño | Sigue. En la cámara se ve cada paso ("Para seguir, palma abierta…" y "Cierra el puño para seguir") |
 | Cerrar los ojos 2 s en la pausa de la meditación | Sigue meditando |
-| Espacio | Empezar, pausar o seguir. En los estiramientos y las flexiones es la única pausa, porque ahí las manos están ocupadas |
+| Espacio | Empezar, pausar o seguir |
 | Flechas o Tab, y Enter | Moverse entre los botones y pulsar |
 | Clic | Pulsar un botón |
-| R, E, I, X | Elegir respiración, meditación, estiramientos o flexiones en el inicio |
+| R, E, I, X | Abrir respiración, meditación, estiramientos o flexiones desde el menú |
+| ← → en la pantalla de una fase | Bajar o subir el nivel que juegas |
 | M | Sonido |
 | F | Pantalla completa, y otra vez para volver a la ventana |
-| Botón Tu progreso | La racha, la semana y lo que llevas de cada fase |
 | D | Ver los números que mide la cámara |
-| Esc | Volver al inicio. En el inicio pregunta si quieres salir, igual que el botón Salir |
+| Esc | Volver a la pantalla de antes. En el menú pregunta si quieres salir, igual que el botón Salir |
 
-Opciones para probar, que no cuentan para subir de nivel.
+Opciones para probar, que no cuentan para subir de nivel. Para enseñar el juego con unas semanas de progreso inventado, `python herramientas/crear_demo.py` y después `bash jugar.sh --datos datos/demo`.
 
 ```bash
+bash jugar.sh --rapido        # todo corto a la vez, para probarlo entero
 bash jugar.sh --vueltas 2     # respiración corta
 bash jugar.sh --avanzada      # respiración avanzada sin desbloquearla
 bash jugar.sh --minutos 1     # meditación corta (0 es sin límite)
 bash jugar.sh --segundos 5    # estiramientos cortos
+bash jugar.sh --flexiones 2   # flexiones cortas
 bash jugar.sh --camara 1      # otra cámara, si hay varias
 ```
 
@@ -165,9 +206,9 @@ El progreso se guarda en `datos/progreso.json`, en tu equipo. Cada meditación, 
 bash instalar.sh
 ```
 
-Son más de 100 y no necesitan cámara. Prueban la lógica de las cuatro fases con cuerpos inventados (cada postura, contar flexiones, la calibración, los avisos, la escalera de minutos y los desbloqueos), los gestos (señalar, la palma que pausa y la que solo pasa por delante, la mano apoyada en la cabeza), la navegación con el teclado y la instalación (los scripts, las versiones fijadas y que los modelos cargan). `tests/test_interfaz.py` abre la aplicación sin ventana con una cámara falsa y hace el ritual entero como un usuario, sin tocar tu progreso.
+Son 184 y no necesitan cámara. Prueban la lógica de las cuatro fases con cuerpos inventados (cada postura, contar flexiones, la calibración, los avisos, la escalera de minutos y la regla de los niveles), los gestos (señalar, la palma que pausa y la que solo pasa por delante, la mano apoyada en la cabeza), la navegación con el teclado y la instalación (los scripts, las versiones fijadas y que los modelos cargan). `tests/test_interfaz.py` abre la aplicación sin ventana con una cámara falsa y juega como un usuario, sin tocar tu progreso. Recorre todas las pantallas en todos sus estados y comprueba que en ningún botón el texto se sale o se pisa con la tecla. Hace el ritual entero (también elegido desde la fila de arriba con el dedo, el ratón y las flechas), cada fase del tutorial al resultado (en las flexiones, una persona de perfil que baja y sube, con la cadera recta o hundida), la pausa con la palma en las cuatro fases (al empezar y a mitad, en el tutorial y en la sesión, y seguir con la palma y el puño), con Espacio y al salir de la cámara, y comprueba que cerrar la ventana a mitad deja guardado el registro. Con `--rapido` comprueba que cada fase acorta sus textos y que las flexiones acaban en segundos sin subir de nivel. `tests/test_arranque.py` comprueba que las opciones de `main.py` (también `--rapido`) llegan a la aplicación y que la demo de `herramientas/crear_demo.py` deja una racha larga, los niveles subidos y hoy sin hacer.
 
-En GitHub se pasan solos en cada push (`.github/workflows/tests.yml`). Además, un Ubuntu y un Mac de GitHub ejecutan `instalar.sh` desde cero, arrancan con `jugar.sh` y lo quitan con `desinstalar.sh`, igual que un usuario nuevo.
+En GitHub se pasan solos en cada push (`.github/workflows/tests.yml`), midiendo con `coverage` qué parte del código prueban. El informe sale en el resumen de cada ejecución en la pestaña Actions. Lo único que no se puede probar sin una persona delante es la cámara y la ventana de verdad (`camara.py`, `vision.py` y `ventana.py`). Además, un Ubuntu y un Mac de GitHub ejecutan `instalar.sh` desde cero, arrancan con `jugar.sh` y lo quitan con `desinstalar.sh`, igual que un usuario nuevo.
 
 ## Arquitectura
 
@@ -185,16 +226,17 @@ temple/
   flexiones.py             cerebro  el ángulo del codo, lo que bajas, la cadera y el contador
   puntero.py               cerebro  señalar, el imán de los botones y la palma que pausa
   navegacion.py            cerebro  moverse por los botones con el teclado
-  progreso.py              cerebro  historial, racha, lotos, escalera y desbloqueos en JSON
+  progreso.py              cerebro  historial, racha y la regla única de niveles, en JSON
   interfaz/
-    app.py                 el bucle, las teclas, la pausa y el cambio de pantalla
+    app.py                 el bucle, las teclas, la pausa, el ritual y el cambio de pantalla
+    menus.py               menú, practicar una fase, antes de empezar, progreso, ajustes y salir
     fases/                 una clase por fase (respiración, meditación, estiramientos y flexiones)
-    inicio.py, marco.py, botones.py, piezas.py, textos.py, dibujo.py, estilo.py, sonido.py
+    marco.py, botones.py, piezas.py, textos.py, dibujo.py, estilo.py, sonido.py
 herramientas/              scripts de los experimentos
 tests/
 ```
 
-La aplicación no sabe nada de respirar ni de estirar. Le pide a la fase activa lo suyo (sus botones del inicio, su panel, lo que dibuja sobre la cámara y su resultado). Los estiramientos y las flexiones entraron así, con su lógica en `temple/`, su clase en `temple/interfaz/fases/` y una línea en la lista `FASES`, sin tocar las otras fases.
+La aplicación no sabe nada de respirar ni de estirar. Le pide a la fase activa lo suyo (cómo colocarse, qué cambia en cada nivel, su panel, lo que dibuja sobre la cámara y su resultado). Guardar la sesión con la regla de los niveles es común a todas, en la clase base. Los estiramientos y las flexiones entraron así, con su lógica en `temple/`, su clase en `temple/interfaz/fases/` y una línea en la lista `FASES`, sin tocar las otras fases.
 
 La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por fotograma. El modelo de cara solo trabaja al meditar.
 
@@ -213,8 +255,8 @@ La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por f
 | "Sujeta el codo" mira la muñeca más cercana al codo del otro brazo | Con los brazos cruzados MediaPipe intercambia a ratos qué muñeca es cuál |
 | Señalar solo cuenta con el índice estirado, los demás dedos cerrados y apuntando a la pantalla o hacia arriba | Con la mano apoyada en la cabeza se pulsaban botones solos |
 | La palma que pausa tiene que estar de frente, quieta y lejos de la nariz | Al bajar la mano después de meditar saltaba la pausa. Una mano que pide pausa está quieta, una que baja no |
-| En los estiramientos la palma no pausa | Las manos están siempre abiertas por arriba, en la cabeza o en el codo |
-| Cada texto en un hueco fijo de una línea que se encoge si no cabe | Así nada se pisa, diga lo que diga |
+| En los estiramientos la palma pausa, salvo mientras haces bien una postura | En las posturas la mano está abierta en la cabeza o arriba. Fuera de ellas, la palma quieta es una petición de pausa, igual que en las otras fases |
+| Cada texto en un hueco fijo que se encoge si no cabe (el título en una línea y el detalle en dos), y el círculo de todas las fases a la misma altura, por debajo | Así nada se pisa, diga lo que diga. Un test recorre los textos de todos los pasos y falla si alguno llegaría al círculo |
 | Una clase por fase y la aplicación solo habla con la fase activa | `app.py` había llegado a 1.300 líneas con dos fases mezcladas |
 | Instalación con Conda y conda-forge, y tests en GitHub en Ubuntu y Mac | Es lo más parecido al equipo limpio que pide la entrega, y conda-forge no pide aceptar condiciones |
 | Sonidos generados con numpy | No hace falta ningún archivo de audio |
@@ -223,6 +265,12 @@ La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por f
 | Una flexión cuenta al bajar de un ángulo y volver a subir de otro distinto | Si fuera el mismo, un temblor del codo contaría dos flexiones |
 | 5 s para colocarse y 2 s de plancha antes de contar | En la primera prueba contaba una flexión mientras nos tumbábamos |
 | Dos niveles en las flexiones | Con los límites del nivel técnico, alguien que empieza no sumaba casi ninguna |
+| En las flexiones, la mediana de los últimos 5 fotogramas, un fallo de menos de 0,3 s no reinicia la plancha y una flexión de menos de 0,4 s no cuenta | En nuestra prueba del 25/11 el ángulo del codo bailaba de 126° a 172° con los brazos estirados, la plancha tardó 18 s en darse por buena y un salto suelto contó una flexión que no existía |
+| Una sola regla para subir de nivel en las cuatro fases (5 días con 3 lotos) | Antes cada fase tenía la suya (sesiones, semanas, mejor marca). Con una sola se explica en una frase y es coherente (consistencia, heurística de Nielsen) |
+| Menú por pantallas en lugar de un inicio con todo | El inicio tenía once cosas a la vez y con el dedo costaba atinar. Una cosa en cada pantalla (diseño minimalista, heurística de Nielsen) y botones grandes y separados |
+| Seguir desde la pausa con la palma abierta y luego el puño | Un gesto en dos tiempos no salta solo, y se ve en la cámara en qué paso vas |
+| Los estiramientos no suben de nivel | Son el calentamiento antes de las flexiones. Hacerlos más largos no es un reto que tenga sentido |
+| Antes de cada fase, cómo colocarse y una silueta en las flexiones | Al probar las flexiones nos pusimos de frente a la cámara en vez de de perfil |
 | Fondo en tonos de piedra y letra más grande en las sesiones | El violeta no recordaba a un templo, y a 1-2 m la letra pequeña no se leía |
 
 ## Tecnología

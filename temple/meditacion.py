@@ -220,7 +220,7 @@ def guion_tutorial() -> list[Paso]:
         Paso("esperar", "Cierra los ojos", "Cuando suene la campanita, ábrelos",
              objetivo="ojos", espera_max=ESPERA_OJOS_S),
         Paso("mensaje", "Gana lotos", "Hasta tres, cuanto más rato lo hagas bien", duracion=5),
-        Paso("mensaje", "Tu meta", "5 días con 2 lotos en una semana te dan más minutos",
+        Paso("mensaje", "Tu meta", "5 días con 3 lotos te suben de nivel",
              duracion=6),
     ]
 

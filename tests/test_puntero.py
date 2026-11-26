@@ -1,7 +1,7 @@
 import unittest
 
-from temple.puntero import (GestoPalma, Puntero, a_area, apunta_a_pantalla, distancia_a_rect,
-                            palma_abierta, senala, senalando)
+from temple.puntero import (GestoPalma, GestoPuno, Puntero, a_area, apunta_a_pantalla, de_frente, distancia_a_rect,
+                            palma_abierta, puno, senala, senalando)
 
 AREA = (0, 0, 1280, 720)
 ARRIBA = (100, 100, 400, 60)
@@ -100,6 +100,21 @@ class TestPuntero(unittest.TestCase):
         pulsos = correr(p, 0.7, mano_hacia(300, 130), [ARRIBA])
         self.assertEqual(pulsos.count(0), 1)
 
+    def test_otro_boton_cuenta_como_soltar(self):
+        p = Puntero(AREA, espera_s=1.0)
+        correr(p, 0.5, mano_hacia(300, 130, puno=True), [ARRIBA, ABAJO])
+        self.assertIn(0, correr(p, 1.2, mano_hacia(300, 130), [ARRIBA, ABAJO]))
+        # Sin bajar la mano, al otro boton (como el Si de salir)
+        self.assertIn(1, correr(p, 1.5, mano_hacia(300, 430), [ARRIBA, ABAJO]))
+
+    def test_boton_nuevo_en_el_mismo_sitio_pide_soltar(self):
+        p = Puntero(AREA, espera_s=1.0)
+        correr(p, 0.5, mano_hacia(300, 130, puno=True), [ARRIBA])
+        self.assertIn(0, correr(p, 1.2, mano_hacia(300, 130), [ARRIBA]))
+        # La pantalla cambia y debajo del dedo queda otro boton que pisa al de antes
+        otro = (150, 110, 300, 60)
+        self.assertNotIn(0, correr(p, 3, mano_hacia(300, 130), [otro]))
+
     def test_parpadeo_corto_no_borra_la_espera(self):
         p = Puntero(AREA, espera_s=1.0)
         correr(p, 0.5, mano_hacia(300, 130, puno=True), [ARRIBA])
@@ -177,6 +192,15 @@ class TestPalma(unittest.TestCase):
         mano[5], mano[17] = (0.7, 0.6), (0.71, 0.6)  # la mano se ve estrecha
         self.assertFalse(any(g.actualizar(DT, mano, (0.5, 0.2), 0.3) for _ in range(100)))
 
+    def test_de_frente_en_imagen_ancha(self):
+        """Medidas de la palma de Rares el 25/11 en una imagen 4:3. En 0 a 1 se ve
+        estrecha (0.53), pero en proporcion real es de frente (0.71) y pausa."""
+        mano = mano_en(0.7, 0.5, abierta=True)
+        mano[0], mano[9] = (0.70, 0.60), (0.70, 0.45)  # muneca y centro, 0.15 de alto
+        mano[5], mano[17] = (0.66, 0.46), (0.74, 0.46)  # nudillos, 0.08 de ancho
+        self.assertFalse(de_frente(mano))
+        self.assertTrue(de_frente(mano, aspecto=4 / 3))
+
     def test_mano_que_baja_no_pausa(self):
         """Al bajar la mano abierta despues de meditar no se pausa (Rares, 19/11)."""
         g = GestoPalma(0.5)
@@ -217,3 +241,48 @@ class TestArreglosMeditacion(unittest.TestCase):
         mano = mano_en(0.5, 0.4, abierta=True)  # centro de la palma en y = 0.5
         self.assertFalse(any(g.actualizar(0.1, mano, techo=0.3) for _ in range(20)))
         self.assertTrue(any(g.actualizar(0.1, mano, techo=0.7) for _ in range(20)))
+
+
+class TestPalmaYPuno(unittest.TestCase):
+    """Seguir desde la pausa abriendo la palma y cerrando el puno (pedido por Rares, 25/11)."""
+
+    ABIERTA = mano_en(0.6, 0.5, abierta=True)
+    PUNO = mano_en(0.6, 0.5, puno=True)
+    SENALA = mano_en(0.6, 0.5)
+
+    def correr(self, g, segundos, mano):
+        return [g.actualizar(DT, mano) for _ in range(int(segundos / DT))]
+
+    def test_reconoce_el_puno(self):
+        self.assertTrue(puno(self.PUNO))
+        self.assertFalse(puno(self.SENALA))
+        self.assertFalse(puno(self.ABIERTA))
+
+    def test_palma_y_luego_puno_sigue(self):
+        g = GestoPuno()
+        self.assertFalse(any(self.correr(g, 0.5, self.ABIERTA)))
+        self.assertEqual(g.estado, "cierra")
+        self.assertTrue(any(self.correr(g, 0.2, self.PUNO)))
+        self.assertEqual(g.estado, "nada")
+
+    def test_solo_el_puno_no_sigue(self):
+        g = GestoPuno()
+        self.assertFalse(any(self.correr(g, 2, self.PUNO)))
+
+    def test_palma_muy_corta_no_vale(self):
+        g = GestoPuno()
+        self.correr(g, 0.2, self.ABIERTA)
+        self.assertEqual(g.estado, "abriendo")
+        self.assertFalse(any(self.correr(g, 0.5, self.PUNO)))
+
+    def test_senalar_no_sigue(self):
+        g = GestoPuno()
+        self.assertFalse(any(self.correr(g, 3, self.SENALA)))
+
+    def test_si_tarda_en_cerrar_se_olvida(self):
+        g = GestoPuno(cerrar_s=1.0)
+        self.correr(g, 0.5, self.ABIERTA)
+        self.correr(g, 1.5, None)  # baja la mano
+        self.assertEqual(g.estado, "nada")
+        self.assertFalse(any(self.correr(g, 0.5, self.PUNO)))
+

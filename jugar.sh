@@ -2,6 +2,7 @@
 # Arranca Temple con el entorno que crea instalar.sh, sin tener que activarlo.
 #
 #   bash jugar.sh
+#   bash jugar.sh --rapido         todo corto, para probarlo entero en unos minutos
 #   bash jugar.sh --minutos 1      cualquier opcion de main.py (python main.py --help)
 
 set -euo pipefail

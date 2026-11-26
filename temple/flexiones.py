@@ -1,5 +1,6 @@
 import csv
 import math
+from statistics import median
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -9,6 +10,10 @@ NIVELES = {
 }
 REPETICIONES = 5
 SOSTENER_S = 2.0
+# Arreglos tras la prueba de Rares del 25/11 (datos/ultimas_flexiones.csv)
+SUAVIZAR = 5  # fotogramas para la mediana. El angulo del codo bailaba de 126 a 172 grados
+TOLERANCIA_S = 0.3  # un parpadeo fuera de la plancha no reinicia la cuenta de 2 s
+MIN_FLEXION_S = 0.4  # bajar y subir mas rapido que esto es ruido, no una flexion
 REGISTRO = Path(__file__).resolve().parent.parent / "datos" / "ultimas_flexiones.csv"
 
 
@@ -98,7 +103,7 @@ class Paso:
 def guion_sesion(repeticiones=REPETICIONES):
     return [
         Paso("mensaje", "Prepárate", "Tienes 5 segundos para ponerte en el suelo", duracion=5),
-        Paso("esperar", "Ponte de lado", "Que se te vea de la cabeza a los pies",
+        Paso("esperar", "Ponte de perfil", "Que se te vea de la cabeza a los pies",
              objetivo="cuerpo"),
         Paso("esperar", "Brazos estirados", "El cuerpo recto, como una tabla",
              objetivo="plancha"),
@@ -110,9 +115,9 @@ def guion_sesion(repeticiones=REPETICIONES):
 
 def guion_tutorial():
     return [
-        Paso("mensaje", "Flexiones", "Pon el portátil en el suelo, a tu lado", duracion=5),
+        Paso("mensaje", "Flexiones", "Portátil en el suelo, a unos 2 metros", duracion=5),
         Paso("mensaje", "Prepárate", "Tienes 5 segundos para ponerte en el suelo", duracion=5),
-        Paso("esperar", "Ponte de lado", "Que se te vea de la cabeza a los pies",
+        Paso("esperar", "Ponte de perfil", "Que se te vea de la cabeza a los pies",
              objetivo="cuerpo"),
         Paso("esperar", "Brazos estirados", "El cuerpo recto, como una tabla",
              objetivo="plancha"),
@@ -152,6 +157,9 @@ class Practica:
     abajo: bool = False
     profunda: bool = False
     recta: bool = True
+    fuera_desde: float = -1.0
+    bajada_t: float = -1.0
+    historia: list = field(default_factory=list)
     hechas: int = 0
     buenas: int = 0
     fallos: dict = field(default_factory=dict)
@@ -170,10 +178,22 @@ class Practica:
         self.indice += 1
         self.inicio = t
         self.desde = -1.0
+        self.fuera_desde = -1.0
         self.llevas = 0
         self.abajo = False
 
-    def contar(self, m):
+    def suavizar(self, m):
+        """Mediana de los ultimos fotogramas, para que un salto suelto no cuente."""
+        if not m.cuerpo:
+            self.historia.clear()
+            return m
+        self.historia = (self.historia + [m])[-SUAVIZAR:]
+        return Medida(cuerpo=True,
+                      codo=median(h.codo for h in self.historia),
+                      profundidad=median(h.profundidad for h in self.historia),
+                      cadera=median(h.cadera for h in self.historia))
+
+    def contar(self, m, t):
         u = NIVELES[self.nivel]
         if not m.cuerpo:
             return False, ""
@@ -181,6 +201,7 @@ class Practica:
         if not self.abajo:
             if m.codo <= u["abajo"]:
                 self.abajo = True
+                self.bajada_t = t
                 self.profunda = False
                 self.recta = True
             return False, ""
@@ -194,6 +215,8 @@ class Practica:
             return False, ""
 
         self.abajo = False
+        if t - self.bajada_t < MIN_FLEXION_S:
+            return False, ""  # demasiado rapida, era ruido
         self.llevas += 1
         self.hechas += 1
 
@@ -211,7 +234,7 @@ class Practica:
     def actualizar(self, t, cuerpo):
         if self.inicio < 0:
             self.inicio = t
-        m = medir(cuerpo)
+        m = self.suavizar(medir(cuerpo))
         total = len(self.pasos)
 
         if self.indice >= total:
@@ -232,18 +255,22 @@ class Practica:
 
         if paso.tipo == "esperar":
             if falta(paso.objetivo, m, self.nivel) is None:
+                self.fuera_desde = -1.0
                 if self.desde < 0:
                     self.desde = t
-                hecho = min((t - self.desde) / self.sostener_s, 1.0)
-            else:
-                self.desde = -1.0
-                hecho = 0.0
+            elif self.desde >= 0:
+                # Un momento fuera se perdona. Si dura, se empieza de cero
+                if self.fuera_desde < 0:
+                    self.fuera_desde = t
+                if t - self.fuera_desde > TOLERANCIA_S:
+                    self.desde = self.fuera_desde = -1.0
+            hecho = 0.0 if self.desde < 0 else min((t - self.desde) / self.sostener_s, 1.0)
             if hecho >= 1.0:
                 self.siguiente_paso(t)
             return Estado(paso, indice, total, hecho, m, self.hechas, self.buenas,
                           nuevo_paso=nuevo)
 
-        flexion, fallo = self.contar(m)
+        flexion, fallo = self.contar(m, t)
         abajo = self.abajo
         hecho = min(self.llevas / paso.repeticiones, 1.0)
         if self.llevas >= paso.repeticiones:

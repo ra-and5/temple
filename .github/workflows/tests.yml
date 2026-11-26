@@ -1,7 +1,8 @@
 # Comprueba Temple en equipos limpios de GitHub cada vez que se sube codigo.
 # Si algo se rompe, el commit sale con una cruz roja en GitHub y llega un correo.
 #
-#   tests        los tests rapidos, instalando con pip (unos 2 minutos)
+#   tests        los tests rapidos, instalando con pip (unos 2 minutos), con el informe
+#                de cobertura (que parte del codigo prueban) en el resumen de cada run
 #   instalacion  lo que haria un usuario nuevo en Ubuntu y en macOS. bash instalar.sh
 #                desde cero (instala Miniconda, el entorno y los modelos y pasa
 #                todos los tests, tambien el que carga los modelos de verdad),
@@ -38,8 +39,21 @@ jobs:
       - name: Instalar las dependencias
         run: pip install -r requirements.txt
 
-      - name: Pasar los tests
-        run: python -m unittest discover tests -v
+      - name: Instalar coverage (solo aqui, para medir que parte del codigo prueban los tests)
+        run: pip install coverage==7.6.10
+
+      - name: Pasar los tests midiendo la cobertura
+        run: coverage run --source=temple,main -m unittest discover tests -v
+
+      - name: Informe de cobertura en el resumen del run
+        if: always()
+        run: |
+          coverage report -m
+          echo "## Cobertura de los tests" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "La camara y la ventana de verdad (camara.py, vision.py y ventana.py) solo se prueban con la persona delante." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
 
   instalacion:
     strategy:

@@ -110,5 +110,33 @@ class TestContar(unittest.TestCase):
         self.assertEqual(sum(1 for e in estados if e.flexion), 2)
 
 
+class TestRuido(unittest.TestCase):
+    """Lo que paso en la prueba de Rares del 25/11 con la camara."""
+
+    # El mensaje dura 5 s y colocarse 2 s, asi que a los 7,5 s se esta en la plancha
+    COLOCARSE = [ARRIBA] * 75
+
+    def test_un_parpadeo_no_reinicia_la_plancha(self):
+        p = F.Practica(F.guion_sesion(3), "facil")
+        # 1 s en plancha, dos fotogramas con el codo doblado y otros 1,2 s
+        correr(p, self.COLOCARSE + [ARRIBA] * 10 + [ABAJO] * 2 + [ARRIBA] * 12)
+        self.assertEqual(p.pasos[p.indice].tipo, "contar")
+
+    def test_salir_de_la_plancha_un_rato_si_reinicia(self):
+        p = F.Practica(F.guion_sesion(3), "facil")
+        correr(p, self.COLOCARSE + [ARRIBA] * 10 + [ABAJO] * 8 + [ARRIBA] * 8)
+        self.assertEqual(p.pasos[p.indice].objetivo, "plancha")
+
+    def test_un_salto_del_codo_no_es_una_flexion(self):
+        p = sesion()
+        correr(p, [ARRIBA] * 5 + [ABAJO] + [ARRIBA] * 10)
+        self.assertEqual(p.hechas, 0)
+
+    def test_una_flexion_demasiado_rapida_no_cuenta(self):
+        p = sesion()
+        correr(p, [ARRIBA] * 5 + [ABAJO] * 3 + [ARRIBA] * 10)
+        self.assertEqual(p.hechas, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

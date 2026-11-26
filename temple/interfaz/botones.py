@@ -17,6 +17,9 @@ from temple.interfaz import estilo as E
 from temple.puntero import Puntero
 
 REPETIBLES = ("vueltas", "minutos")  # grupos cuyo menos y mas se repiten sin soltar el dedo
+MARGEN = 24  # hueco entre el borde del boton y lo de dentro
+HUECO = 14  # entre el texto y la tecla o la etiqueta
+LETRA, LETRA_MIN = 19, 15  # tamano del texto, y lo mas que se reduce si no cabe
 
 
 @dataclass
@@ -25,6 +28,9 @@ class Boton:
     accion: Callable[[], None]
     zona: pygame.Rect | None = None  # donde cuenta el dedo, si es distinta del dibujo
     grupo: str | None = None  # botones de la misma fila para el teclado
+    texto: str = ""
+    piezas: tuple[pygame.Rect, ...] = ()  # donde quedo el texto, la tecla y la etiqueta
+    letra: int = LETRA  # tamano con el que cupo el texto
 
 
 class Botonera:
@@ -107,25 +113,80 @@ class Botonera:
             pygame.draw.rect(capa, borde, r, 2 if marcado else 1, border_radius=radio)
         destino.blit(capa, rect.topleft)
 
-        s = E.fuente("negrita", 19).render(texto, True, col_texto)
+        # De derecha a izquierda. La tecla, la etiqueta y lo que queda para el texto
+        derecha = rect.right - MARGEN
+        izquierda = rect.x + MARGEN + (38 if icono and not centrado else 0)
+        k = E.fuente("texto", 15).render(tecla, True, col_tecla) if tecla else None
+        e = E.fuente("negrita", 12).render(etiqueta.upper(), True, E.NOCHE_ARRIBA) if etiqueta else None
+        caja = e.get_rect().inflate(14, 6) if e else None
+        ancho = E.fuente("negrita", LETRA).size(texto)[0]
+
+        def sitio(con_tecla: bool) -> int:
+            fin = derecha
+            if con_tecla and k:
+                fin -= k.get_width() + HUECO
+            if caja:
+                fin -= caja.w + HUECO
+            return fin - izquierda
+
+        if k and ancho > sitio(True):
+            k = None  # si no cabe, fuera la tecla. Sigue funcionando y sale en la ayuda de abajo
+        letra = LETRA
         if centrado:
-            destino.blit(s, s.get_rect(center=rect.center))
+            hueco = rect.w - 2 * min(MARGEN, rect.w // 4)
         else:
-            x = rect.x + 26
+            hueco = sitio(False)
+        while letra > LETRA_MIN and E.fuente("negrita", letra).size(texto)[0] > hueco:
+            letra -= 1
+        s = E.fuente("negrita", letra).render(texto, True, col_texto)
+
+        piezas = []
+        if centrado:
+            sr = s.get_rect(center=rect.center)
+        else:
             if icono:
-                icono((x + 10, rect.centery))
-                x += 38
-            destino.blit(s, s.get_rect(midleft=(x, rect.centery)))
-        if tecla:
-            k = E.fuente("texto", 15).render(tecla, True, col_tecla)
-            destino.blit(k, k.get_rect(midright=(rect.right - 24, rect.centery)))
-        if etiqueta:
-            e = E.fuente("negrita", 12).render(etiqueta.upper(), True, E.NOCHE_ARRIBA)
-            caja = e.get_rect().inflate(14, 6)
-            caja.midright = (rect.right - 88, rect.centery)  # dentro, junto a la tecla
+                icono((rect.x + MARGEN + 10, rect.centery))
+            sr = s.get_rect(midleft=(izquierda, rect.centery))
+        destino.blit(s, sr)
+        piezas.append(sr)
+        if k:
+            kr = k.get_rect(midright=(derecha, rect.centery))
+            destino.blit(k, kr)
+            piezas.append(kr)
+            derecha = kr.left - HUECO
+        if caja:
+            caja.midright = (derecha, rect.centery)  # dentro, junto a la tecla
             pygame.draw.rect(destino, E.ORO, caja, border_radius=caja.h // 2)
             destino.blit(e, e.get_rect(center=caja.center))
-        self.anadir(Boton(rect, accion, zona, grupo))
+            piezas.append(caja)
+        self.anadir(Boton(rect, accion, zona, grupo, texto, tuple(piezas), letra))
+
+    def casilla(self, destino, rect, texto, accion, grupo=None) -> Boton:
+        """Boton sin forma propia, como los puntos del ritual en el menu.
+
+        Solo dibuja el fondo cuando esta marcado o el raton o el dedo estan
+        encima, y lo apunta como cualquier boton. Lo de dentro lo dibuja quien
+        lo llama, que puede apuntar en piezas donde lo ha puesto.
+        """
+        indice = len(self.lista)
+        por_dedo = self.por_dedo(indice)
+        marcado = por_dedo or self.foco == indice
+        encima = marcado or rect.collidepoint(self.raton())
+        capa = pygame.Surface(rect.size, pygame.SRCALPHA)
+        r, radio = capa.get_rect(), 16
+        if encima:
+            pygame.draw.rect(capa, (*E.ORO, 46), r, border_radius=radio)
+        if por_dedo and self.puntero.llenado > 0:
+            relleno = pygame.Surface(rect.size, pygame.SRCALPHA)
+            pygame.draw.rect(relleno, (255, 255, 255, 45), r, border_radius=radio)
+            capa.blit(relleno, (0, 0), pygame.Rect(0, 0, int(rect.w * min(1.0, self.puntero.llenado)),
+                                                   rect.h))
+        if marcado:
+            pygame.draw.rect(capa, (*E.CREMA, 230), r, 2, border_radius=radio)
+        destino.blit(capa, rect.topleft)
+        boton = Boton(rect, accion, None, grupo, texto)
+        self.anadir(boton)
+        return boton
 
     # ---- pulsar ----
 

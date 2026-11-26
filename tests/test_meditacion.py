@@ -2,13 +2,10 @@
     python -m unittest discover tests
 """
 
-import tempfile
 import unittest
-from datetime import date, timedelta
-from pathlib import Path
 
 from temple import meditacion as M
-from temple.progreso import CORTOS, ESCALERA, LIBRE, Progreso
+from temple.progreso import LIBRE
 
 FPS = 20
 
@@ -157,84 +154,6 @@ class TestLibre(unittest.TestCase):
         self.assertEqual(pr.pasos[pr._indice].tipo, "mensaje")
         _, t = correr(pr, t, 7, recto())
         self.assertTrue(pr.actualizar(t + 0.1, recto()).terminado)
-
-
-class TestNivelMeditacion(unittest.TestCase):
-    def setUp(self):
-        self.dir = tempfile.TemporaryDirectory()
-        self.p = Progreso.cargar(Path(self.dir.name) / "progreso.json")
-        self.lunes = date(2026, 11, 9)
-
-    def tearDown(self):
-        self.dir.cleanup()
-
-    def meditar(self, dia, minutos):
-        self.p.registrar("meditacion", "normal", 0.9, 3, dia, minutos=minutos)
-
-    def semana_completa(self, semana, minutos):
-        lunes = self.lunes + timedelta(days=7 * semana)
-        for i in range(5):
-            self.meditar(lunes + timedelta(days=i), minutos)
-
-    def test_empieza_en_el_primer_escalon(self):
-        self.assertEqual(self.p.minutos_meditacion(self.lunes), ESCALERA[0])
-        self.assertEqual(self.p.siguiente_escalon(self.lunes), ESCALERA[1])
-
-    def test_cinco_dias_desbloquean_el_siguiente(self):
-        self.semana_completa(0, 5)
-        self.assertEqual(self.p.minutos_meditacion(self.lunes + timedelta(days=6)), 5)
-        self.assertEqual(self.p.minutos_meditacion(self.lunes + timedelta(days=7)), ESCALERA[1])
-
-    def test_cuatro_dias_no_suben(self):
-        for i in range(4):
-            self.meditar(self.lunes + timedelta(days=i), 5)
-        self.assertEqual(self.p.minutos_meditacion(self.lunes + timedelta(days=7)), 5)
-
-    def test_sesiones_cortas_no_cuentan(self):
-        self.semana_completa(0, 1)
-        self.assertEqual(self.p.minutos_meditacion(self.lunes + timedelta(days=7)), 5)
-        self.assertEqual(self.p.dias_meditados_semana(self.lunes + timedelta(days=5)), 0)
-
-    def test_hace_falta_meditar_el_escalon_de_esa_semana(self):
-        self.semana_completa(0, 5)
-        self.semana_completa(1, 5)  # la segunda semana tocaban 8
-        self.assertEqual(self.p.minutos_meditacion(self.lunes + timedelta(days=14)), ESCALERA[1])
-
-    def test_toda_la_escalera_y_el_libre(self):
-        for n, m in enumerate(ESCALERA):
-            self.semana_completa(n, m)
-        despues = self.lunes + timedelta(days=7 * len(ESCALERA))
-        self.assertEqual(self.p.minutos_meditacion(despues), ESCALERA[-1])
-        self.assertTrue(self.p.libre_desbloqueado(despues))
-        self.assertIsNone(self.p.siguiente_escalon(despues))
-        self.assertEqual(self.p.opciones_minutos(despues)[-1], LIBRE)
-
-    def test_el_ultimo_escalon_desbloquea_el_libre(self):
-        for n, m in enumerate(ESCALERA[:-1]):
-            self.semana_completa(n, m)
-        hoy = self.lunes + timedelta(days=7 * (len(ESCALERA) - 1))
-        self.assertEqual(self.p.minutos_meditacion(hoy), ESCALERA[-1])
-        self.assertEqual(self.p.siguiente_escalon(hoy), LIBRE)
-        self.assertFalse(self.p.libre_desbloqueado(hoy))
-
-    def test_elegir_minutos(self):
-        self.assertEqual(self.p.opciones_minutos(self.lunes), list(CORTOS) + [5])
-        self.assertEqual(self.p.minutos_elegidos(self.lunes), 5)
-        self.assertEqual(self.p.cambiar_minutos(-1, self.lunes), 3)
-        self.assertEqual(self.p.cambiar_minutos(-5, self.lunes), 1)
-        self.assertEqual(self.p.cambiar_minutos(9, self.lunes), 5)  # no pasa de lo desbloqueado
-
-    def test_un_loto_no_cuenta(self):
-        for i in range(5):
-            self.p.registrar("meditacion", "normal", 0.5, 1, self.lunes + timedelta(days=i),
-                             minutos=5)
-        self.assertEqual(self.p.dias_meditados_semana(self.lunes + timedelta(days=5)), 0)
-        self.assertEqual(self.p.minutos_meditacion(self.lunes + timedelta(days=7)), 5)
-
-    def test_dos_sesiones_el_mismo_dia_cuentan_uno(self):
-        self.meditar(self.lunes, 5)
-        self.meditar(self.lunes, 5)
-        self.assertEqual(self.p.dias_meditados_semana(self.lunes), 1)
 
 
 if __name__ == "__main__":

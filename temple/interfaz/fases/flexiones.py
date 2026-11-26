@@ -1,4 +1,3 @@
-import math
 
 import pygame
 
@@ -8,12 +7,12 @@ from temple.interfaz import estilo as E
 from temple.interfaz import marco
 from temple.interfaz import piezas as Z
 from temple.interfaz.fases.base import Fase
+from temple.progreso import NIVELES
 from temple.puntero import PALMA_S
 
 P = E.PANEL
 
 NOMBRES = {"facil": "Fácil", "tecnico": "Técnico"}
-NOTAS = {"facil": "cuenta casi todo", "tecnico": "hasta el suelo y con el cuerpo recto"}
 
 CONSEJOS = {
     "poco profunda": "Para mejorar, baja hasta el suelo",
@@ -24,10 +23,10 @@ CONSEJOS = {
 class Flexiones(Fase):
     clave = "flexiones"
     nombre = "Flexiones"
+    verbo = "Empezar"
     tecla = pygame.K_x
-    motivo_pausa = "Señala Seguir con el índice y espera"
-    ayuda = ("Levántate o sal de la cámara para pausar",
-             "Espacio pausar  ·  D datos de la cámara  ·  M sonido  ·  Esc volver al inicio")
+    colocacion = "Portátil en el suelo, a 2 m. Ponte de perfil, que te vea de la cabeza a los pies"
+    ayuda = "Palma abierta y quieta, o sal de la cámara, para pausar"
 
     def __init__(self, app, opciones):
         super().__init__(app, PALMA_S)
@@ -36,40 +35,47 @@ class Flexiones(Fase):
         self.registro = None
         self.reloj = 0.0
         self.ultimo = ""
-        self.nivel = "facil"
         self.ruta_registro = opciones.datos / F.REGISTRO.name
+        self.flexiones_fijas = opciones.flexiones  # --flexiones para probar
 
-    def cambiar(self, paso):
-        if self.nivel == "facil":
-            self.nivel = "tecnico"
-        else:
-            self.nivel = "facil"
+    @property
+    def variante(self):
+        return NIVELES[self.clave][self.nivel][0]
 
-    def resumen(self):
-        mejor = self.app.progreso.mejor(self.clave, self.nivel)
-        if mejor is None:
-            return "Todavía sin sesiones"
-        return f"Tu mejor marca, {math.floor(mejor * 100)} % de flexiones buenas"
+    def nombre_nivel(self, n):
+        tipo, repeticiones = NIVELES[self.clave][n]
+        return f"{NOMBRES[tipo]}, {repeticiones} flexiones"
 
-    def panel_inicio(self):
-        app = self.app
-        p = app.pantalla
-        primera = not app.progreso.tutorial_hecho(self.clave)
-        Z.botones_empezar(app, primera, "Aprender flexiones", "Empezar flexiones")
-        Z.linea(p, self.resumen() if not primera else
-                f"{F.REPETICIONES} flexiones en el suelo. Gana hasta 3 lotos",
-                "texto", 15, E.APAGADO, P.top + 248)
-        Z.linea(p, "Portátil en el suelo, de lado, a unos 2 metros", "texto", 15, E.CREMA,
-                P.top + 280)
-        Z.fila_mas_menos(app, f"Nivel {NOMBRES[self.nivel]}", NOTAS[self.nivel], self.cambiar,
-                         "nivel")
+    def guia(self, img):
+        """Una silueta de perfil en plancha, para ver como ponerse."""
+        w, h = img.get_size()
+        capa = pygame.Surface((w, h), pygame.SRCALPHA)
+        col = (*E.ORO, 200)
+        suelo = int(h * 0.86)
+        cabeza = (int(w * 0.265), int(h * 0.605))
+        hombro = (int(w * 0.30), int(h * 0.64))
+        cadera = (int(w * 0.56), int(h * 0.72))
+        tobillo = (int(w * 0.80), int(h * 0.80))
+        mano = (int(w * 0.30), suelo)
+        pygame.draw.line(capa, (*E.ORO_SUAVE, 120), (int(w * 0.08), suelo),
+                         (int(w * 0.92), suelo), 2)
+        pygame.draw.circle(capa, col, cabeza, int(h * 0.04), 4)
+        for a, b in ((hombro, cadera), (cadera, tobillo), (hombro, mano)):
+            pygame.draw.line(capa, col, a, b, 6)
+        pygame.draw.line(capa, col, tobillo, (tobillo[0] + 6, suelo), 6)
+        D.texto(capa, E.fuente("negrita", 24), "Ponte así, de perfil", E.CREMA, w // 2,
+                int(h * 0.12))
+        D.texto(capa, E.fuente("texto", 18), "con el portátil en el suelo, a unos 2 metros",
+                E.APAGADO, w // 2, int(h * 0.12) + 34)
+        img.blit(capa, (0, 0))
 
-    def empezar(self, modo, variante):
+    def empezar(self, modo):
+        tipo, repeticiones = NIVELES[self.clave][self.nivel]
         if modo == "tutorial":
             pasos = F.guion_tutorial()
         else:
-            pasos = F.guion_sesion()
-        self.practica = F.Practica(pasos, self.nivel)
+            pasos = F.guion_sesion(self.flexiones_fijas or repeticiones)
+        self.practica = F.Practica(pasos, tipo)
         self.cerrar_registro()
         self.registro = F.Registro(self.ruta_registro)
         self.estado = None
@@ -91,8 +97,10 @@ class Flexiones(Fase):
             return
         contando = self.estado is not None and self.estado.paso.tipo == "contar"
         app.vigilar(not lectura.cuerpo and contando)
-        self.palma.actualizar(0, None)
         if app.pausado():
+            self.palma.actualizar(0, None)
+            return
+        if self.pausa_con_palma(dt, lectura):
             return
 
         self.reloj += dt
@@ -118,32 +126,22 @@ class Flexiones(Fase):
         app = self.app
         app.sonido("cuenco")
         self.cerrar_registro()
+        self.estado = None
         if app.modo == "tutorial":
             app.progreso.marcar_tutorial(self.clave)
-            app.modo = "inicio"
-            app.elegir_fase(self.clave)
-            self.estado = None
-            app.avisar("Ya sabes hacer flexiones. Ahora, la sesión completa", 5)
+            app.fin_tutorial("Ya sabes hacer flexiones. Ahora, la sesión completa")
             return
         precision = self.practica.precision()
-        n = F.lotos(precision)
-        mejor_antes = app.progreso.mejor(self.clave, self.nivel)
-        app.progreso.registrar(self.clave, self.nivel, precision, n)
-        self.resultado = {
-            "precision": precision,
-            "estrellas": n,
-            "record": mejor_antes is not None and precision > mejor_antes,
-            "peor": self.practica.peor(),
-        }
+        self.guardar(precision, F.lotos(precision))
+        self.resultado["peor"] = self.practica.peor()
         app.modo = "resultado"
-        self.estado = None
 
     def lineas_datos(self):
         if self.estado is None:
             return []
         m = self.estado.medida
-        u = F.NIVELES[self.nivel]
-        return [f"nivel {NOMBRES[self.nivel]}",
+        u = F.NIVELES[self.variante]
+        return [f"nivel {NOMBRES[self.variante]}",
                 f"codo {m.codo:.0f}  (abajo <= {u['abajo']}, arriba >= {u['arriba']})",
                 f"profundidad {m.profundidad:.2f}  (suelo <= {u['profundo']})",
                 f"cadera {m.cadera:.2f}  (recta entre -{u['cadera']} y {u['cadera']})"]
@@ -157,7 +155,7 @@ class Flexiones(Fase):
         else:
             lado = 1
         m = self.estado.medida
-        if abs(m.cadera) <= F.NIVELES[self.nivel]["cadera"]:
+        if abs(m.cadera) <= F.NIVELES[self.variante]["cadera"]:
             color = E.JADE
         else:
             color = E.ORO
@@ -193,8 +191,7 @@ class Flexiones(Fase):
             Z.botones_pausa(app, P.top + 250)
             return
 
-        centro = (P.centerx, P.top + 310)
-        radio = 88
+        centro, radio = Z.CENTRO, Z.RADIO
         if paso.tipo == "contar":
             D.enso(p, centro, radio, 1, E.ORO_SUAVE, 12, 45)
             D.enso(p, centro, radio, e.hecho, E.JADE, 14)
@@ -217,28 +214,18 @@ class Flexiones(Fase):
             elif self.ultimo == "cadera":
                 Z.chip(app, "Cadera recta", E.TERRACOTA)
         elif paso.tipo == "esperar":
-            falta = F.falta(paso.objetivo, e.medida, self.nivel)
+            falta = F.falta(paso.objetivo, e.medida, self.variante)
             if falta and e.hecho == 0:
                 Z.chip(app, falta, E.CREMA, suave=True)
         else:
             Z.barra_mensaje(p, e.hecho)
 
-    def panel_resultado(self):
+    def dibujar_resultado(self):
         app = self.app
-        p = app.pantalla
         r = self.resultado
         Z.resultado(app, r, "Flexiones completadas", "de las flexiones fueron buenas")
         if r["estrellas"] < 3 and r["peor"]:
-            Z.linea(p, CONSEJOS[r["peor"]], "texto", 15, E.APAGADO, P.top + 326)
-
-        faltan = [f.nombre.lower() for f in app.fases.values()
-                  if not app.progreso.hecha_hoy(f.clave)]
-        if not faltan:
-            texto, color = "Ritual de hoy completo", E.ORO
-        else:
-            texto, color = f"Hoy aún te queda {' y '.join(faltan)}", E.APAGADO
-        Z.linea(p, texto, "negrita", 16, color, P.top + 384)
-        Z.boton_volver(app)
+            Z.linea(app.pantalla, CONSEJOS[r["peor"]], "texto", 15, E.APAGADO, P.top + 326)
 
 
 def cuerpo_de(lectura):

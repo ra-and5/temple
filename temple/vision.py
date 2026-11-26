@@ -64,6 +64,7 @@ class Lectura:
     perdida_s: float = 0.0  # segundos sin ver la mano
     hombros: tuple[tuple[float, float], tuple[float, float]] | None = None
     ojos: float | None = None  # 0 abiertos, 1 cerrados (solo con el modelo de cara)
+    aspecto: float = 1.0  # ancho / alto de la imagen, para medir la mano en proporcion real
     # Para los estiramientos. Cada par va en el mismo orden que los hombros
     orejas: tuple[tuple[float, float], tuple[float, float]] | None = None
     codos: tuple[tuple[float, float], tuple[float, float]] | None = None
@@ -157,6 +158,8 @@ class Detector:
                 valores = {b.category_name: b.score for b in res_cara.face_blendshapes[0]}
                 ojos = (valores.get("eyeBlinkLeft", 0) + valores.get("eyeBlinkRight", 0)) / 2
         ahora = time.monotonic()
+        alto, ancho = frame_bgr.shape[:2]
+        aspecto = ancho / alto if alto else 1.0
 
         # La mano se devuelve aunque no haya cuerpo, porque los menus se
         # manejan con el dedo y ahi da igual que no se vean los hombros
@@ -167,12 +170,14 @@ class Detector:
         puntos_3d = ([(q.x, q.y, q.z) for q in res_manos.hand_world_landmarks[0]]
                      if res_manos.hand_world_landmarks else None)
         if not res_pose.pose_landmarks:
-            return Lectura(tapado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
+            return Lectura(tapado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos,
+                           aspecto=aspecto)
         p = res_pose.pose_landmarks[0]
         nariz = p[NARIZ]
         escala = _distancia(p[HOMBRO_IZQ], p[HOMBRO_DER])
         if escala < 1e-3:
-            return Lectura(tapado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos)
+            return Lectura(tapado=None, mano=puntos_mano, mano_3d=puntos_3d, ojos=ojos,
+                           aspecto=aspecto)
         pos_nariz = (nariz.x, nariz.y)
         hombros = ((p[HOMBRO_IZQ].x, p[HOMBRO_IZQ].y), (p[HOMBRO_DER].x, p[HOMBRO_DER].y))
 
@@ -196,7 +201,7 @@ class Detector:
                 self._estable = "ninguno"
                 self._historial.clear()
             return Lectura(tapado=self._estable, nariz=pos_nariz, escala=escala,
-                           perdida_s=perdida, hombros=hombros, ojos=ojos, **cuerpo)
+                           perdida_s=perdida, hombros=hombros, ojos=ojos, aspecto=aspecto, **cuerpo)
 
         self._visto_mano = ahora
         mano = res_manos.hand_landmarks[0]
@@ -217,6 +222,7 @@ class Detector:
             mano_3d=puntos_3d,
             hombros=hombros,
             ojos=ojos,
+            aspecto=aspecto,
             **cuerpo,
         )
 

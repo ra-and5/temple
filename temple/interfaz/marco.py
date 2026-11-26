@@ -15,14 +15,14 @@ from mediapipe.python.solutions.hands import HAND_CONNECTIONS
 from temple import meditacion as M
 from temple.interfaz import dibujo as D
 from temple.interfaz import estilo as E
-from temple.interfaz.textos import AYUDA_PAUSA, AYUDA_PROGRESO, AYUDA_SALIR, AYUDAS
+from temple.interfaz.textos import AYUDA_PAUSA, AYUDAS
 
 
 def barra_superior(app) -> None:
     p = app.pantalla
     D.loto(p, (62, 62), 30)
     ancho = D.texto_espaciado(p, E.fuente("titulo", 34), "TEMPLE", E.CREMA, (92, 26), espacio=6)
-    lema = E.fuente("cursiva", 22).render("respira · medita · estira, con tu cámara", True,
+    lema = E.fuente("cursiva", 22).render("respira · medita · estira · fortalece", True,
                                           E.ORO_SUAVE)
     p.blit(lema, (92 + ancho + 24, 36))
     racha = app.progreso.racha(date.today())
@@ -84,6 +84,8 @@ def camara(app, frame, lectura) -> None:
     elif practicando:
         app.fase.pistas(img, lectura)
     else:
+        if app.modo == "previa":
+            app.fase.guia(img)  # como colocarse, antes de empezar
         mano(img, lectura)
     img.blit(app.mascara_cam, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
     p.blit(img, E.CAMARA.topleft)
@@ -133,15 +135,16 @@ def datos(app, lectura) -> None:
 # ---------- abajo y encima ----------
 
 def pie(app) -> None:
-    mano, teclado = AYUDAS[app.modo]
-    if app.modo in ("tutorial", "sesion") and app.fase.ayuda:
-        mano, teclado = app.fase.ayuda
+    """La ayuda de abajo. Una linea para la mano y otra para el teclado."""
     if app.pausa_manual:
         mano, teclado = AYUDA_PAUSA
-    if app.modo == "inicio" and app.preguntando_salir:
-        mano, teclado = AYUDA_SALIR
-    if app.modo == "inicio" and app.viendo_progreso:
-        mano, teclado = AYUDA_PROGRESO
+    elif app.modo in ("tutorial", "sesion"):
+        mano, teclado = AYUDAS["practica"]
+        mano = app.fase.ayuda or mano
+    else:
+        mano, teclado = AYUDAS[app.modo]
+        if app.modo == "previa" and not app.fase.con_niveles:
+            teclado = "Espacio empezar  ·  T tutorial  ·  Esc volver"
     filas = [("CON LA MANO", mano, E.CREMA), ("TECLADO", teclado, E.APAGADO)]
     etiquetas = [E.fuente("negrita", 15).render(e, True, E.ORO_SUAVE) for e, _, _ in filas]
     textos = [E.fuente("texto", 18).render(t, True, c) for _, t, c in filas]
@@ -173,22 +176,41 @@ def aviso(app) -> None:
 
 
 def gestos(app, lectura) -> None:
-    """Anillo de la palma mientras se aguanta, y el punto del dedo en los menus."""
+    """Lo que hace la mano, dibujado sobre ella.
+
+    Practicando, el aro de la palma que pausa. En la pausa, la palma abierta
+    y despues el puno que sigue. En los menus, el punto del dedo, y solo si
+    la mano tiene forma de senalar.
+    """
     p = app.pantalla
+    practicando = app.modo in ("tutorial", "sesion")
     palma = app.fase.palma
-    if palma.llenado > 0 and lectura.mano:
-        x, y = lectura.mano[9]
-        c = (E.CAMARA.x + int(x * E.CAMARA.w), E.CAMARA.y + int(y * E.CAMARA.h))
-        D.enso(p, c, 46, 1, E.ORO_SUAVE, 4, 120)
-        D.enso(p, c, 46, palma.llenado, E.LAVANDA, 7)
-        D.texto(p, E.fuente("negrita", 16), "Pausa", E.CREMA, c[0], c[1] + 54)
+    if practicando and not app.pausado() and palma.llenado > 0 and lectura.mano:
+        _aro(p, lectura.mano, palma.llenado, E.LAVANDA, "Pausa")
+    puno = app.puno
+    if practicando and app.pausa_manual and lectura.mano and puno.estado != "nada":
+        if puno.estado == "abriendo":
+            _aro(p, lectura.mano, puno.llenado, E.JADE, "Para seguir, palma abierta…")
+        else:
+            _aro(p, lectura.mano, 1, E.JADE, "Cierra el puño para seguir")
     puntero = app.botonera.puntero
-    if app.menu_activo() and puntero.pos is not None:
+    if app.menu_activo() and puntero.pos is not None and puntero.senala:
         # Solo un punto discreto. Lo importante es el boton que resalta el iman
         c = (int(puntero.pos[0]), int(puntero.pos[1]))
-        # Apagado si la mano no senala, para que se note que asi no pulsa
-        alfa = 170 if puntero.senala else 55
         capa = pygame.Surface((24, 24), pygame.SRCALPHA)
-        pygame.draw.circle(capa, (*E.CREMA, alfa), (12, 12), 6)
-        pygame.draw.circle(capa, (*E.NOCHE_ARRIBA, alfa), (12, 12), 7, 1)
+        pygame.draw.circle(capa, (*E.CREMA, 200), (12, 12), 6)
+        pygame.draw.circle(capa, (*E.NOCHE_ARRIBA, 200), (12, 12), 7, 1)
         p.blit(capa, (c[0] - 12, c[1] - 12))
+
+
+def _aro(p, mano, llenado, color, texto) -> None:
+    """Un aro alrededor del centro de la palma que se llena, con su texto debajo."""
+    x, y = mano[9]
+    c = (E.CAMARA.x + int(x * E.CAMARA.w), E.CAMARA.y + int(y * E.CAMARA.h))
+    D.enso(p, c, 46, 1, E.ORO_SUAVE, 4, 120)
+    D.enso(p, c, 46, llenado, color, 7)
+    s = E.fuente("negrita", 18).render(texto, True, E.NOCHE_ARRIBA)
+    caja = s.get_rect(midtop=(c[0], c[1] + 56)).inflate(20, 8)
+    caja.clamp_ip(E.CAMARA)  # con la mano en un borde, el texto no se sale de la camara
+    pygame.draw.rect(p, color, caja, border_radius=caja.h // 2)
+    p.blit(s, s.get_rect(center=caja.center))
