@@ -301,4 +301,4 @@ La cámara y los modelos van en un hilo aparte porque tardan de 30 a 50 ms por f
 ## Autores
 
 - Rares Andrei Mocanu
-- Nikolas Kaplan
+- Nikolas Moses Kaplan
