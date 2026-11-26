@@ -25,7 +25,22 @@ Un ritual diario de cuatro fases que va de la calma al cuerpo. La cámara no se 
 
 Es un **juego serio** porque no está hecho solo para entretener. Sirve para crear un hábito sano. Temple es una ayuda para practicar y no sustituye a un profesional de la salud.
 
-> **Documentación.** Para usarlo, sigue este README. Para ver cómo funciona por dentro (la cámara, cada fase y cada archivo), [docs/como-funciona.md](docs/como-funciona.md). Para saber por qué está hecho así, [docs/decisiones.md](docs/decisiones.md).
+## Cómo está hecho
+
+Usamos tres modelos de [MediaPipe](https://ai.google.dev/edge/mediapipe) ya entrenados. **Pose** da 33 puntos del cuerpo, **Hands** 21 puntos de cada mano y **Face** dice si los ojos están cerrados. No entrenamos nada. Encima ponemos reglas con distancias y ángulos entre esos puntos, medidas en anchos de hombros para que dé igual lo lejos que estés.
+
+El código va en tres capas.
+
+| Capa | Dónde | Qué hace |
+|---|---|---|
+| Ojos | `temple/camara.py` y `temple/vision.py` | Leen la cámara en un hilo aparte y sacan los puntos |
+| Cerebro | Una lógica por fase en `temple/`, más los gestos y el progreso | Deciden qué pasa. No saben que existe una pantalla, así que se prueban sin cámara |
+| Interfaz | `temple/interfaz/` | Dibuja y suena con Pygame. Una clase por fase |
+
+Todo está explicado en dos guías.
+
+- **[Cómo funciona por dentro](docs/como-funciona.md).** Cómo ve la cámara, qué mide cada fase, una foto de principio a fin, lo que hemos aplicado de la asignatura y qué hace cada archivo.
+- **[Decisiones](docs/decisiones.md).** Todas las decisiones, con el problema que las provocó y lo que descartamos.
 
 ## La respiración alterna
 
@@ -191,37 +206,6 @@ De lejos, con la mano. De cerca, con el teclado o el ratón, como cualquier prog
 | **Antes de empezar** | Cómo colocarte, el nivel, lo que te falta para subir y Empezar |
 | **Tu progreso** | La racha, los días de esta semana y el nivel de cada fase |
 | **Ajustes** | Sonido, pantalla completa y vueltas de respiración |
-
-## Si algo falla
-
-| Qué pasa | Qué hacer |
-|---|---|
-| «No se puede abrir la cámara» | Cierra las videollamadas. Si tienes varias cámaras, prueba `bash jugar.sh --camara 1` |
-| «La cámara no da imagen» en macOS | Ajustes del Sistema → Privacidad y seguridad → Cámara. Activa la Terminal y vuelve a abrir Temple |
-| En un Mac coge la cámara del iPhone | `bash jugar.sh --camara 1` |
-| «Faltan los modelos de MediaPipe» o «Temple no está instalado» | `bash instalar.sh` |
-| «No te veo» | Aléjate un poco y pon luz de frente |
-| «No te veo entero» en las flexiones | Aléjate hasta que se te vean los pies, con el portátil en el suelo y de lado |
-| «No veo tu mano, aléjate un poco» | Muy cerca solo se ve el dedo y no la mano entera |
-| Señalas y no se pulsa | Índice estirado hacia la pantalla o hacia arriba, los demás dedos cerrados, y quieto 1,5 s |
-| La instalación falla en los tests | Copia lo que sale en la terminal y abre un *issue* |
-
-## Cómo está hecho
-
-Usamos tres modelos de [MediaPipe](https://ai.google.dev/edge/mediapipe) ya entrenados. **Pose** da 33 puntos del cuerpo, **Hands** 21 puntos de cada mano y **Face** dice si los ojos están cerrados. No entrenamos nada. Encima ponemos reglas con distancias y ángulos entre esos puntos, medidas en anchos de hombros para que dé igual lo lejos que estés.
-
-El código va en tres capas.
-
-| Capa | Dónde | Qué hace |
-|---|---|---|
-| Ojos | `temple/camara.py` y `temple/vision.py` | Leen la cámara en un hilo aparte y sacan los puntos |
-| Cerebro | Una lógica por fase en `temple/`, más los gestos y el progreso | Deciden qué pasa. No saben que existe una pantalla, así que se prueban sin cámara |
-| Interfaz | `temple/interfaz/` | Dibuja y suena con Pygame. Una clase por fase |
-
-Todo está explicado en dos guías.
-
-- **[Cómo funciona por dentro](docs/como-funciona.md).** Cómo ve la cámara, qué mide cada fase, una foto de principio a fin, lo que hemos aplicado de la asignatura y qué hace cada archivo.
-- **[Decisiones](docs/decisiones.md).** Todas las decisiones, con el problema que las provocó y lo que descartamos.
 
 ## Cómo lo hicimos
 
