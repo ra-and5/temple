@@ -4,6 +4,8 @@
 
 **Un juego serio que te guía cada día para respirar, meditar, estirar y hacer flexiones, y que comprueba con la webcam que lo haces bien.**
 
+**▶️ [Mira el vídeo de Temple (9:33)](docs/temple-video.mp4)**
+
 Práctica 2 de Interacción Persona-Máquina (Grado en Ingeniería en Inteligencia Artificial, Universidad de Alicante, curso 2026-2027).
 
 *Temple* es la calma para no perder los nervios y también el valor para afrontar un reto. En inglés es un templo, el sitio al que vuelves cada día.
